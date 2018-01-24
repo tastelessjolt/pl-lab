@@ -1,5 +1,5 @@
 from __future__ import print_function
-from lex import *
+from lex import APLLexer
 from yacc import *
 import sys
 
@@ -13,11 +13,13 @@ def process(data):
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
-        eprint("Usage: " + argv[0] + " <filename>")
+        eprint("Usage: " + sys.argv[0] + " <filename>")
         sys.exit()
 
-    l = lex.lex(debug=1)
-    lex.runmain()
-    # filename = sys.argv[1]
-    # data = open(filename, 'r').read()
-    # process(data)
+    lexer = APLLexer()
+    lexer.build()
+
+    filename = sys.argv[1]
+    data = open(filename, 'r').read()
+
+    lexer.test_t(data)
