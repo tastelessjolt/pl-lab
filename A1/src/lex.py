@@ -67,21 +67,3 @@ class APLLexer(object):
                 break
             l.append((tok.value, tok.type))
         print(l)
-
-class TestClass(object):
-    tests_dir = 'tests/all/'
-    tests_out = 'tests/lex/'
-    def test_files(self):
-        lexer = APLLexer()
-        lexer.build()
-
-        import os
-
-        os.listdir ()
-
-        for file in os.listdir(TestClass.tests_dir):
-            f = open(os.path.join(TestClass.tests_dir, file))
-            l = lexer.test(f.read())
-
-            output = open(os.path.join(TestClass.tests_out, file)).read()
-            assert output.strip() == l.__str__().strip()
