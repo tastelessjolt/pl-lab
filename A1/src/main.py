@@ -1,5 +1,5 @@
 from __future__ import print_function
-from lex import APLLexer
+from lex import *
 from yacc import *
 import sys
 
