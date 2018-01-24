@@ -1,0 +1,1 @@
+[('void', 'VOID'), ('main', 'MAIN'), ('(', 'LPAREN'), (')', 'RPAREN'), ('{', 'LCURLY'), ('int', 'INT'), ('Main', 'ID'), (';', 'SEMICOLON'), ('int', 'INT'), ('*', 'PTR'), ('p', 'ID'), ('=', 'EQUALS'), ('&', 'REF'), ('Main', 'ID'), (';', 'SEMICOLON'), ('*', 'PTR'), ('p', 'ID'), ('=', 'EQUALS'), ('5', 'NUM'), (';', 'SEMICOLON'), ('}', 'RCURLY')]
