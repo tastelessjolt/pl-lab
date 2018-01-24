@@ -1,11 +1,21 @@
 language: python
 
+# Python versions to test on
 python:
-  - "3.6"
-  - "nightly"
+  - 2.7
+  - 3.6
+  - nightly
 
 # command to install dependencies
-install: "pip install -r requirements.txt"
+install:
+  - pip install -r requirements.txt
+  - pip install pytest
+  - pip install codecov
 
 # command to run tests
-script: pytest
+script:
+  - echo Running tests and codecov ...; pytest --cov=./
+
+# Upload results to codecov
+after_success:
+  - echo Uploading code coverage data ...; codecov --token=74fb764a-c50f-486c-95c7-aed91ce2dfcb
