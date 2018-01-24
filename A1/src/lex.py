@@ -1,41 +1,80 @@
 import ply.lex as lex
 
-reserved = {'int': 'INT',
-            'main': 'MAIN',
-            'void': 'VOID'}
+class APLLexer(object):
+    reserved = {
+        'int': 'INT',
+        'main': 'MAIN',
+        'void': 'VOID'
+    }
 
-tokens = [
-    'ID',
-    'LPAREN',
-    'RPAREN',
-    'EQUALS',
-    'PTR',
-    'SEMICOLON',
-    'REF',
-    'COMMA',
-    'LCURLY',
-    'RCURLY',
-    'NUM'
-] + list(reserved.values())
+    tokens = [
+        'ID',
+        'LPAREN',
+        'RPAREN',
+        'EQUALS',
+        'PTR',
+        'SEMICOLON',
+        'REF',
+        'COMMA',
+        'LCURLY',
+        'RCURLY',
+        'NUM'
+    ] + list(reserved.values())
 
-t_ignore = " \t\n"
+    t_ignore = " \t\n"
 
-t_LPAREN = r'\('
-t_RPAREN = r'\)'
-t_PTR = r'\*'
-t_EQUALS = r'='
-t_SEMICOLON = r';'
-t_REF = r'\&'
-t_COMMA = r'\,'
-t_LCURLY = r'\{'
-t_RCURLY = r'\}'
-t_NUM = r'\d+'
+    t_LPAREN = r'\('
+    t_RPAREN = r'\)'
+    t_PTR = r'\*'
+    t_EQUALS = r'='
+    t_SEMICOLON = r';'
+    t_REF = r'\&'
+    t_COMMA = r'\,'
+    t_LCURLY = r'\{'
+    t_RCURLY = r'\}'
+    t_NUM = r'\d+'
 
-def t_ID(t):
-    r'[a-zA-Z_][a-zA-Z0-9_]*'
-    t.type = reserved.get(t.value, 'ID')
-    return t
+    def t_ID(self, t):
+        r'[a-zA-Z_][a-zA-Z0-9_]*'
+        t.type = APLLexer.reserved.get(t.value, 'ID')
+        return t
 
-def t_error(t):
-    print("Illegal character '%s'" % t.value[0])
-    t.lexer.skip(1)
+    def t_error(self, t):
+        print("Illegal character '%s'" % t.value[0])
+        t.lexer.skip(1)
+
+    # Build the lexer
+    def build(self, **kwargs):
+        self.lexer = lex.lex(module=self, **kwargs)
+
+    def test(self, data):
+        l = []
+        self.lexer.input(data)
+        while True:
+            tok = self.lexer.token()
+            if not tok:
+                break
+            import pdb
+            l.append((tok.value, tok.type))
+        return tok
+
+    # Test it output
+    def test_t(self, data):
+        self.lexer.input(data)
+        while True:
+             tok = self.lexer.token()
+             if not tok: 
+                 break
+             print(tok)
+
+class TestClass(object):
+    def test_files(self):
+        lexer = APLLexer()
+        lexer.build()
+
+        # for file in 
+        # l = lexer.test()
+
+    def test_two(self):
+        x = "hello"
+        assert hasattr(x, 'check')
