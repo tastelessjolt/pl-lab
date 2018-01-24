@@ -1,9 +1,10 @@
-from ..lex import APLLexer 
-import os 
+import sys
+import os
+from lex import APLLexer
 
 class TestClass(object):
-    tests_dir = os.path.join(os.path.realpath(__file__), 'all/')
-    tests_out = os.path.join(os.path.realpath(__file__), 'lex/')
+    tests_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../testcases/')
+    tests_out = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'outputs/')
 
     def test_files(self):
         lexer = APLLexer()
