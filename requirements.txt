@@ -1,0 +1,4 @@
+ply
+pytest
+pytest-cov
+
