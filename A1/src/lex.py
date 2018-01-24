@@ -54,27 +54,34 @@ class APLLexer(object):
             tok = self.lexer.token()
             if not tok:
                 break
-            import pdb
             l.append((tok.value, tok.type))
-        return tok
+        return l
 
     # Test it output
     def test_t(self, data):
+        l = []
         self.lexer.input(data)
         while True:
-             tok = self.lexer.token()
-             if not tok: 
-                 break
-             print(tok)
+            tok = self.lexer.token()
+            if not tok: 
+                break
+            l.append((tok.value, tok.type))
+        print(l)
 
 class TestClass(object):
+    tests_dir = 'tests/all/'
+    tests_out = 'tests/lex/'
     def test_files(self):
         lexer = APLLexer()
         lexer.build()
 
-        # for file in 
-        # l = lexer.test()
+        import os
 
-    def test_two(self):
-        x = "hello"
-        assert hasattr(x, 'check')
+        os.listdir ()
+
+        for file in os.listdir(TestClass.tests_dir):
+            f = open(os.path.join(TestClass.tests_dir, file))
+            l = lexer.test(f.read())
+
+            output = open(os.path.join(TestClass.tests_out, file)).read()
+            assert output.strip() == l.__str__().strip()
