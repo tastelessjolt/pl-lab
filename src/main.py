@@ -1,13 +1,10 @@
-from __future__ import print_function
+from utils import *
 from lex import *
 from yacc import *
 import sys
 import argparse
 
 VERSION = '0.1.0'
-
-def eprint(*args, **kwargs):
-    print(*args, file=sys.stderr, **kwargs)
 
 def process(data):
     lex.lex()
