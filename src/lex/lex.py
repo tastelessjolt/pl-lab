@@ -1,4 +1,5 @@
 import ply.lex as lex
+from utils import *
 
 class APLLexer(object):
     reserved = {
@@ -40,7 +41,7 @@ class APLLexer(object):
         return t
 
     def t_error(self, t):
-        print("Illegal character '%s'" % t.value[0])
+        eprint("Illegal character '%s'" % t.value[0])
         t.lexer.skip(1)
 
     # Build the lexer
@@ -63,7 +64,7 @@ class APLLexer(object):
         self.lexer.input(data)
         while True:
             tok = self.lexer.token()
-            if not tok: 
+            if not tok:
                 break
             l.append((tok.value, tok.type))
         print(l)

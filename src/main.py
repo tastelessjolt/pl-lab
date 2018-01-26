@@ -2,9 +2,7 @@ from __future__ import print_function
 from lex import *
 from yacc import *
 import sys
-
-def eprint(*args, **kwargs):
-    print(*args, file=sys.stderr, **kwargs)
+from utils import *
 
 def process(data):
     lex.lex()
