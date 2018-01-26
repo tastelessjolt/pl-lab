@@ -11,7 +11,7 @@ def process(data):
     yacc.yacc()
     yacc.parse(data)
 
-def buildParser():
+def buildArgParser():
     parser = argparse.ArgumentParser(description='APL Compiler ver ' + VERSION)
     parser.add_argument('input_file', type=str,
                         help='program to compile')
@@ -21,13 +21,21 @@ def buildParser():
 
 if __name__ == '__main__':
 
-    parser = buildParser()
+    parser = buildArgParser()
     args = parser.parse_args()
 
     lexer = APLLexer()
     lexer.build()
+    import pdb
+    pdb.set_trace()
+
+    parser = APLYacc()
+    parser.build()
 
     filename = args.input_file
     data = open(filename, 'r').read()
+    if False:
+        lexer.test_t(data)
+        sys.exit()
 
-    lexer.test_t(data)
+    print(parser.parse(data, lexer).t)
