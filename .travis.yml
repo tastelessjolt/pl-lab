@@ -20,3 +20,10 @@ script:
 # Upload results to codecov
 after_success:
   - echo Uploading code coverage data ...; codecov --token=74fb764a-c50f-486c-95c7-aed91ce2dfcb
+
+notifications:
+  email:
+    recipients:
+      - harshith9399@gmail.com
+    on_success: never
+    on_failure: always
