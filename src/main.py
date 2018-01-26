@@ -15,6 +15,8 @@ def buildParser():
     parser = argparse.ArgumentParser(description='APL Compiler ver ' + VERSION)
     parser.add_argument('input_file', type=str,
                         help='program to compile')
+    parser.add_argument('-l', help='generate only lex output')
+    parser.add_argument('-y', help='generate only yacc output')
     return parser
 
 if __name__ == '__main__':
