@@ -26,8 +26,8 @@ if __name__ == '__main__':
 
     lexer = APLLexer()
     lexer.build()
-    import pdb
-    pdb.set_trace()
+    # import pdb
+    # pdb.set_trace()
 
     parser = APLYacc()
     parser.build()
