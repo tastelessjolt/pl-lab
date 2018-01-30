@@ -126,12 +126,48 @@ class APLYacc(object):
 
     def p_assignment(self, p):
         '''
-            assignment : ID EQUALS ID
-                        | ID EQUALS REF ID
-                        | PTR ID EQUALS PTR ID
-                        | PTR ID EQUALS NUM
+            assignment : ID EQUALS ptrassignment
+                        | ptr EQUALS refassignment
+                        | ptr EQUALS ptrassignment
         '''
-        p[0] = Stats((0, 0, 1))
+        p[0] = Stats((0, 0, 1)) + p[3]
+
+    def p_ptrassignment(self, p):
+        '''
+            ptrassignment : ID EQUALS ptrassignment
+                            | ptr EQUALS ptrassignment 
+                            | REF ID
+                            | ID
+                            | ptr
+        '''
+        try:
+            p[0] = p[3] + Stats((0, 0, 1))
+        except:
+            p[0] = Stats((0, 0, 0))
+
+    def p_refassignment(self, p):
+        '''
+            refassignment : ptr EQUALS refassignment
+                            | ptr EQUALS ptrassignment
+                            | ptr
+                            | NUM
+        '''
+        try:
+            p[0] = p[3] + Stats((0, 0, 1))
+        except:
+            p[0] = Stats((0, 0, 0))
+
+    def p_ptr (self, p):
+        '''
+            ptr : PTR _ptr
+        '''
+        pass
+
+    def p__ptr(self, p):
+        '''
+            _ptr : PTR _ptr
+                | ID
+        '''
 
     def p_error(self, p):
         if p:
@@ -143,5 +179,4 @@ class APLYacc(object):
         self.yacc = yacc.yacc(module=self, debug = True, **kwargs)
 
     def parse(self, data, lexer):
-        print(data)
         return self.yacc.parse(data, lexer=lexer.lexer)
