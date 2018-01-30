@@ -1,7 +1,6 @@
 void main ()
 {
 	int a;
-	int *p;
+	int ***p, b, *q;
 
-    p=&a;
 }

@@ -31,106 +31,107 @@ class APLYacc(object):
         0,  # no of pointers
         0  # no of assignments
     )
-
-    def p_program_main(self, p):
+    start = 'program'
+    def p_program(self, p):
         '''
-                program : VOID MAIN LPAREN RPAREN LCURLY body RCURLY
+            program : main
+        '''
+        p[0] = p[1]
+
+    def p_epsilon(self, p):
+        '''
+            epsilon :
+        '''
+        pass
+
+    def p_main(self, p):
+        '''
+            main : VOID MAIN LPAREN RPAREN LCURLY body RCURLY
         '''
         p[0] = p[6]
 
-    def p_function_statements(self, p):
+    def p_function_body(self, p):
         '''
-                body : statement SEMICOLON
-                        | statement SEMICOLON body
+            body : statement stlist
         '''
         try:
-            p[0] = p[1] + p[3]
+            p[0] = p[1] + p[2]
         except:
             p[0] = p[1]
 
     def p_statements(self, p):
         '''
-                statement : type idlist
-                            | assignment
-        '''
-        # | ID EQUALS expression
-        # | PTR ID EQUALS expression
-        try:
-            p[0] = p[2]
-        except:
-            p[0] = p[1]
-
-    def p_assignment(self, p):
-        '''
-            assignment : ID expression1 REF ID COMMA assignment
-                        | ptr ID expression2 ref_val COMMA assignment
-                        | ID expression1 REF ID
-                        | ptr ID expression2 ref_val
+            stlist : statement stlist
+                    | epsilon
         '''
         try:
-            p[0] = p[6] + Stats((0, 0, 1))
+            p[0] = p[1] + p[2] 
         except:
-            p[0] = Stats((0, 0, 1))
+            p[0] = Stats((0, 0, 0))
 
-    def p_expression1(self, p):
+    def p_statement(self, p):
         '''
-            expression1 : EQUALS
-                        | EQUALS ID expression1
+            statement : declaration SEMICOLON
+                        | assignments SEMICOLON
+        '''
+        p[0] = p[1]
+
+    def p_declaration(self, p):
+        '''
+            declaration : type var varlist
+        '''
+        p[0] = p[2] + p[3]
+
+    def p_dec_varlist(self, p):
+        '''
+            varlist : COMMA var varlist 
+                    | epsilon
         '''
         try:
-            p[0] = p[3] + Stats((0, 0, 1))
+            p[0] = p[2] + p[3]
         except:
-            p[0] = Stats((0, 0, 1))
-
-    def p_expression2(self, p):
-        '''
-            expression2 : EQUALS
-                        | EQUALS ptr ID expression2
-        '''
-        try:
-            p[0] = p[4] + Stats((0, 0, 1))
-        except:
-            p[0] = Stats((0, 0, 1))
-
-    def p_ref_val(self, p):
-        '''
-            ref_val : ptr ID
-                    | NUM
-        '''
-        pass
-
-    def p_idlist(self, p):
-        '''
-            idlist : id COMMA idlist
-                    | id
-        '''
-        try:
-            p[0] = p[1] + p[3]
-        except:
-            p[0] = p[1]
-
-    def p_id(self, p):
-        '''
-            id : ID
-                | ptr ID
-        '''
-        if len(p) == 2:
-            p[0] = Stats((1, 0, 0))
-        else:
-            p[0] = Stats((0, 1, 0))
-
-    def p_ptr(self, p):
-        '''
-                ptr : PTR ptr
-                    | PTR
-        '''
-        pass
+            p[0] = Stats((0, 0, 0))
 
     def p_type(self, p):
         '''
-                type : INT
+            type : INT
         '''
         pass
+
+    def p_var(self, p):
+        '''
+            var : ID 
+                | PTR var
+        '''
+        if p[1] == '*':
+            p[0] = Stats((0, 1, 0))
+        else:
+            p[0] = Stats((1, 0, 0))
+
+    def p_assignments(self, p):
+        '''
+            assignments : assignment assignlist
+        '''
+        p[0] = p[1] + p[2]
+
+    def p_assignlist(self, p):
+        '''
+            assignlist : COMMA assignment assignlist 
+                        | epsilon
+        '''
+        try: 
+            p[0] = p[2] + p[3]
+        except:
+            p[0] = Stats((0, 0, 0))
+
+    def p_assignment(self, p):
+        '''
+            assignment : ID EQUALS ID
+                        | ID EQUALS REF ID
+                        | PTR ID EQUALS PTR ID
+                        | PTR ID EQUALS NUM
+        '''
+        p[0] = Stats((0, 0, 1))
 
     def p_error(self, p):
         if p:
@@ -142,4 +143,5 @@ class APLYacc(object):
         self.yacc = yacc.yacc(module=self, debug = True, **kwargs)
 
     def parse(self, data, lexer):
+        print(data)
         return self.yacc.parse(data, lexer=lexer.lexer)

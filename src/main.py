@@ -38,4 +38,8 @@ if __name__ == '__main__':
         lexer.test_t(data)
         sys.exit()
 
-    print(parser.parse(data, lexer).t)
+    stats = parser.parse(data, lexer)
+    if stats is not None:
+        print(stats.t)
+    else: 
+        eprint("Exited due to above errors")
