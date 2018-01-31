@@ -12,23 +12,23 @@ class TestYacc(object):
         lexer = APLLexer()
         lexer.build()
 
-        for file in os.listdir(TestClass.tests_dir):
-            filepath = os.path.join(TestClass.tests_dir, file)
+        for file in os.listdir(TestYacc.tests_dir):
+            filepath = os.path.join(TestYacc.tests_dir, file)
             if os.path.isfile(filepath):
                 f = open(filepath)
                 l = lexer.test(f.read())
 
-                output = open(os.path.join(TestClass.tests_out, file)).read()
+                output = open(os.path.join(TestYacc.tests_out, file)).read()
                 assert output.strip() == l.__str__().strip()
 
     def test_lex_only(self, capsys):
         lexer = APLLexer()
         lexer.build()
 
-        for file in os.listdir(TestClass.lex_tests_dir):
-            filepath = os.path.join(TestClass.lex_tests_dir, file)
+        for file in os.listdir(TestYacc.lex_tests_dir):
+            filepath = os.path.join(TestYacc.lex_tests_dir, file)
             if os.path.isfile(filepath):
                 f = open(filepath)
                 l = lexer.test(f.read())
-                output = open(os.path.join(TestClass.tests_out, file)).read()
+                output = open(os.path.join(TestYacc.tests_out, file)).read()
                 assert output.strip() == (capsys.readouterr().err + l.__str__().strip())
