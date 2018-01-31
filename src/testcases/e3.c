@@ -5,5 +5,4 @@ void main()
         int *p, *q;
  
         p = &a, q = &b;
-	*p = *q = 3;
 }

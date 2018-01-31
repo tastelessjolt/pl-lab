@@ -7,10 +7,14 @@ from utils import eprint
 Parsing with yacc
 '''
 
-# # TODO
-
-
 class Stats:
+    '''
+        t = (
+            0,  # no of variables
+            0,  # no of pointers
+            0  # no of assignments
+        )
+    '''
 
     def __init__(self, t):
         self.t = t
@@ -23,17 +27,6 @@ class APLYacc(object):
     reserved = APLLexer.reserved
     tokens = APLLexer.tokens
 
-    precedence = [
-        ('right', 'EQUALS'),
-        ('left', 'PTR', 'REF'),
-    ]
-
-
-    STAGE_ONE_STRUCT = (
-        0,  # no of variables
-        0,  # no of pointers
-        0  # no of assignments
-    )
     start = 'program'
     def p_program(self, p):
         '''
@@ -68,7 +61,7 @@ class APLYacc(object):
                     | epsilon
         '''
         try:
-            p[0] = p[1] + p[2] 
+            p[0] = p[1] + p[2]
         except:
             p[0] = Stats((0, 0, 0))
 
@@ -87,7 +80,7 @@ class APLYacc(object):
 
     def p_dec_varlist(self, p):
         '''
-            varlist : COMMA var varlist 
+            varlist : COMMA var varlist
                     | epsilon
         '''
         try:
@@ -103,7 +96,7 @@ class APLYacc(object):
 
     def p_var(self, p):
         '''
-            var : ID 
+            var : ID
                 | PTR var
         '''
         if p[1] == '*':
@@ -119,20 +112,19 @@ class APLYacc(object):
 
     def p_assignlist(self, p):
         '''
-            assignlist : COMMA assignment assignlist 
+            assignlist : COMMA assignment assignlist
                         | epsilon
         '''
-        try: 
+        try:
             p[0] = p[2] + p[3]
         except:
             p[0] = Stats((0, 0, 0))
 
     def p_assignment(self, p):
         '''
-            assignment : ID EQUALS ID
-                        | ID EQUALS REF ID
-                        | ptr EQUALS ptr
-                        | ptr EQUALS NUM
+            assignment :  ID EQUALS ptr ID
+                        | PTR ptr ID EQUALS ptr ID
+                        | PTR ptr ID EQUALS NUM
         '''
         p[0] = Stats((0, 0, 1))
 
@@ -140,7 +132,7 @@ class APLYacc(object):
         '''
             ptr : PTR ptr
                 | REF ptr
-                | ID
+                | epsilon
         '''
         pass
 

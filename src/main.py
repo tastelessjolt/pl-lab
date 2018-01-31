@@ -32,6 +32,7 @@ if __name__ == '__main__':
 
     filename = args.input_file
     data = open(filename, 'r').read()
+
     if False:
         lexer.test_t(data)
         sys.exit()
@@ -39,5 +40,5 @@ if __name__ == '__main__':
     stats = parser.parse(data)
     if stats is not None:
         print(stats.t)
-    else: 
+    else:
         eprint("Exited due to above errors")
