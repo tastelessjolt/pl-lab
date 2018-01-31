@@ -22,7 +22,7 @@ class APLLexer(object):
         'NUM'
     ] + list(reserved.values())
 
-    t_ignore = " \t\n"
+    t_ignore = " \t"
 
     t_LPAREN = r'\('
     t_RPAREN = r'\)'
@@ -39,6 +39,12 @@ class APLLexer(object):
         r'[a-zA-Z_][a-zA-Z0-9_]*'
         t.type = APLLexer.reserved.get(t.value, 'ID')
         return t
+
+    # Define a rule so we can track line numbers
+    def t_newline(self, t):
+        r'\n+'
+        t.lexer.lineno += len(t.value)
+
 
     def t_error(self, t):
         eprint("Illegal character '%s'" % t.value[0])

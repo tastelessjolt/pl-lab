@@ -1,16 +1,13 @@
 import ply.yacc as yacc
 from lex import *
 import operator
+from utils import eprint
 
 '''
 Parsing with yacc
 '''
 
 # # TODO
-precedence = (
-    ('right', 'EQUALS'),
-    ('left', 'PTR'),
-)
 
 
 class Stats:
@@ -25,6 +22,12 @@ class Stats:
 class APLYacc(object):
     reserved = APLLexer.reserved
     tokens = APLLexer.tokens
+
+    precedence = [
+        ('right', 'EQUALS'),
+        ('left', 'PTR', 'REF'),
+    ]
+
 
     STAGE_ONE_STRUCT = (
         0,  # no of variables
@@ -128,20 +131,28 @@ class APLYacc(object):
         '''
             assignment : ID EQUALS ID
                         | ID EQUALS REF ID
-                        | PTR ID EQUALS PTR ID
-                        | PTR ID EQUALS NUM
+                        | ptr EQUALS ptr
+                        | ptr EQUALS NUM
         '''
         p[0] = Stats((0, 0, 1))
 
+    def p_ptr(self, p):
+        '''
+            ptr : PTR ptr
+                | REF ptr
+                | ID
+        '''
+        pass
+
     def p_error(self, p):
         if p:
-            print("syntax error at {0}".format(p.value))
+            eprint("syntax error at ({1}:{2}): {0}".format(p.value, p.lineno, p.lexpos))
         else:
-            print("syntax error at EOF")
+            eprint("syntax error at EOF")
 
-    def build(self, **kwargs):
+    def build(self, lexer, **kwargs):
         self.yacc = yacc.yacc(module=self, debug = True, **kwargs)
+        self.lexer = lexer.lexer
 
-    def parse(self, data, lexer):
-        print(data)
-        return self.yacc.parse(data, lexer=lexer.lexer)
+    def parse(self, data):
+        return self.yacc.parse(data, lexer=self.lexer)

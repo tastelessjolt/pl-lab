@@ -26,11 +26,9 @@ if __name__ == '__main__':
 
     lexer = APLLexer()
     lexer.build()
-    # import pdb
-    # pdb.set_trace()
 
     parser = APLYacc()
-    parser.build()
+    parser.build(lexer)
 
     filename = args.input_file
     data = open(filename, 'r').read()
@@ -38,7 +36,7 @@ if __name__ == '__main__':
         lexer.test_t(data)
         sys.exit()
 
-    stats = parser.parse(data, lexer)
+    stats = parser.parse(data)
     if stats is not None:
         print(stats.t)
     else: 
