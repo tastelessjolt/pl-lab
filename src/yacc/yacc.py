@@ -50,10 +50,7 @@ class APLYacc(object):
         '''
             body : statement stlist
         '''
-        try:
-            p[0] = p[1] + p[2]
-        except:
-            p[0] = p[1]
+        p[0] = p[1] + p[2]
 
     def p_statements(self, p):
         '''
