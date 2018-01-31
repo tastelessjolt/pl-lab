@@ -40,5 +40,3 @@ if __name__ == '__main__':
         stats = parser.parse(data)
         if stats is not None:
             print(stats.t)
-        else:
-            eprint("Exited due to above errors")
