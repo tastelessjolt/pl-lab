@@ -25,10 +25,10 @@ class TestYacc(object):
                 assert output.strip() == l.t.__str__().strip()
 
     def test_yacc_only(self, capsys):
-        lexer = APLLexer()
-        lexer.build()
 
         for file in os.listdir(TestYacc.lex_tests_dir):
+            lexer = APLLexer()
+            lexer.build()
             parser = APLYacc()
             parser.build(lexer)
             filepath = os.path.join(TestYacc.lex_tests_dir, file)
