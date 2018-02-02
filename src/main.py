@@ -27,14 +27,16 @@ if __name__ == '__main__':
     lexer = APLLexer()
     lexer.build()
 
-    parser = APLYacc()
-    parser.build(lexer)
-
     filename = args.input_file
     data = open(filename, 'r').read()
 
     if args.lex:
         lexer.test_t(data)
+        if not args.yacc:
+            sys.exit()
+
+    parser = APLYacc()
+    parser.build(lexer)
 
     if args.yacc or not (args.lex or args.yacc):
         stats = parser.parse(data)

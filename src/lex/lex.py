@@ -66,11 +66,4 @@ class APLLexer(object):
 
     # Test it output
     def test_t(self, data):
-        l = []
-        self.lexer.input(data)
-        while True:
-            tok = self.lexer.token()
-            if not tok:
-                break
-            l.append((tok.value, tok.type))
-        print(l)
+        print(self.test(data))
