@@ -31,7 +31,7 @@ if __name__ == '__main__':
     data = open(filename, 'r').read()
 
     if args.lex:
-        lexer.test_t(data)
+        print(lexer.scan(data))
         if not args.yacc:
             sys.exit()
 

@@ -54,7 +54,7 @@ class APLLexer(object):
     def build(self, **kwargs):
         self.lexer = lex.lex(module=self, **kwargs)
 
-    def test(self, data):
+    def scan(self, data):
         l = []
         self.lexer.input(data)
         while True:
@@ -63,7 +63,3 @@ class APLLexer(object):
                 break
             l.append((tok.value, tok.type))
         return l
-
-    # Test it output
-    def test_t(self, data):
-        print(self.test(data))

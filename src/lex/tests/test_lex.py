@@ -15,7 +15,7 @@ class TestClass(object):
             filepath = os.path.join(TestClass.tests_dir, file)
             if os.path.isfile(filepath):
                 f = open(filepath)
-                l = lexer.test(f.read())
+                l = lexer.scan(f.read())
 
                 output = open(os.path.join(TestClass.tests_out, file)).read()
                 assert output.strip() == (capsys.readouterr().err + l.__str__().strip())
@@ -28,6 +28,6 @@ class TestClass(object):
             filepath = os.path.join(TestClass.lex_tests_dir, file)
             if os.path.isfile(filepath):
                 f = open(filepath)
-                l = lexer.test(f.read())
+                l = lexer.scan(f.read())
                 output = open(os.path.join(TestClass.tests_out, file)).read()
                 assert output.strip() == (capsys.readouterr().err + l.__str__().strip())
