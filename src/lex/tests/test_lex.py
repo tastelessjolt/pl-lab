@@ -7,7 +7,7 @@ class TestClass(object):
     tests_out = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'outputs/')
     lex_tests_dir = os.path.join(tests_dir, 'lex')
 
-    def test_common(self):
+    def test_common(self, capsys):
         lexer = APLLexer()
         lexer.build()
 
@@ -18,7 +18,7 @@ class TestClass(object):
                 l = lexer.test(f.read())
 
                 output = open(os.path.join(TestClass.tests_out, file)).read()
-                assert output.strip() == l.__str__().strip()
+                assert output.strip() == (capsys.readouterr().err + l.__str__().strip())
 
     def test_lex_only(self, capsys):
         lexer = APLLexer()

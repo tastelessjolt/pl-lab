@@ -1,1 +1,2 @@
+Generating LALR tables
 [('void', 'VOID'), ('main', 'MAIN'), ('(', 'LPAREN'), (')', 'RPAREN'), ('{', 'LCURLY'), ('int', 'INT'), ('a', 'ID'), (';', 'SEMICOLON'), ('int', 'INT'), ('b', 'ID'), (';', 'SEMICOLON'), ('int', 'INT'), ('*', 'PTR'), ('p', 'ID'), (',', 'COMMA'), ('*', 'PTR'), ('q', 'ID'), (';', 'SEMICOLON'), ('p', 'ID'), ('=', 'EQUALS'), ('&', 'REF'), ('a', 'ID'), (',', 'COMMA'), ('q', 'ID'), ('=', 'EQUALS'), ('&', 'REF'), ('b', 'ID'), (';', 'SEMICOLON'), ('}', 'RCURLY')]
