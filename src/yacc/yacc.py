@@ -48,9 +48,9 @@ class APLYacc(object):
 
     def p_function_body(self, p):
         '''
-            body : statement stlist
+            body : stlist
         '''
-        p[0] = p[1] + p[2]
+        p[0] = p[1]
 
     def p_statements(self, p):
         '''
