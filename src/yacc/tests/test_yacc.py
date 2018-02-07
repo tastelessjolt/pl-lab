@@ -2,6 +2,7 @@ import sys
 import os
 from lex import APLLexer
 from yacc import APLYacc
+from yacc import YaccOutput
 
 class TestYacc(object):
     tests_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../testcases/')
@@ -16,7 +17,7 @@ class TestYacc(object):
                 lexer = APLLexer()
                 lexer.build()
 
-                parser = APLYacc()
+                parser = APLYacc(output=YaccOutput.STATS)
                 parser.build(lexer)
 
                 f = open(filepath)
@@ -35,7 +36,7 @@ class TestYacc(object):
             if os.path.isfile(filepath):
                 lexer = APLLexer()
                 lexer.build()
-                parser = APLYacc()
+                parser = APLYacc(output=YaccOutput.STATS)
                 parser.build(lexer)
                 f = open(filepath)
                 l = parser.parse(f.read())

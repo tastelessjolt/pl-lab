@@ -35,10 +35,10 @@ if __name__ == '__main__':
         if not args.yacc:
             sys.exit()
 
-    parser = APLYacc()
-    parser.build(lexer)
 
     if args.yacc or not (args.lex or args.yacc):
+        parser = APLYacc(output = YaccOutput.STATS)
+        parser.build(lexer)
         stats = parser.parse(data)
         if stats is not None:
             print(stats.t)

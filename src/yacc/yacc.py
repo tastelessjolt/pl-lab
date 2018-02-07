@@ -2,6 +2,7 @@ import ply.yacc as yacc
 from lex import *
 import operator
 from utils import eprint
+from enum import Enum
 
 '''
 Parsing with yacc
@@ -22,100 +23,119 @@ class Stats:
     def __add__(self, other):
         return Stats(tuple(map(operator.add, self.t, other.t)))
 
+class YaccOutput(Enum):
+    STATS = 0
+    AST = 1
 
 class APLYacc(object):
     reserved = APLLexer.reserved
     tokens = APLLexer.tokens
+
+
+    def __init__(self, output=YaccOutput.AST):
+        self.output = output
 
     start = 'program'
     def p_program(self, p):
         '''
             program : main
         '''
-        p[0] = p[1]
+        if self.output == YaccOutput.STATS:
+            p[0] = p[1]
 
     def p_epsilon(self, p):
         '''
             epsilon :
         '''
-        pass
+        if self.output == YaccOutput.STATS:
+            pass
 
     def p_main(self, p):
         '''
             main : VOID MAIN LPAREN RPAREN LCURLY body RCURLY
         '''
-        p[0] = p[6]
+        if self.output == YaccOutput.STATS:
+            p[0] = p[6]
 
     def p_function_body(self, p):
         '''
             body : stlist
         '''
-        p[0] = p[1]
+        if self.output == YaccOutput.STATS:
+            p[0] = p[1]
 
     def p_statements(self, p):
         '''
             stlist : statement stlist
                     | epsilon
         '''
-        try:
-            p[0] = p[1] + p[2]
-        except:
-            p[0] = Stats((0, 0, 0))
+        if self.output == YaccOutput.STATS:
+            try:
+                p[0] = p[1] + p[2]
+            except:
+                p[0] = Stats((0, 0, 0))
 
     def p_statement(self, p):
         '''
             statement : declaration SEMICOLON
                         | assignments SEMICOLON
         '''
-        p[0] = p[1]
+        if self.output == YaccOutput.STATS:
+            p[0] = p[1]
 
     def p_declaration(self, p):
         '''
             declaration : type var varlist
         '''
-        p[0] = p[2] + p[3]
+        if self.output == YaccOutput.STATS:
+            p[0] = p[2] + p[3]
 
     def p_dec_varlist(self, p):
         '''
             varlist : COMMA var varlist
                     | epsilon
         '''
-        try:
-            p[0] = p[2] + p[3]
-        except:
-            p[0] = Stats((0, 0, 0))
+        if self.output == YaccOutput.STATS:
+            try:
+                p[0] = p[2] + p[3]
+            except:
+                p[0] = Stats((0, 0, 0))
 
     def p_type(self, p):
         '''
             type : INT
         '''
-        pass
+        if self.output == YaccOutput.STATS:
+            pass
 
     def p_var(self, p):
         '''
             var : ID
                 | PTR var
         '''
-        if p[1] == '*':
-            p[0] = Stats((0, 1, 0))
-        else:
-            p[0] = Stats((1, 0, 0))
+        if self.output == YaccOutput.STATS:
+            if p[1] == '*':
+                p[0] = Stats((0, 1, 0))
+            else:
+                p[0] = Stats((1, 0, 0))
 
     def p_assignments(self, p):
         '''
             assignments : assignment assignlist
         '''
-        p[0] = p[1] + p[2]
+        if self.output == YaccOutput.STATS:
+            p[0] = p[1] + p[2]
 
     def p_assignlist(self, p):
         '''
             assignlist : COMMA assignment assignlist
                         | epsilon
         '''
-        try:
-            p[0] = p[2] + p[3]
-        except:
-            p[0] = Stats((0, 0, 0))
+        if self.output == YaccOutput.STATS:
+            try:
+                p[0] = p[2] + p[3]
+            except:
+                p[0] = Stats((0, 0, 0))
 
     def p_assignment(self, p):
         '''
@@ -123,7 +143,8 @@ class APLYacc(object):
                         | PTR ptr ID EQUALS ptr ID
                         | PTR ptr ID EQUALS NUM
         '''
-        p[0] = Stats((0, 0, 1))
+        if self.output == YaccOutput.STATS:
+            p[0] = Stats((0, 0, 1))
 
     def p_ptr(self, p):
         '''
@@ -131,7 +152,8 @@ class APLYacc(object):
                 | REF ptr
                 | epsilon
         '''
-        pass
+        if self.output == YaccOutput.STATS:
+            pass
 
     def p_error(self, p):
         if p:
