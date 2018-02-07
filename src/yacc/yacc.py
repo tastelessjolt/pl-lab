@@ -31,6 +31,12 @@ class APLYacc(object):
     reserved = APLLexer.reserved
     tokens = APLLexer.tokens
 
+    precedence = [
+        ('left', 'PLUS', 'MINUS'),
+        ('left', 'DIVIDE', 'TIMES'),
+        ('right', 'UMINUS'),
+        ('right', 'PTR'),
+    ]
 
     def __init__(self, output=YaccOutput.AST):
         self.output = output
@@ -176,13 +182,38 @@ class APLYacc(object):
 
     def p_expr(self, p):
         '''
-            expr : ptr ID
-                | NUM
+            expr : expr PLUS expr 
+                | expr MINUS expr
+                | expr PTR expr %prec TIMES
+                | expr DIVIDE expr
         '''
         if self.output == YaccOutput.STATS:
             pass
         elif self.output == YaccOutput.AST:
             pass
+
+    def p_expr_uminus(self, p):
+        ''' 
+            expr : MINUS expr %prec UMINUS
+        '''
+        pass
+
+    def p_expr_group(self, p):
+        '''
+            expr : LPAREN expr RPAREN
+        '''
+        pass
+
+    def p_expr_leaf(self, p):
+        '''
+            expr : ptr ID 
+                | NUM
+        '''
+        pass
+        # try:
+        #     p[0] = p[2]
+        # except:
+        #     p[0] = p[1]
 
     def p_ptr(self, p):
         '''
