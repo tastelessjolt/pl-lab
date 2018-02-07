@@ -14,12 +14,15 @@ class APLLexer(object):
         'RPAREN',
         'EQUALS',
         'PTR',
+        'PLUS',
+        'MINUS',
+        'DIVIDE',
         'SEMICOLON',
         'REF',
         'COMMA',
         'LCURLY',
         'RCURLY',
-        'NUM'
+        'NUM',
     ] + list(reserved.values())
 
     t_ignore = " \t"
@@ -28,6 +31,9 @@ class APLLexer(object):
     t_RPAREN = r'\)'
     t_PTR = r'\*'
     t_EQUALS = r'='
+    t_PLUS=r'\+'
+    t_MINUS=r'\-'
+    t_DIVIDE=r'\/'
     t_SEMICOLON = r';'
     t_REF = r'\&'
     t_COMMA = r'\,'
