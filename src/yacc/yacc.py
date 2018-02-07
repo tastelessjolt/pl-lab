@@ -1,7 +1,7 @@
 import ply.yacc as yacc
 from lex import *
 import operator
-from utils import eprint
+from utils import *
 from enum import Enum
 
 '''
