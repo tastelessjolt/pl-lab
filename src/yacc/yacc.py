@@ -68,7 +68,7 @@ class APLYacc(object):
         if self.output == YaccOutput.STATS:
             p[0] = p[6]
         elif self.output == YaccOutput.AST:
-            pass
+            p[0] = p[6]
             # p[0] = ASTFunc('main', p[6])
 
     def p_function_body(self, p):
@@ -91,9 +91,11 @@ class APLYacc(object):
             except:
                 p[0] = Stats((0, 0, 0))
         elif self.output == YaccOutput.AST:
-            pass
-            # try: 
-                # p[0] = ASTStmtList(p[2], p[1])
+            try: 
+                p[2].insert(0, p[1])
+                p[0] = p[2]
+            except:
+                p[0] = []
 
     def p_statement(self, p):
         '''
@@ -103,7 +105,7 @@ class APLYacc(object):
         if self.output == YaccOutput.STATS:
             p[0] = p[1]
         elif self.output == YaccOutput.AST:
-            pass
+            p[0] = p[1]
 
     def p_declaration(self, p):
         '''
@@ -112,7 +114,7 @@ class APLYacc(object):
         if self.output == YaccOutput.STATS:
             p[0] = p[2] + p[3]
         elif self.output == YaccOutput.AST:
-            pass
+            p[0] = 'DEC ' + p[1]
 
     def p_dec_varlist(self, p):
         '''
@@ -134,7 +136,7 @@ class APLYacc(object):
         if self.output == YaccOutput.STATS:
             pass
         elif self.output == YaccOutput.AST:
-            pass
+            p[0] = p[1]
 
     def p_var(self, p):
         '''
@@ -156,7 +158,8 @@ class APLYacc(object):
         if self.output == YaccOutput.STATS:
             p[0] = p[1] + p[2]
         elif self.output == YaccOutput.AST:
-            pass
+            p[2].insert(0, p[1])
+            p[0] = p[2]
 
     def p_assignlist(self, p):
         '''
@@ -169,7 +172,11 @@ class APLYacc(object):
             except:
                 p[0] = Stats((0, 0, 0))
         elif self.output == YaccOutput.AST:
-            pass
+            try:
+                p[3].insert(0, p[2])
+                p[0] = p[3]
+            except:
+                p[0] = []
 
     def p_assignment(self, p):
         '''
@@ -179,7 +186,10 @@ class APLYacc(object):
         if self.output == YaccOutput.STATS:
             p[0] = Stats((0, 0, 1))
         elif self.output == YaccOutput.AST:
-            pass
+            try:
+                p[0] = BinOp(p[4], p[1] + p[2] + p[3], p[5])
+            except:
+                p[0] = BinOp(p[2], p[1], p[3] + p[4])
 
     def p_expr(self, p):
         '''
@@ -191,26 +201,38 @@ class APLYacc(object):
         if self.output == YaccOutput.STATS:
             pass
         elif self.output == YaccOutput.AST:
-            pass
+            p[0] = BinOp(p[2], p[1], p[3])
 
     def p_expr_uminus(self, p):
         ''' 
             expr : MINUS expr %prec UMINUS
         '''
-        pass
+        if self.output == YaccOutput.STATS:
+            pass
+        elif self.output == YaccOutput.AST:
+            p[0] = UnaryOp(p[1], p[2])
 
     def p_expr_group(self, p):
         '''
             expr : LPAREN expr RPAREN
         '''
-        pass
+        if self.output == YaccOutput.STATS:
+            pass
+        elif self.output == YaccOutput.AST:
+            p[0] = p[2]        
 
     def p_expr_leaf(self, p):
         '''
             expr : ptr ID 
                 | NUM
         '''
-        pass
+        if self.output == YaccOutput.STATS:
+            pass
+        elif self.output == YaccOutput.AST:
+            try:
+                p[0] = p[1] + p[2]
+            except:
+                p[0] = p[1]
         # try:
         #     p[0] = p[2]
         # except:
@@ -225,7 +247,10 @@ class APLYacc(object):
         if self.output == YaccOutput.STATS:
             pass
         elif self.output == YaccOutput.AST:
-            pass
+            try:
+                p[0] = p[1] + p[2]
+            except:
+                p[0] = ''
 
     def p_error(self, p):
         if p:
