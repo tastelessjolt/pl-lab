@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 from utils import *
 from lex import *
 from yacc import *

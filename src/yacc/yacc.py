@@ -180,7 +180,7 @@ class APLYacc(object):
 
     def p_assignment(self, p):
         '''
-            assignment :  ID EQUALS ptr ID
+            assignment :  ID EQUALS expr
                         | PTR ptr ID EQUALS expr
         '''
         if self.output == YaccOutput.STATS:
@@ -189,7 +189,7 @@ class APLYacc(object):
             try:
                 p[0] = BinOp(p[4], p[1] + p[2] + p[3], p[5])
             except:
-                p[0] = BinOp(p[2], p[1], p[3] + p[4])
+                p[0] = BinOp(p[2], p[1], p[3])
 
     def p_expr(self, p):
         '''
