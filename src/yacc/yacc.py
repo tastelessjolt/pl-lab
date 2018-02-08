@@ -91,7 +91,7 @@ class APLYacc(object):
             except:
                 p[0] = Stats((0, 0, 0))
         elif self.output == YaccOutput.AST:
-            try: 
+            try:
                 p[2].insert(0, p[1])
                 p[0] = p[2]
             except:
@@ -193,7 +193,7 @@ class APLYacc(object):
 
     def p_expr(self, p):
         '''
-            expr : expr PLUS expr 
+            expr : expr PLUS expr
                 | expr MINUS expr
                 | expr PTR expr %prec TIMES
                 | expr DIVIDE expr
@@ -204,7 +204,7 @@ class APLYacc(object):
             p[0] = BinOp(p[2], p[1], p[3])
 
     def p_expr_uminus(self, p):
-        ''' 
+        '''
             expr : MINUS expr %prec UMINUS
         '''
         if self.output == YaccOutput.STATS:
@@ -219,11 +219,11 @@ class APLYacc(object):
         if self.output == YaccOutput.STATS:
             pass
         elif self.output == YaccOutput.AST:
-            p[0] = p[2]        
+            p[0] = p[2]
 
     def p_expr_leaf(self, p):
         '''
-            expr : ptr ID 
+            expr : ptr ID
                 | NUM
         '''
         if self.output == YaccOutput.STATS:

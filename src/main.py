@@ -4,7 +4,7 @@ from yacc import *
 import sys
 import argparse
 
-VERSION = '0.2.0'
+VERSION = '0.3.0'
 
 def process(data):
     lex.lex()
