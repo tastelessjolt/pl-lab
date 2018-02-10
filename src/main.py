@@ -50,5 +50,8 @@ if __name__ == '__main__':
     if args.ast or not (args.yacc or args.lex):
         parser = APLYacc(output = YaccOutput.AST)
         parser.build(lexer)
-        stats = parser.parse(data)
-        print(stats)
+        ast = parser.parse(data)
+        eprint("Successfully Parsed")
+        for i in ast:
+            if i is not None:
+                print(i[0], "\n")

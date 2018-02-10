@@ -39,7 +39,11 @@ class APLLexer(object):
     t_COMMA = r'\,'
     t_LCURLY = r'\{'
     t_RCURLY = r'\}'
-    t_NUM = r'\d+'
+
+    def t_NUM(self, t):
+        r'\d+'
+        t.value = int(t.value)
+        return t
 
     def t_ID(self, t):
         r'[a-zA-Z_][a-zA-Z0-9_]*'

@@ -92,8 +92,7 @@ class APLYacc(object):
                 p[0] = Stats((0, 0, 0))
         elif self.output == YaccOutput.AST:
             try:
-                p[2].insert(0, p[1])
-                p[0] = p[2]
+                p[0] = [p[1]] + p[2]
             except:
                 p[0] = []
 
@@ -114,7 +113,8 @@ class APLYacc(object):
         if self.output == YaccOutput.STATS:
             p[0] = p[2] + p[3]
         elif self.output == YaccOutput.AST:
-            p[0] = 'DEC ' + p[1]
+            # p[0] = 'DEC ' + p[1]
+            pass
 
     def p_dec_varlist(self, p):
         '''
@@ -136,7 +136,7 @@ class APLYacc(object):
         if self.output == YaccOutput.STATS:
             pass
         elif self.output == YaccOutput.AST:
-            p[0] = p[1]
+            pass
 
     def p_var(self, p):
         '''
@@ -158,8 +158,7 @@ class APLYacc(object):
         if self.output == YaccOutput.STATS:
             p[0] = p[1] + p[2]
         elif self.output == YaccOutput.AST:
-            p[2].insert(0, p[1])
-            p[0] = p[2]
+            p[0] = [p[1]] + p[2]
 
     def p_assignlist(self, p):
         '''
@@ -173,8 +172,7 @@ class APLYacc(object):
                 p[0] = Stats((0, 0, 0))
         elif self.output == YaccOutput.AST:
             try:
-                p[3].insert(0, p[2])
-                p[0] = p[3]
+                p[0] = [p[2]] + p[3]
             except:
                 p[0] = []
 
@@ -186,10 +184,20 @@ class APLYacc(object):
         if self.output == YaccOutput.STATS:
             p[0] = Stats((0, 0, 1))
         elif self.output == YaccOutput.AST:
-            try:
-                p[0] = BinOp(p[4], p[1] + p[2] + p[3], p[5])
-            except:
-                p[0] = BinOp(p[2], p[1], p[3])
+            if len(p) == 6:
+                temp = Var(p[3])
+                if p[2] != '':
+                    for i in range(len(p[2]) - 1, -1, -1):
+                        if p[2][i] == '&':
+                            temp = UnaryOp(Operator.ref, temp)
+                        else:
+                            temp = UnaryOp(Operator.ptr, temp)
+
+                temp = UnaryOp(Operator.ptr, temp)
+
+                p[0] = BinOp(Operator.equal, temp, p[5])
+            elif len(p) == 4:
+                p[0] = BinOp(Operator.equal, Var(p[1]), p[3])
 
     def p_expr(self, p):
         '''
@@ -201,7 +209,7 @@ class APLYacc(object):
         if self.output == YaccOutput.STATS:
             pass
         elif self.output == YaccOutput.AST:
-            p[0] = BinOp(p[2], p[1], p[3])
+            p[0] = BinOp(Operator.arith_sym_to_op(p[2]), p[1], p[3])
 
     def p_expr_uminus(self, p):
         '''
@@ -210,7 +218,7 @@ class APLYacc(object):
         if self.output == YaccOutput.STATS:
             pass
         elif self.output == YaccOutput.AST:
-            p[0] = UnaryOp(p[1], p[2])
+            p[0] = UnaryOp(Operator.uminus, p[2])
 
     def p_expr_group(self, p):
         '''
@@ -229,14 +237,17 @@ class APLYacc(object):
         if self.output == YaccOutput.STATS:
             pass
         elif self.output == YaccOutput.AST:
-            try:
-                p[0] = p[1] + p[2]
-            except:
-                p[0] = p[1]
-        # try:
-        #     p[0] = p[2]
-        # except:
-        #     p[0] = p[1]
+            if len(p) == 3:
+                temp = Var(p[2])
+                if p[1] != '':
+                    for i in range(len(p[1]) - 1, -1, -1):
+                        if p[1][i] == '&':
+                            temp = UnaryOp(Operator.ref, temp)
+                        else:
+                            temp = UnaryOp(Operator.ptr, temp)
+                p[0] = temp
+            elif len(p) == 2:
+                p[0] = Num(p[1])
 
     def p_ptr(self, p):
         '''
