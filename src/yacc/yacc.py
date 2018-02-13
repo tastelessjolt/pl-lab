@@ -180,7 +180,7 @@ class APLYacc(object):
 
     def p_assignment(self, p):
         '''
-            assignment :  ID EQUALS expr
+            assignment :  ID EQUALS notNumExpr
                         | PTR ptr ID EQUALS expr
         '''
         if self.output == YaccOutput.STATS:
@@ -201,11 +201,67 @@ class APLYacc(object):
             elif len(p) == 4:
                 p[0] = BinOp(Operator.equal, Var(p[1]), p[3])
 
-    def p_expr(self, p):
+    def p_notNumExpr(self, p):
         '''
-            expr : expr PLUS expr
-                | expr MINUS expr
-                | expr DIVIDE expr
+            notNumExpr : notNumExpr PLUS onlyNumExpr
+                        | onlyNumExpr PLUS notNumExpr
+                        | notNumExpr MINUS onlyNumExpr
+                        | onlyNumExpr MINUS notNumExpr
+                        | notNumExpr PTR onlyNumExpr %prec TIMES
+                        | onlyNumExpr PTR notNumExpr %prec TIMES
+                        | notNumExpr DIVIDE onlyNumExpr
+                        | onlyNumExpr DIVIDE notNumExpr
+                        | notNumExpr PLUS notNumExpr
+                        | notNumExpr MINUS notNumExpr
+                        | notNumExpr PTR notNumExpr %prec TIMES
+                        | notNumExpr DIVIDE notNumExpr
+        '''
+        if self.output == YaccOutput.STATS:
+            pass
+        elif self.output == YaccOutput.AST:
+            p[0] = BinOp(Operator.arith_sym_to_op(p[2]), p[1], p[3])
+
+    def p_notNumExpr_uminus(self, p):
+        '''
+            notNumExpr : MINUS notNumExpr %prec UMINUS
+        '''
+        if self.output == YaccOutput.STATS:
+            pass
+        elif self.output == YaccOutput.AST:
+            p[0] = UnaryOp(Operator.uminus, p[2])
+
+    def p_notNumExpr_group(self, p):
+        '''
+            notNumExpr : LPAREN notNumExpr RPAREN
+        '''
+        if self.output == YaccOutput.STATS:
+            pass
+        elif self.output == YaccOutput.AST:
+            p[0] = p[2]
+
+    def p_notNumExpr_leaf(self, p):
+        '''
+            notNumExpr : ptr ID
+        '''
+        if self.output == YaccOutput.STATS:
+            pass
+        elif self.output == YaccOutput.AST:
+            temp = Var(p[2])
+            if p[1] != '':
+                for i in range(len(p[1]) - 1, -1, -1):
+                    if p[1][i] == '&':
+                        temp = UnaryOp(Operator.ref, temp)
+                    else:
+                        temp = UnaryOp(Operator.ptr, temp)
+            p[0] = temp
+
+    ############################################################
+    def p_onlyNumExpr(self, p):
+        '''
+            onlyNumExpr : onlyNumExpr PLUS onlyNumExpr
+                | onlyNumExpr MINUS onlyNumExpr
+                | onlyNumExpr PTR onlyNumExpr %prec TIMES
+                | onlyNumExpr DIVIDE onlyNumExpr
         '''
         if self.output == YaccOutput.STATS:
             pass
@@ -221,6 +277,37 @@ class APLYacc(object):
         elif self.output == YaccOutput.AST:
             p[0] = BinOp(Operator.arith_sym_to_op(p[2]), p[1], p[3])
 
+    def p_onlyNumExpr_uminus(self, p):
+        '''
+            onlyNumExpr : MINUS onlyNumExpr %prec UMINUS
+        '''
+        if self.output == YaccOutput.STATS:
+            pass
+        elif self.output == YaccOutput.AST:
+            p[0] = UnaryOp(Operator.uminus, p[2])
+
+
+    def p_onlyNumExpr_group(self, p):
+        '''
+            onlyNumExpr : LPAREN onlyNumExpr RPAREN
+        '''
+        if self.output == YaccOutput.STATS:
+            pass
+        elif self.output == YaccOutput.AST:
+            p[0] = p[2]
+
+    def p_onlyNumExpr_leaf(self, p):
+        '''
+            onlyNumExpr : NUM
+        '''
+        if self.output == YaccOutput.STATS:
+            pass
+        elif self.output == YaccOutput.AST:
+            p[0] = Num(p[1])
+
+
+    ############################################################
+
     def p_expr_uminus(self, p):
         '''
             expr : MINUS expr %prec UMINUS
@@ -229,6 +316,18 @@ class APLYacc(object):
             pass
         elif self.output == YaccOutput.AST:
             p[0] = UnaryOp(Operator.uminus, p[2])
+
+    def p_expr(self, p):
+        '''
+            expr : expr PLUS expr
+                | expr MINUS expr
+                | expr PTR expr %prec TIMES
+                | expr DIVIDE expr
+        '''
+        if self.output == YaccOutput.STATS:
+            pass
+        elif self.output == YaccOutput.AST:
+            p[0] = BinOp(Operator.arith_sym_to_op(p[2]), p[1], p[3])
 
     def p_expr_group(self, p):
         '''

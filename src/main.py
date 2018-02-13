@@ -51,7 +51,8 @@ if __name__ == '__main__':
         parser = APLYacc(output = YaccOutput.AST)
         parser.build(lexer)
         ast = parser.parse(data)
-        eprint("Successfully Parsed")
-        for i in ast:
-            if i is not None:
-                print(i[0], "\n")
+        if ast:
+            eprint("Successfully Parsed")
+            for i in ast:
+                if i is not None:
+                    print(i[0], "\n")
