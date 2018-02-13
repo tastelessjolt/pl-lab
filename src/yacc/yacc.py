@@ -5,6 +5,8 @@ from lex import *
 from ast import *
 from utils import *
 
+import pdb
+
 '''
 Parsing with yacc
 '''
@@ -34,9 +36,9 @@ class APLYacc(object):
 
     precedence = [
         ('left', 'PLUS', 'MINUS'),
-        ('left', 'DIVIDE', 'TIMES'),
+        ('left', 'PTR', 'DIVIDE'),
         ('right', 'UMINUS'),
-        ('right', 'PTR'),
+        # ('right', 'PTR', 'REF'),
     ]
 
     def __init__(self, output=YaccOutput.AST):
@@ -203,8 +205,16 @@ class APLYacc(object):
         '''
             expr : expr PLUS expr
                 | expr MINUS expr
-                | expr PTR expr %prec TIMES
                 | expr DIVIDE expr
+        '''
+        if self.output == YaccOutput.STATS:
+            pass
+        elif self.output == YaccOutput.AST:
+            p[0] = BinOp(Operator.arith_sym_to_op(p[2]), p[1], p[3])
+
+    def p_expr_times(self, p):
+        '''
+            expr : expr PTR expr
         '''
         if self.output == YaccOutput.STATS:
             pass
@@ -234,6 +244,7 @@ class APLYacc(object):
             expr : ptr ID
                 | NUM
         '''
+        pdb.set_trace()
         if self.output == YaccOutput.STATS:
             pass
         elif self.output == YaccOutput.AST:
