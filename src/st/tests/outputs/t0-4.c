@@ -1,0 +1,43 @@
+Generating LALR tables
+Successfully Parsed
+ASGN
+(
+	DEREF
+	(
+		ADDR
+		(
+			ADDR
+			(
+				ADDR
+				(
+					VAR(a)
+				)
+			)
+		)
+	)
+	,
+	MINUS
+	(
+		PLUS
+		(
+			DEREF
+			(
+				ADDR
+				(
+					VAR(a)
+				)
+			)
+			,
+			DEREF
+			(
+				VAR(f)
+			)
+		)
+		,
+		ADDR
+		(
+			VAR(g)
+		)
+	)
+)
+

@@ -4,6 +4,7 @@ from utils import *
 from lex import *
 from yacc import *
 import sys
+import os
 import argparse
 
 VERSION = '0.3.0'
@@ -51,7 +52,12 @@ if __name__ == '__main__':
         parser = APLYacc(output = YaccOutput.AST)
         parser.build(lexer)
         ast = parser.parse(data)
-        eprint("Successfully Parsed")
-        for i in ast:
-            if i is not None:
-                print(i[0], "\n")
+        f = open ('Parser_ast_' + os.path.basename(filename), 'w')
+        if ast:
+            eprint("Successfully Parsed")
+            for i in ast:
+                if i is not None:
+                    f.write(i[0].__str__() + "\n")
+        else:
+            f.write('')
+        f.close()
