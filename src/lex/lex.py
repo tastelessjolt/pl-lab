@@ -13,7 +13,7 @@ class APLLexer(object):
         'LPAREN',
         'RPAREN',
         'EQUALS',
-        'PTR',
+        'STR',
         'PLUS',
         'MINUS',
         'DIVIDE',
@@ -29,7 +29,7 @@ class APLLexer(object):
 
     t_LPAREN = r'\('
     t_RPAREN = r'\)'
-    t_PTR = r'\*'
+    t_STR = r'\*'
     t_EQUALS = r'='
     t_PLUS=r'\+'
     t_MINUS=r'\-'

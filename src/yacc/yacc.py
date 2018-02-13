@@ -1,11 +1,9 @@
 import ply.yacc as yacc
-import operator
 from enum import Enum
 from lex import *
-from ast import *
+from st import *
 from utils import *
-
-import pdb
+import operator
 
 '''
 Parsing with yacc
@@ -36,9 +34,8 @@ class APLYacc(object):
 
     precedence = [
         ('left', 'PLUS', 'MINUS'),
-        ('left', 'PTR', 'DIVIDE'),
-        ('right', 'UMINUS'),
-        # ('right', 'PTR', 'REF'),
+        ('left', 'STR', 'DIVIDE'),
+        ('right', 'UMINUS', 'DEREF', 'REF'),
     ]
 
     def __init__(self, output=YaccOutput.AST):
@@ -143,7 +140,7 @@ class APLYacc(object):
     def p_var(self, p):
         '''
             var : ID
-                | PTR var
+                | STR var %prec DEREF
         '''
         if self.output == YaccOutput.STATS:
             if p[1] == '*':
@@ -181,7 +178,7 @@ class APLYacc(object):
     def p_assignment(self, p):
         '''
             assignment :  ID EQUALS expr
-                        | PTR ptr ID EQUALS expr
+                        | STR ptr ID EQUALS expr  %prec DEREF
         '''
         if self.output == YaccOutput.STATS:
             p[0] = Stats((0, 0, 1))
@@ -206,15 +203,7 @@ class APLYacc(object):
             expr : expr PLUS expr
                 | expr MINUS expr
                 | expr DIVIDE expr
-        '''
-        if self.output == YaccOutput.STATS:
-            pass
-        elif self.output == YaccOutput.AST:
-            p[0] = BinOp(Operator.arith_sym_to_op(p[2]), p[1], p[3])
-
-    def p_expr_times(self, p):
-        '''
-            expr : expr PTR expr
+                | expr STR expr
         '''
         if self.output == YaccOutput.STATS:
             pass
@@ -244,7 +233,6 @@ class APLYacc(object):
             expr : ptr ID
                 | NUM
         '''
-        pdb.set_trace()
         if self.output == YaccOutput.STATS:
             pass
         elif self.output == YaccOutput.AST:
@@ -262,7 +250,7 @@ class APLYacc(object):
 
     def p_ptr(self, p):
         '''
-            ptr : PTR ptr
+            ptr : STR ptr %prec DEREF
                 | REF ptr
                 | epsilon
         '''
