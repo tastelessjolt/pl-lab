@@ -178,7 +178,8 @@ class APLYacc(object):
     def p_assignment(self, p):
         '''
             assignment :  ID EQUALS notNumExpr
-                        | STR ptr ID EQUALS expr %prec DEREF
+                        | STR ptr ID EQUALS notNumExpr %prec DEREF
+                        | STR ptr ID EQUALS onlyNumExpr %prec DEREF
         '''
         if self.output == YaccOutput.STATS:
             p[0] = Stats((0, 0, 1))
@@ -296,58 +297,6 @@ class APLYacc(object):
 
 
     ############################################################
-
-
-
-    def p_expr(self, p):
-        '''
-            expr : expr PLUS expr
-                | expr MINUS expr
-                | expr DIVIDE expr
-                | expr STR expr
-        '''
-        if self.output == YaccOutput.STATS:
-            pass
-        elif self.output == YaccOutput.AST:
-            p[0] = BinOp(Operator.arith_sym_to_op(p[2]), p[1], p[3])
-
-    def p_expr_uminus(self, p):
-        '''
-            expr : MINUS expr %prec UMINUS
-        '''
-        if self.output == YaccOutput.STATS:
-            pass
-        elif self.output == YaccOutput.AST:
-            p[0] = UnaryOp(Operator.uminus, p[2])
-
-    def p_expr_group(self, p):
-        '''
-            expr : LPAREN expr RPAREN
-        '''
-        if self.output == YaccOutput.STATS:
-            pass
-        elif self.output == YaccOutput.AST:
-            p[0] = p[2]
-
-    def p_expr_leaf(self, p):
-        '''
-            expr : ptr ID
-                | NUM
-        '''
-        if self.output == YaccOutput.STATS:
-            pass
-        elif self.output == YaccOutput.AST:
-            if len(p) == 3:
-                temp = Var(p[2])
-                if p[1] != '':
-                    for i in range(len(p[1]) - 1, -1, -1):
-                        if p[1][i] == '&':
-                            temp = UnaryOp(Operator.ref, temp)
-                        else:
-                            temp = UnaryOp(Operator.ptr, temp)
-                p[0] = temp
-            elif len(p) == 2:
-                p[0] = Num(p[1])
 
     def p_ptr(self, p):
         '''
