@@ -57,7 +57,7 @@ if __name__ == '__main__':
             eprint("Successfully Parsed")
             for i in ast:
                 if i is not None:
-                    f.write(i[0].__str__() + "\n")
+                    f.write(i[0].__str__() + "\n\n")
         else:
             f.write('')
         f.close()

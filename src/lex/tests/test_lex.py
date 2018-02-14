@@ -13,7 +13,7 @@ class TestLex(object):
 
         for file in os.listdir(TestLex.tests_dir):
             filepath = os.path.join(TestLex.tests_dir, file)
-            if os.path.isfile(filepath):
+            if os.path.isfile(filepath) and file.endswith(".c"):
                 f = open(filepath)
                 l = lexer.scan(f.read())
 
@@ -26,7 +26,7 @@ class TestLex(object):
 
         for file in os.listdir(TestLex.lex_tests_dir):
             filepath = os.path.join(TestLex.lex_tests_dir, file)
-            if os.path.isfile(filepath):
+            if os.path.isfile(filepath) and file.endswith(".c"):
                 f = open(filepath)
                 l = lexer.scan(f.read())
                 output = open(os.path.join(TestLex.tests_out, file)).read()

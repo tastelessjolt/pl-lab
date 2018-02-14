@@ -13,7 +13,7 @@ class TestYacc(object):
 
         for file in os.listdir(TestYacc.tests_dir):
             filepath = os.path.join(TestYacc.tests_dir, file)
-            if os.path.isfile(filepath):
+            if os.path.isfile(filepath) and file.endswith(".c"):
                 lexer = APLLexer()
                 lexer.build()
 
@@ -33,7 +33,7 @@ class TestYacc(object):
 
         for file in os.listdir(TestYacc.lex_tests_dir):
             filepath = os.path.join(TestYacc.lex_tests_dir, file)
-            if os.path.isfile(filepath):
+            if os.path.isfile(filepath) and file.endswith(".c"):
                 lexer = APLLexer()
                 lexer.build()
                 parser = APLYacc(output=YaccOutput.STATS)
