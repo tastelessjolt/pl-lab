@@ -6,11 +6,14 @@ ASGN
 	(
 		ADDR
 		(
-			ADDR
+			DEREF
 			(
 				ADDR
 				(
-					VAR(a)
+					ADDR
+					(
+						VAR(a)
+					)
 				)
 			)
 		)

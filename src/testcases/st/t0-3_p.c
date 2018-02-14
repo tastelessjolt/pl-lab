@@ -6,7 +6,7 @@ void main()
 	pb = &b;
 	pc = &c;
 	*pa = 2;
-	*pb = 4;
+	*pb = 4 * 5;
 
 	*pc = *pa * *pb / -**pa;
 }

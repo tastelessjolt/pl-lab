@@ -6,7 +6,7 @@ void main()
    int *px, *py, *pz;
 
    *px = 5;
-   *y = 1;
+   *y = (1 + 2) + 3;
    *pz = 1;
    *z = **px + *py - ***px;
    sdasz = -*z * &y + *x;

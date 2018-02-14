@@ -58,6 +58,7 @@ class TestAST(object):
 
                 output = open(os.path.join(TestAST.tests_out, file)).read()
                 errout = capsys.readouterr().err
-                print(errout)
-                print(ast_str)
+                # print(errout)
+                print(file)
+                # print(ast_str)
                 assert output.strip() == (errout + ast_str).strip()

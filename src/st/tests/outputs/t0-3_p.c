@@ -47,7 +47,12 @@ ASGN
 		VAR(pb)
 	)
 	,
-	CONST(4)
+	MUL
+	(
+		CONST(4)
+		,
+		CONST(5)
+	)
 )
 
 ASGN

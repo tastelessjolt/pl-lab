@@ -17,7 +17,17 @@ ASGN
 		VAR(y)
 	)
 	,
-	CONST(1)
+	PLUS
+	(
+		PLUS
+		(
+			CONST(1)
+			,
+			CONST(2)
+		)
+		,
+		CONST(3)
+	)
 )
 
 ASGN
