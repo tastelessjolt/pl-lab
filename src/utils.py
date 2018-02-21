@@ -5,6 +5,15 @@ from enum import Enum
 def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
 
+class Datatype(object):
+	# `int**` has ptr_depth = 2; `int` has ptr_depth = 0
+	def __init__(self, ptr_depth):
+		self.basetype = 'int'
+		self.ptr_depth = ptr_depth
+
+	def __str__(self):
+		return self.basetype + '*'*self.ptr_depth
+
 class Operator(Enum):
 	plus = 0
 	minus = 1
