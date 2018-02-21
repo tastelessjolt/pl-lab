@@ -27,6 +27,7 @@ class Stats:
 class YaccOutput(Enum):
     STATS = 0
     AST = 1
+    CFG = 2
 
 class APLYacc(object):
     reserved = APLLexer.reserved
@@ -36,6 +37,8 @@ class APLYacc(object):
         ('left', 'PLUS', 'MINUS'),
         ('left', 'STR', 'DIVIDE'),
         ('right', 'UMINUS', 'DEREF', 'REF'),
+        ('left', 'LESS_THAN', 'GREATER_THAN', 'LESS_EQUAL', 'GREATER_EQUAL'),
+        ('left', 'DOUBLE_EQUAL'),
     ]
 
     def __init__(self, output=YaccOutput.AST):
@@ -81,7 +84,7 @@ class APLYacc(object):
 
     def p_statements(self, p):
         '''
-            stlist : statement stlist
+            stlist : stmt stlist
                     | epsilon
         '''
         if self.output == YaccOutput.STATS:
@@ -94,6 +97,48 @@ class APLYacc(object):
                 p[0] = [p[1]] + p[2]
             except:
                 p[0] = []
+
+#######################################################################3
+
+    def p_stmt(self, p):
+        '''
+            stmt : matched_stmt
+                | unmatched_stmt
+        '''
+        p[0] = p[1]
+    
+    def p_matched_stmt(self, p):
+        '''
+            matched_stmt : IF LPAREN condition RPAREN matched_stmt ELSE matched_stmt
+                        | IF LPAREN condition RPAREN block ELSE block
+                        | statement
+        '''
+        p[0] = p[1]
+
+    def p_unmatched_stmt(self, p):
+        '''
+            unmatched_stmt : IF LPAREN condition RPAREN unmatched_stmt
+                            | IF LPAREN condition RPAREN matched_stmt ELSE unmatched_stmt
+                            | IF LPAREN condition RPAREN block
+        '''
+        pass
+
+    def p_condition(self, p):
+        '''
+            condition : assignment
+        '''
+        pass
+
+    def p_block(self, p):
+        '''
+            block : LCURLY stlist RCURLY
+        '''
+        if self.output == YaccOutput.STATS:
+            p[0] = p[2]
+        elif self.output == YaccOutput.AST:
+            p[0] = p[2]
+        
+#######################################################################3
 
     def p_statement(self, p):
         '''
@@ -112,7 +157,6 @@ class APLYacc(object):
         if self.output == YaccOutput.STATS:
             p[0] = p[2] + p[3]
         elif self.output == YaccOutput.AST:
-            # p[0] = 'DEC ' + p[1]
             pass
 
     def p_dec_varlist(self, p):
@@ -199,7 +243,6 @@ class APLYacc(object):
             elif len(p) == 4:
                 p[0] = BinOp(Operator.equal, Var(p[1]), p[3])
 
-    ############################################################
     def p_notNumExpr(self, p):
         '''
             notNumExpr : notNumExpr PLUS onlyNumExpr
@@ -254,7 +297,6 @@ class APLYacc(object):
                         temp = UnaryOp(Operator.ptr, temp)
             p[0] = temp
 
-    ############################################################
     def p_onlyNumExpr(self, p):
         '''
             onlyNumExpr : onlyNumExpr PLUS onlyNumExpr
@@ -294,9 +336,6 @@ class APLYacc(object):
             pass
         elif self.output == YaccOutput.AST:
             p[0] = Num(p[1])
-
-
-    ############################################################
 
     def p_ptr(self, p):
         '''
