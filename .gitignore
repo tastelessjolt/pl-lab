@@ -99,3 +99,6 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+# AST output files 
+Parser_ast_*

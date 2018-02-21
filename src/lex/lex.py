@@ -5,7 +5,10 @@ class APLLexer(object):
     reserved = {
         'int': 'INT',
         'main': 'MAIN',
-        'void': 'VOID'
+        'void': 'VOID',
+        'if': 'IF',
+        'else': 'ELSE',
+        'while': 'WHILE'
     }
 
     tokens = [
@@ -23,6 +26,11 @@ class APLLexer(object):
         'LCURLY',
         'RCURLY',
         'NUM',
+        'DOUBLE_EQUAL',
+        'LESS_THAN',
+        'GREATER_THAN',
+        'LESS_EQUAL',
+        'GREATER_EQUAL',
     ] + list(reserved.values())
 
     t_ignore = " \t"
@@ -39,6 +47,11 @@ class APLLexer(object):
     t_COMMA = r'\,'
     t_LCURLY = r'\{'
     t_RCURLY = r'\}'
+    t_DOUBLE_EQUAL = r'=='
+    t_LESS_THAN = r'<'
+    t_GREATER_THAN = r'>'
+    t_LESS_EQUAL = r'<='
+    t_GREATER_EQUAL = r'>='
 
     def t_NUM(self, t):
         r'\d+'
