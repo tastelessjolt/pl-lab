@@ -38,7 +38,7 @@ class APLYacc(object):
         ('left', 'STR', 'DIVIDE'),
         ('right', 'UMINUS', 'DEREF', 'REF'),
         ('left', 'LESS_THAN', 'GREATER_THAN', 'LESS_EQUAL', 'GREATER_EQUAL'),
-        ('left', 'DOUBLE_EQUAL'),
+        ('left', 'DOUBLE_EQUAL', 'NOT_EQUAL'),
     ]
 
     def __init__(self, output=YaccOutput.AST):
@@ -110,22 +110,23 @@ class APLYacc(object):
     def p_matched_stmt(self, p):
         '''
             matched_stmt : IF LPAREN condition RPAREN matched_stmt ELSE matched_stmt
-                        | IF LPAREN condition RPAREN block ELSE block
-                        | statement
+                        | WHILE LPAREN condition RPAREN matched_stmt
+                        | other
         '''
         p[0] = p[1]
 
     def p_unmatched_stmt(self, p):
         '''
-            unmatched_stmt : IF LPAREN condition RPAREN unmatched_stmt
+            unmatched_stmt : IF LPAREN condition RPAREN stmt
+                            | WHILE LPAREN condition RPAREN unmatched_stmt
                             | IF LPAREN condition RPAREN matched_stmt ELSE unmatched_stmt
-                            | IF LPAREN condition RPAREN block
         '''
         pass
 
     def p_condition(self, p):
         '''
-            condition : assignment
+            condition : notNumExpr
+                        | onlyNumExpr
         '''
         pass
 
@@ -138,17 +139,26 @@ class APLYacc(object):
         elif self.output == YaccOutput.AST:
             p[0] = p[2]
         
-#######################################################################3
 
-    def p_statement(self, p):
+    # def p_while(self, p):
+    #     '''
+    #         while : WHILE LPAREN condition RPAREN stmt
+    #     '''
+    #     pass
+
+    def p_other(self, p):
         '''
-            statement : declaration SEMICOLON
-                        | assignments SEMICOLON
+            other : declaration SEMICOLON
+                    | block
+                    | assignments SEMICOLON
+                    | SEMICOLON
         '''
         if self.output == YaccOutput.STATS:
             p[0] = p[1]
         elif self.output == YaccOutput.AST:
             p[0] = p[1]
+
+#######################################################################3
 
     def p_declaration(self, p):
         '''
@@ -157,7 +167,7 @@ class APLYacc(object):
         if self.output == YaccOutput.STATS:
             p[0] = p[2] + p[3]
         elif self.output == YaccOutput.AST:
-            pass
+            p[0] = 'dec'
 
     def p_dec_varlist(self, p):
         '''
@@ -246,17 +256,37 @@ class APLYacc(object):
     def p_notNumExpr(self, p):
         '''
             notNumExpr : notNumExpr PLUS onlyNumExpr
-                        | onlyNumExpr PLUS notNumExpr
                         | notNumExpr MINUS onlyNumExpr
-                        | onlyNumExpr MINUS notNumExpr
                         | notNumExpr STR onlyNumExpr
-                        | onlyNumExpr STR notNumExpr
                         | notNumExpr DIVIDE onlyNumExpr
+                        | notNumExpr DOUBLE_EQUAL onlyNumExpr
+                        | notNumExpr NOT_EQUAL onlyNumExpr
+                        | notNumExpr LESS_THAN onlyNumExpr
+                        | notNumExpr GREATER_THAN onlyNumExpr
+                        | notNumExpr LESS_EQUAL onlyNumExpr
+                        | notNumExpr GREATER_EQUAL onlyNumExpr
+                        
+                        | onlyNumExpr PLUS notNumExpr
+                        | onlyNumExpr MINUS notNumExpr
+                        | onlyNumExpr STR notNumExpr
                         | onlyNumExpr DIVIDE notNumExpr
+                        | onlyNumExpr DOUBLE_EQUAL notNumExpr
+                        | onlyNumExpr NOT_EQUAL notNumExpr
+                        | onlyNumExpr LESS_THAN notNumExpr
+                        | onlyNumExpr GREATER_THAN notNumExpr
+                        | onlyNumExpr LESS_EQUAL notNumExpr
+                        | onlyNumExpr GREATER_EQUAL notNumExpr
+                        
                         | notNumExpr PLUS notNumExpr
                         | notNumExpr MINUS notNumExpr
                         | notNumExpr STR notNumExpr
                         | notNumExpr DIVIDE notNumExpr
+                        | notNumExpr DOUBLE_EQUAL notNumExpr
+                        | notNumExpr NOT_EQUAL notNumExpr
+                        | notNumExpr LESS_THAN notNumExpr
+                        | notNumExpr GREATER_THAN notNumExpr
+                        | notNumExpr LESS_EQUAL notNumExpr
+                        | notNumExpr GREATER_EQUAL notNumExpr
         '''
         if self.output == YaccOutput.STATS:
             pass
@@ -303,6 +333,12 @@ class APLYacc(object):
                 | onlyNumExpr MINUS onlyNumExpr
                 | onlyNumExpr STR onlyNumExpr
                 | onlyNumExpr DIVIDE onlyNumExpr
+                | onlyNumExpr DOUBLE_EQUAL onlyNumExpr
+                | onlyNumExpr NOT_EQUAL onlyNumExpr
+                | onlyNumExpr LESS_THAN onlyNumExpr
+                | onlyNumExpr GREATER_THAN onlyNumExpr
+                | onlyNumExpr LESS_EQUAL onlyNumExpr
+                | onlyNumExpr GREATER_EQUAL onlyNumExpr
         '''
         if self.output == YaccOutput.STATS:
             pass

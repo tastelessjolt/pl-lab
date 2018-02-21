@@ -27,6 +27,7 @@ class APLLexer(object):
         'RCURLY',
         'NUM',
         'DOUBLE_EQUAL',
+        'NOT_EQUAL',
         'LESS_THAN',
         'GREATER_THAN',
         'LESS_EQUAL',
@@ -48,6 +49,7 @@ class APLLexer(object):
     t_LCURLY = r'\{'
     t_RCURLY = r'\}'
     t_DOUBLE_EQUAL = r'=='
+    t_NOT_EQUAL = r'\!='
     t_LESS_THAN = r'<'
     t_GREATER_THAN = r'>'
     t_LESS_EQUAL = r'<='
