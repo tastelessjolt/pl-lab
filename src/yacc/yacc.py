@@ -62,22 +62,13 @@ class APLYacc(object):
 
     def p_main(self, p):
         '''
-            main : VOID MAIN LPAREN RPAREN LCURLY body RCURLY
+            main : VOID MAIN LPAREN RPAREN LCURLY stlist RCURLY
         '''
         if self.output == YaccOutput.STATS:
             p[0] = p[6]
         elif self.output == YaccOutput.AST:
             p[0] = p[6]
             # p[0] = ASTFunc('main', p[6])
-
-    def p_function_body(self, p):
-        '''
-            body : stlist
-        '''
-        if self.output == YaccOutput.STATS:
-            p[0] = p[1]
-        elif self.output == YaccOutput.AST:
-            p[0] = p[1]
 
     def p_statements(self, p):
         '''
