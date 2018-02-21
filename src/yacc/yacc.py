@@ -158,7 +158,8 @@ class APLYacc(object):
         if self.output == YaccOutput.STATS:
             p[0] = p[2] + p[3]
         elif self.output == YaccOutput.AST:
-            p[0] = 'dec'
+            # p[0] = 'dec'
+            pass
 
     def p_dec_varlist(self, p):
         '''
