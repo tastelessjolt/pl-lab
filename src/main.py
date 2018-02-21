@@ -7,7 +7,7 @@ import sys
 import os
 import argparse
 
-VERSION = '0.3.0'
+VERSION = '0.3.1'
 
 def process(data):
     lex.lex()
