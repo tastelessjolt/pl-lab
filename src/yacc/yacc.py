@@ -52,7 +52,7 @@ class APLYacc(object):
         if self.output == YaccOutput.STATS:
             p[0] = p[1]
         elif self.output == YaccOutput.AST:
-            p[0] = p[1]
+            p[0] = Program([p[1]])
 
     def p_epsilon(self, p):
         '''
@@ -70,7 +70,7 @@ class APLYacc(object):
         if self.output == YaccOutput.STATS:
             p[0] = p[6]
         elif self.output == YaccOutput.AST:
-            p[0] = p[6]
+            p[0] = Func(VoidType(), 'main', [], p[6])
             # p[0] = ASTFunc('main', p[6])
 
     def p_statements(self, p):
@@ -97,7 +97,7 @@ class APLYacc(object):
                 | unmatched_stmt
         '''
         p[0] = p[1]
-    
+
     def p_matched_stmt(self, p):
         '''
             matched_stmt : IF LPAREN condition RPAREN matched_stmt ELSE matched_stmt
@@ -129,13 +129,6 @@ class APLYacc(object):
             p[0] = p[2]
         elif self.output == YaccOutput.AST:
             p[0] = p[2]
-        
-
-    # def p_while(self, p):
-    #     '''
-    #         while : WHILE LPAREN condition RPAREN stmt
-    #     '''
-    #     pass
 
     def p_other(self, p):
         '''
@@ -257,7 +250,7 @@ class APLYacc(object):
                         | notNumExpr GREATER_THAN onlyNumExpr
                         | notNumExpr LESS_EQUAL onlyNumExpr
                         | notNumExpr GREATER_EQUAL onlyNumExpr
-                        
+
                         | onlyNumExpr PLUS notNumExpr
                         | onlyNumExpr MINUS notNumExpr
                         | onlyNumExpr STR notNumExpr
@@ -268,7 +261,7 @@ class APLYacc(object):
                         | onlyNumExpr GREATER_THAN notNumExpr
                         | onlyNumExpr LESS_EQUAL notNumExpr
                         | onlyNumExpr GREATER_EQUAL notNumExpr
-                        
+
                         | notNumExpr PLUS notNumExpr
                         | notNumExpr MINUS notNumExpr
                         | notNumExpr STR notNumExpr
