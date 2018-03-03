@@ -172,12 +172,13 @@ class APLYacc(object):
                     | assignments SEMICOLON
                     | SEMICOLON
         '''
-        if self.output == YaccOutput.STATS:
-            p[0] = p[1]
-        elif self.output == YaccOutput.AST:
-            p[0] = p[1]
-        elif self.output == YaccOutput.CFG:
-            p[0] = p[1]
+        if p[0] != ';':
+            if self.output == YaccOutput.STATS:
+                p[0] = p[1]
+            elif self.output == YaccOutput.AST:
+                p[0] = p[1]
+            elif self.output == YaccOutput.CFG:
+                p[0] = p[1]
 
 #######################################################################3
 
