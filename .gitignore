@@ -102,3 +102,5 @@ ENV/
 
 # AST output files 
 Parser_ast_*
+.cache/
+.vscode/
