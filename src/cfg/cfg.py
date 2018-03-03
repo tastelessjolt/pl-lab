@@ -2,10 +2,31 @@
 from st import *
 
 class CFG(object):
-    class Block(object):
-        def __init__(self, astlist, blocknum):
+    class BasicBlock(object):
+        def __init__(self, astlist=[], blocknum=-1, goto=-1):
             self.astlist = astlist
             self.blocknum = blocknum
+            self.goto = goto
+
+        def __str__(self):
+            return NotImplementedError
+
+    class IfBlock(object):
+        def __init__(self, astlist=[], blocknum=-1, gotoif=-1, gotoelse=-1):
+            self.astlist = astlist
+            self.blocknum = blocknum
+            self.gotoif = gotoif
+            self.gotoelse = gotoelse
+
+        def __str__(self):
+            return NotImplementedError
+
+    class WhileBlock(object):
+        def __init__(self, astlist=[], blocknum=-1, gotoif=-1, gotoelse=-1):
+            self.astlist = astlist
+            self.blocknum = blocknum
+            self.gotoif = gotoif
+            self.gotoelse = gotoelse
 
         def __str__(self):
             return NotImplementedError
@@ -13,36 +34,64 @@ class CFG(object):
     def __init__(self, programAST):
         self.ast = programAST
         self.blocks = []
-        self.traverse_ast()
+        self.numblocks = 0
 
-    def traverse_if(self, if_ast, blocknum):
-        raise NotImplementedError
-
-    def traverse_while(self, while_ast, blocknum):
-        raise NotImplementedError
-
-    def traverse_ast(self):
-        block_number = 0
         function_list = self.ast.function_list
         main_func = [func for func in function_list if func.fname == 'main'][0]
-        stlist = main_func.stlist
+        self.traverse_ast(main_func.stlist)
+
+
+    def traverse_if(self, ifblock, nextblock):
+        ifblock.gotoif = traverse_ast(ifblock.astlist[0].stlist1, nextblock)
+        if ifblock.astlist[0].stlist2:
+            ifblock.gotoelse = traverse_ast(ifblock.astlist[0].stlist2, nextblock)
+
+    def traverse_while(self, whileblock, nextblock):
+        whileblock.gotoif = traverse_ast(whileblock.astlist[0].stlist, whileblock)
+        whileblock.gotoelse = nextblock
+
+    def traverse_ast(self, stlist, nextblock=BasicBlock()):
         block_list = []
 
         j = 0
 
+        localblocks = []
+
         while(j < len(stlist)):
-            while(not (isinstance(stlist[j], IfStatement) or isinstance(stlist[j], WhileStatement))):
-                block_list.append(stlist[j])
+            if not (isinstance(stlist[j], IfStatement) or isinstance(stlist[j], WhileStatement)):
+                while(not (isinstance(stlist[j], IfStatement) or isinstance(stlist[j], WhileStatement))):
+                    block_list.append(stlist[j])
+                    j += 1
+                # Basic Block
+                localblocks.append(BasicBlock(block_list, self.numblocks))
+                self.numblocks += 1
+                block_list = []
+            elif isinstance(stlist[j], IfStatement):
+                # IfBlock
+                localblocks.append(IfBlock([stlist[j]], self.numblocks))
+                self.numblocks += 1
+                block_list = []
                 j += 1
-            self.blocks.append(Block(block_list, block_number))
-            block_number += 1
-            block_list = []
-            self.blocks.append(Block([stlist[j]], block_number))
-            block_number += 1
-
-            if isinstance(stlist[j], IfStatement):
-                traverse_if(stlist[j], block_number)
             else:
-                traverse_while(stlist[j], block_number)
+                # While Block
+                localblocks.append(WhileBlock([stlist[j]], self.numblocks))
+                self.numblocks += 1
+                block_list = []
+                j += 1
 
-            j += 1
+        localblocks.append(nextblock)
+
+        for i in range(len(localblocks) - 1):
+            thisblock = localblocks[i]
+            _nextblock = localblocks[i+1]
+            if isinstance(thisblock, BasicBlock):
+                thisblock.goto = _nextblock
+            elif isinstance(thisblock, IfBlock):
+                self.traverse_if(thisblock, _nextblock)
+            else:
+                self.traverse_while(thisblock, _nextblock)
+
+        localblocks.pop()
+        self.blocks += localblocks
+
+        return localblocks[0]

@@ -19,7 +19,7 @@ class Func(AST):
         raise NotImplementedError
 
 class IfStatement(AST):
-    def __init__(self, operator, condition, stlist1, stlist2):
+    def __init__(self, operator, condition, stlist1, stlist2=[]):
         self.operator = operator
         self.condition = condition
         self.stlist1 = stlist1
