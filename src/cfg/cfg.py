@@ -42,12 +42,12 @@ class CFG(object):
 
 
     def traverse_if(self, ifblock, nextblock):
-        ifblock.gotoif = traverse_ast(ifblock.astlist[0].stlist1, nextblock)
+        ifblock.gotoif = self.traverse_ast(ifblock.astlist[0].stlist1, nextblock)
         if ifblock.astlist[0].stlist2:
-            ifblock.gotoelse = traverse_ast(ifblock.astlist[0].stlist2, nextblock)
+            ifblock.gotoelse = self.traverse_ast(ifblock.astlist[0].stlist2, nextblock)
 
     def traverse_while(self, whileblock, nextblock):
-        whileblock.gotoif = traverse_ast(whileblock.astlist[0].stlist, whileblock)
+        whileblock.gotoif = self.traverse_ast(whileblock.astlist[0].stlist, whileblock)
         whileblock.gotoelse = nextblock
 
     def traverse_ast(self, stlist, nextblock=BasicBlock()):
