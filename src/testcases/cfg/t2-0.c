@@ -29,7 +29,7 @@ void main()
 				*iftmp0 = 1;
 				*f2=4;
 			}
-				*f2 = 4;
+			*f2 = 4;
 		 }
 	 }
 	else {
