@@ -9,18 +9,14 @@ import argparse
 
 VERSION = '0.3.1'
 
-def process(data):
-    lex.lex()
-    yacc.yacc()
-    yacc.parse(data)
-
 def buildArgParser():
     parser = argparse.ArgumentParser(description='APL Compiler ver ' + VERSION)
     parser.add_argument('input_file', type=str,
                         help='program to compile')
     parser.add_argument('-l', '--lex', help='generate lex output', action='store_true')
     parser.add_argument('-y', '--yacc', help='generate yacc output', action='store_true')
-    parser.add_argument('-a', '--ast', help='generate ast output', action='store_true')
+    parser.add_argument('-a', '--ast', help='generate AST output', action='store_true')
+    parser.add_argument('-c', '--cfg', help='generate CFG output', action='store_true')    
     return parser
 
 if __name__ == '__main__':
@@ -48,7 +44,7 @@ if __name__ == '__main__':
             if not args.ast:
                 sys.exit()
 
-    if args.ast or not (args.yacc or args.lex):
+    if args.ast:
         parser = APLYacc(output = YaccOutput.AST)
         parser.build(lexer)
         ast = parser.parse(data)
@@ -61,3 +57,9 @@ if __name__ == '__main__':
         else:
             f.write('')
         f.close()
+    
+    if args.cfg or not (args.yacc or args.lex or args.ast):
+        parser = APLYacc(output = YaccOutput.AST)
+        parser.build(lexer)
+        cfg = parser.parse(data)
+        print(cfg)
