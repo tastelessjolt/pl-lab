@@ -1,36 +1,37 @@
 
 from st import *
 
+
+class BasicBlock(object):
+    def __init__(self, astlist=[], blocknum=-1, goto=-1):
+        self.astlist = astlist
+        self.blocknum = blocknum
+        self.goto = goto
+
+    def __str__(self):
+        return NotImplementedError
+
+class IfBlock(object):
+    def __init__(self, astlist=[], blocknum=-1, gotoif=-1, gotoelse=-1):
+        self.astlist = astlist
+        self.blocknum = blocknum
+        self.gotoif = gotoif
+        self.gotoelse = gotoelse
+
+    def __str__(self):
+        return NotImplementedError
+
+class WhileBlock(object):
+    def __init__(self, astlist=[], blocknum=-1, gotoif=-1, gotoelse=-1):
+        self.astlist = astlist
+        self.blocknum = blocknum
+        self.gotoif = gotoif
+        self.gotoelse = gotoelse
+
+    def __str__(self):
+        return NotImplementedError
+
 class CFG(object):
-    class BasicBlock(object):
-        def __init__(self, astlist=[], blocknum=-1, goto=-1):
-            self.astlist = astlist
-            self.blocknum = blocknum
-            self.goto = goto
-
-        def __str__(self):
-            return NotImplementedError
-
-    class IfBlock(object):
-        def __init__(self, astlist=[], blocknum=-1, gotoif=-1, gotoelse=-1):
-            self.astlist = astlist
-            self.blocknum = blocknum
-            self.gotoif = gotoif
-            self.gotoelse = gotoelse
-
-        def __str__(self):
-            return NotImplementedError
-
-    class WhileBlock(object):
-        def __init__(self, astlist=[], blocknum=-1, gotoif=-1, gotoelse=-1):
-            self.astlist = astlist
-            self.blocknum = blocknum
-            self.gotoif = gotoif
-            self.gotoelse = gotoelse
-
-        def __str__(self):
-            return NotImplementedError
-
     def __init__(self, programAST):
         self.ast = programAST
         self.blocks = []

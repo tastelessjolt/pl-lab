@@ -28,8 +28,8 @@ class IfStatement(AST):
     def __str__(self, depth = 0):
         raise NotImplementedError
 
-class WhileStatment(AST):
-    def __init__(self, operand, condition, stlist):
+class WhileStatement(AST):
+    def __init__(self, operator, condition, stlist):
         self.operator = operator
         self.condition = condition
         self.stlist = stlist
