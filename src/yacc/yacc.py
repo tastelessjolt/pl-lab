@@ -62,10 +62,7 @@ class APLYacc(object):
         '''
             epsilon :
         '''
-        if self.output == YaccOutput.STATS:
-            pass
-        elif self.output == YaccOutput.AST:
-            pass
+        pass
 
     def p_main(self, p):
         '''
@@ -165,6 +162,8 @@ class APLYacc(object):
             p[0] = p[2]
         elif self.output == YaccOutput.AST:
             p[0] = p[2]
+        elif self.output == YaccOutput.CFG:
+            p[0] = p[2]
 
     def p_other(self, p):
         '''
@@ -177,6 +176,8 @@ class APLYacc(object):
             p[0] = p[1]
         elif self.output == YaccOutput.AST:
             p[0] = p[1]
+        elif self.output == YaccOutput.CFG:
+            p[0] = p[1]
 
 #######################################################################3
 
@@ -186,9 +187,6 @@ class APLYacc(object):
         '''
         if self.output == YaccOutput.STATS:
             p[0] = p[2] + p[3]
-        elif self.output == YaccOutput.AST:
-            # p[0] = 'dec'
-            pass
 
     def p_dec_varlist(self, p):
         '''
@@ -200,17 +198,12 @@ class APLYacc(object):
                 p[0] = p[2] + p[3]
             except:
                 p[0] = Stats((0, 0, 0))
-        elif self.output == YaccOutput.AST:
-            pass
 
     def p_type(self, p):
         '''
             type : INT
         '''
-        if self.output == YaccOutput.STATS:
-            pass
-        elif self.output == YaccOutput.AST:
-            pass
+        pass
 
     def p_var(self, p):
         '''
@@ -222,8 +215,6 @@ class APLYacc(object):
                 p[0] = Stats((0, 1, 0))
             else:
                 p[0] = Stats((1, 0, 0))
-        elif self.output == YaccOutput.AST:
-            pass
 
     def p_assignments(self, p):
         '''
@@ -291,9 +282,7 @@ class APLYacc(object):
                         | notNumExpr STR notNumExpr
                         | notNumExpr DIVIDE notNumExpr             
         '''
-        if self.output == YaccOutput.STATS:
-            pass
-        elif self.output == YaccOutput.AST:
+        if self.output == YaccOutput.AST:
             p[0] = BinOp(Operator.arith_sym_to_op(p[2]), p[1], p[3])
 
 # | notNumExpr DOUBLE_EQUAL onlyNumExpr
@@ -321,27 +310,21 @@ class APLYacc(object):
         '''
             notNumExpr : MINUS notNumExpr %prec UMINUS
         '''
-        if self.output == YaccOutput.STATS:
-            pass
-        elif self.output == YaccOutput.AST:
+        if self.output == YaccOutput.AST:
             p[0] = UnaryOp(Operator.uminus, p[2])
 
     def p_notNumExpr_group(self, p):
         '''
             notNumExpr : LPAREN notNumExpr RPAREN
         '''
-        if self.output == YaccOutput.STATS:
-            pass
-        elif self.output == YaccOutput.AST:
+        if self.output == YaccOutput.AST:
             p[0] = p[2]
 
     def p_notNumExpr_leaf(self, p):
         '''
             notNumExpr : ptr ID
         '''
-        if self.output == YaccOutput.STATS:
-            pass
-        elif self.output == YaccOutput.AST:
+        if self.output == YaccOutput.AST:
             temp = Var(p[2])
             if p[1] != '':
                 for i in range(len(p[1]) - 1, -1, -1):
@@ -358,9 +341,7 @@ class APLYacc(object):
                 | onlyNumExpr STR onlyNumExpr
                 | onlyNumExpr DIVIDE onlyNumExpr
         '''
-        if self.output == YaccOutput.STATS:
-            pass
-        elif self.output == YaccOutput.AST:
+        if self.output == YaccOutput.AST:
             p[0] = BinOp(Operator.arith_sym_to_op(p[2]), p[1], p[3])
 
 # | onlyNumExpr DOUBLE_EQUAL onlyNumExpr
@@ -374,9 +355,7 @@ class APLYacc(object):
         '''
             onlyNumExpr : MINUS onlyNumExpr %prec UMINUS
         '''
-        if self.output == YaccOutput.STATS:
-            pass
-        elif self.output == YaccOutput.AST:
+        if self.output == YaccOutput.AST:
             p[0] = UnaryOp(Operator.uminus, p[2])
 
 
@@ -384,18 +363,14 @@ class APLYacc(object):
         '''
             onlyNumExpr : LPAREN onlyNumExpr RPAREN
         '''
-        if self.output == YaccOutput.STATS:
-            pass
-        elif self.output == YaccOutput.AST:
+        if self.output == YaccOutput.AST:
             p[0] = p[2]
 
     def p_onlyNumExpr_leaf(self, p):
         '''
             onlyNumExpr : NUM
         '''
-        if self.output == YaccOutput.STATS:
-            pass
-        elif self.output == YaccOutput.AST:
+        if self.output == YaccOutput.AST:
             p[0] = Num(p[1])
 
     def p_ptr(self, p):
@@ -404,9 +379,7 @@ class APLYacc(object):
                 | REF ptr
                 | epsilon
         '''
-        if self.output == YaccOutput.STATS:
-            pass
-        elif self.output == YaccOutput.AST:
+        if self.output == YaccOutput.AST:
             try:
                 p[0] = p[1] + p[2]
             except:
