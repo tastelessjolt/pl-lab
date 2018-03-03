@@ -34,9 +34,11 @@ class APLYacc(object):
     tokens = APLLexer.tokens
 
     precedence = [
+        ('left', 'LOGICAL_OR'),
+        ('left', 'LOGICAL_AND'),
         ('left', 'PLUS', 'MINUS'),
         ('left', 'STR', 'DIVIDE'),
-        ('right', 'UMINUS', 'DEREF', 'REF'),
+        ('right', 'UMINUS', 'DEREF', 'REF', 'LOGICAL_NOT'),
         ('left', 'LESS_THAN', 'GREATER_THAN', 'LESS_EQUAL', 'GREATER_EQUAL'),
         ('left', 'DOUBLE_EQUAL', 'NOT_EQUAL'),
     ]
@@ -120,8 +122,38 @@ class APLYacc(object):
 
     def p_condition(self, p):
         '''
-            condition : notNumExpr
-                        | onlyNumExpr
+            condition : condition LOGICAL_OR condition
+                        | condition REF condition %prec LOGICAL_AND
+        '''
+        pass
+
+    def p_condition_not(self, p):
+        '''
+            condition : LOGICAL_NOT condition
+        '''
+        pass
+
+    def p_condition_paren(self, p):
+        '''
+            condition : LPAREN condition RPAREN
+        '''
+        pass
+
+    def p_condition_end(self, p):
+        '''
+            condition : expr DOUBLE_EQUAL expr
+                        | expr NOT_EQUAL expr
+                        | expr LESS_THAN expr
+                        | expr GREATER_THAN expr
+                        | expr LESS_EQUAL expr
+                        | expr GREATER_EQUAL expr
+        '''
+        pass
+    
+    def p_expr(self, p):
+        '''
+            expr : notNumExpr
+                | onlyNumExpr
         '''
         pass
 
@@ -248,39 +280,42 @@ class APLYacc(object):
                         | notNumExpr MINUS onlyNumExpr
                         | notNumExpr STR onlyNumExpr
                         | notNumExpr DIVIDE onlyNumExpr
-                        | notNumExpr DOUBLE_EQUAL onlyNumExpr
-                        | notNumExpr NOT_EQUAL onlyNumExpr
-                        | notNumExpr LESS_THAN onlyNumExpr
-                        | notNumExpr GREATER_THAN onlyNumExpr
-                        | notNumExpr LESS_EQUAL onlyNumExpr
-                        | notNumExpr GREATER_EQUAL onlyNumExpr
 
                         | onlyNumExpr PLUS notNumExpr
                         | onlyNumExpr MINUS notNumExpr
                         | onlyNumExpr STR notNumExpr
                         | onlyNumExpr DIVIDE notNumExpr
-                        | onlyNumExpr DOUBLE_EQUAL notNumExpr
-                        | onlyNumExpr NOT_EQUAL notNumExpr
-                        | onlyNumExpr LESS_THAN notNumExpr
-                        | onlyNumExpr GREATER_THAN notNumExpr
-                        | onlyNumExpr LESS_EQUAL notNumExpr
-                        | onlyNumExpr GREATER_EQUAL notNumExpr
-
+                        
                         | notNumExpr PLUS notNumExpr
                         | notNumExpr MINUS notNumExpr
                         | notNumExpr STR notNumExpr
-                        | notNumExpr DIVIDE notNumExpr
-                        | notNumExpr DOUBLE_EQUAL notNumExpr
-                        | notNumExpr NOT_EQUAL notNumExpr
-                        | notNumExpr LESS_THAN notNumExpr
-                        | notNumExpr GREATER_THAN notNumExpr
-                        | notNumExpr LESS_EQUAL notNumExpr
-                        | notNumExpr GREATER_EQUAL notNumExpr
+                        | notNumExpr DIVIDE notNumExpr             
         '''
         if self.output == YaccOutput.STATS:
             pass
         elif self.output == YaccOutput.AST:
             p[0] = BinOp(Operator.arith_sym_to_op(p[2]), p[1], p[3])
+
+# | notNumExpr DOUBLE_EQUAL onlyNumExpr
+# | notNumExpr NOT_EQUAL onlyNumExpr
+# | notNumExpr LESS_THAN onlyNumExpr
+# | notNumExpr GREATER_THAN onlyNumExpr
+# | notNumExpr LESS_EQUAL onlyNumExpr
+# | notNumExpr GREATER_EQUAL onlyNumExpr
+
+# | onlyNumExpr DOUBLE_EQUAL notNumExpr
+# | onlyNumExpr NOT_EQUAL notNumExpr
+# | onlyNumExpr LESS_THAN notNumExpr
+# | onlyNumExpr GREATER_THAN notNumExpr
+# | onlyNumExpr LESS_EQUAL notNumExpr
+# | onlyNumExpr GREATER_EQUAL notNumExpr
+
+# | notNumExpr DOUBLE_EQUAL notNumExpr
+# | notNumExpr NOT_EQUAL notNumExpr
+# | notNumExpr LESS_THAN notNumExpr
+# | notNumExpr GREATER_THAN notNumExpr
+# | notNumExpr LESS_EQUAL notNumExpr
+# | notNumExpr GREATER_EQUAL notNumExpr
 
     def p_notNumExpr_uminus(self, p):
         '''
@@ -322,17 +357,18 @@ class APLYacc(object):
                 | onlyNumExpr MINUS onlyNumExpr
                 | onlyNumExpr STR onlyNumExpr
                 | onlyNumExpr DIVIDE onlyNumExpr
-                | onlyNumExpr DOUBLE_EQUAL onlyNumExpr
-                | onlyNumExpr NOT_EQUAL onlyNumExpr
-                | onlyNumExpr LESS_THAN onlyNumExpr
-                | onlyNumExpr GREATER_THAN onlyNumExpr
-                | onlyNumExpr LESS_EQUAL onlyNumExpr
-                | onlyNumExpr GREATER_EQUAL onlyNumExpr
         '''
         if self.output == YaccOutput.STATS:
             pass
         elif self.output == YaccOutput.AST:
             p[0] = BinOp(Operator.arith_sym_to_op(p[2]), p[1], p[3])
+
+# | onlyNumExpr DOUBLE_EQUAL onlyNumExpr
+# | onlyNumExpr NOT_EQUAL onlyNumExpr
+# | onlyNumExpr LESS_THAN onlyNumExpr
+# | onlyNumExpr GREATER_THAN onlyNumExpr
+# | onlyNumExpr LESS_EQUAL onlyNumExpr
+# | onlyNumExpr GREATER_EQUAL onlyNumExpr
 
     def p_onlyNumExpr_uminus(self, p):
         '''
