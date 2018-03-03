@@ -4,7 +4,7 @@ class CFG(object):
             self.astlist = astlist
             self.blocknum = blocknum
 
-        def __str__(object):
+        def __str__(self):
             return NotImplementedError
 
     def __init__(self, programAST):
@@ -14,4 +14,3 @@ class CFG(object):
 
     def traverse_ast(self):
         raise NotImplementedError
-

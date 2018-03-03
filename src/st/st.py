@@ -5,7 +5,7 @@ class Program(AST):
     def __init__(self, funclist):
         self.funclist = funclist
 
-    def __str__(self, depth):
+    def __str__(self, depth = 0):
         raise NotImplementedError
 
 class Func(AST):
@@ -15,7 +15,7 @@ class Func(AST):
         self.params = params
         self.stlist = stlist
 
-    def __str__(self, depth):
+    def __str__(self, depth = 0):
         raise NotImplementedError
 
 class IfStatement(AST):
@@ -25,7 +25,7 @@ class IfStatement(AST):
         self.stlist1 = stlist1
         self.stlist2 = stlist2
 
-    def __str__(self, depth):
+    def __str__(self, depth = 0):
         raise NotImplementedError
 
 class WhileStatment(AST):
@@ -34,7 +34,7 @@ class WhileStatment(AST):
         self.condition = condition
         self.stlist = stlist
 
-    def __str__(self, depth):
+    def __str__(self, depth = 0):
         raise NotImplementedError
 
 class Declaration(AST):
@@ -44,7 +44,7 @@ class Declaration(AST):
         self.datatype = datatype
         self.varlist = varlist
 
-    def __str__(self, depth):
+    def __str__(self, depth = 0):
         raise NotImplementedError
 
 class BinOp(AST):
@@ -82,7 +82,7 @@ class Var(AST):
     def __init__(self, label):
         self.label = label
 
-    def __str__(self, depth):
+    def __str__(self, depth=0):
         return "\t" * depth + "VAR(%s)" % self.label
 
 
@@ -90,5 +90,5 @@ class Num(AST):
     def __init__(self, val):
         self.val = val
 
-    def __str__(self, depth):
+    def __str__(self, depth=0):
         return "\t" * depth + "CONST(%d)" % self.val
