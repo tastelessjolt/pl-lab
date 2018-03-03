@@ -32,6 +32,8 @@ class APLLexer(object):
         'GREATER_THAN',
         'LESS_EQUAL',
         'GREATER_EQUAL',
+        'LOGICAL_OR',
+        'LOGICAL_NOT',
     ] + list(reserved.values())
 
     t_ignore = " \t"
@@ -54,6 +56,8 @@ class APLLexer(object):
     t_GREATER_THAN = r'>'
     t_LESS_EQUAL = r'<='
     t_GREATER_EQUAL = r'>='
+    t_LOGICAL_OR = r'\|'
+    t_LOGICAL_NOT = r'\!'
 
     def t_NUM(self, t):
         r'\d+'
