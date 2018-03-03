@@ -52,6 +52,8 @@ class APLYacc(object):
         if self.output == YaccOutput.STATS:
             p[0] = p[1]
         elif self.output == YaccOutput.AST:
+            p[0] = p[1]
+        elif self.output == YaccOutput.CFG:
             p[0] = Program([p[1]])
 
     def p_epsilon(self, p):
@@ -70,6 +72,8 @@ class APLYacc(object):
         if self.output == YaccOutput.STATS:
             p[0] = p[6]
         elif self.output == YaccOutput.AST:
+            p[0] = p[6]
+        elif self.output == YaccOutput.CFG:
             p[0] = Func(VoidType(), 'main', [], p[6])
             # p[0] = ASTFunc('main', p[6])
 
