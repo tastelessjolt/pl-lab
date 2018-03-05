@@ -27,7 +27,6 @@ class Stats:
 class YaccOutput(Enum):
     STATS = 0
     AST = 1
-    CFG = 2
 
 class APLYacc(object):
     reserved = APLLexer.reserved
@@ -54,8 +53,6 @@ class APLYacc(object):
         if self.output == YaccOutput.STATS:
             p[0] = p[1]
         elif self.output == YaccOutput.AST:
-            p[0] = p[1]
-        elif self.output == YaccOutput.CFG:
             p[0] = Program([p[1]])
 
     def p_epsilon(self, p):
@@ -71,10 +68,7 @@ class APLYacc(object):
         if self.output == YaccOutput.STATS:
             p[0] = p[6]
         elif self.output == YaccOutput.AST:
-            p[0] = p[6]
-        elif self.output == YaccOutput.CFG:
             p[0] = Func(VoidType(), 'main', [], p[6])
-            # p[0] = ASTFunc('main', p[6])
 
     def p_statements(self, p):
         '''
@@ -107,7 +101,13 @@ class APLYacc(object):
                         | WHILE LPAREN condition RPAREN matched_stmt
                         | other
         '''
-        p[0] = p[1]
+        if self.output == YaccOutput.AST:
+            if p[1] == 'if':
+                p[0] = IfStatement(p[1], p[3], p[5], p[7])
+            elif p[1] == 'while':
+                p[0] = WhileStatement(p[1], p[3], p[5])
+            else:
+                p[0] = p[1]
 
     def p_unmatched_stmt(self, p):
         '''
@@ -115,26 +115,40 @@ class APLYacc(object):
                             | WHILE LPAREN condition RPAREN unmatched_stmt
                             | IF LPAREN condition RPAREN matched_stmt ELSE unmatched_stmt
         '''
-        pass
+        if self.output == YaccOutput.AST:
+            if p[1] == 'if':
+                try:
+                    p[0] = IfStatement(p[1], p[3], p[5], p[7])
+                except Exception:
+                    p[0] = IfStatement(p[1], p[3], p[5])
+            elif p[1] == 'while':
+                p[0] = WhileStatement(p[1], p[3], p[5])
+            
 
     def p_condition(self, p):
         '''
             condition : condition LOGICAL_OR condition
                         | condition REF condition %prec LOGICAL_AND
         '''
-        pass
+        if self.output == YaccOutput.AST:
+            if p[2] != '&':
+                p[0] = BinOp(Operator.arith_sym_to_op(p[2]), p[1], p[3])
+            else:
+                p[0] = BinOp(Operator.logical_and, p[1], p[3])
 
     def p_condition_not(self, p):
         '''
             condition : LOGICAL_NOT condition
         '''
-        pass
+        if self.output == YaccOutput.AST:
+            p[0] = UnaryOp(Operator.arith_sym_to_op(p[1]), p[2])
 
     def p_condition_paren(self, p):
         '''
             condition : LPAREN condition RPAREN
         '''
-        pass
+        if self.output == YaccOutput.AST:
+            p[0] = p[2]
 
     def p_condition_end(self, p):
         '''
@@ -145,14 +159,15 @@ class APLYacc(object):
                         | expr LESS_EQUAL expr
                         | expr GREATER_EQUAL expr
         '''
-        pass
+        if self.output == YaccOutput.AST:
+            p[0] = BinOp(Operator.arith_sym_to_op(p[2]), p[1], p[3])
     
     def p_expr(self, p):
         '''
             expr : notNumExpr
                 | onlyNumExpr
         '''
-        pass
+        p[0] = p[1]
 
     def p_block(self, p):
         '''
@@ -161,9 +176,7 @@ class APLYacc(object):
         if self.output == YaccOutput.STATS:
             p[0] = p[2]
         elif self.output == YaccOutput.AST:
-            p[0] = p[2]
-        elif self.output == YaccOutput.CFG:
-            p[0] = p[2]
+            p[0] = ScopeBlock(p[2])
 
     def p_other(self, p):
         '''
@@ -172,13 +185,13 @@ class APLYacc(object):
                     | assignments SEMICOLON
                     | SEMICOLON
         '''
-        if p[0] != ';':
+        if p[1] != ';':
             if self.output == YaccOutput.STATS:
                 p[0] = p[1]
             elif self.output == YaccOutput.AST:
                 p[0] = p[1]
-            elif self.output == YaccOutput.CFG:
-                p[0] = p[1]
+        else:
+            p[0] = []
 
 #######################################################################3
 
@@ -241,7 +254,7 @@ class APLYacc(object):
                 p[0] = [p[2]] + p[3]
             except:
                 p[0] = []
-
+        
     def p_assignment(self, p):
         '''
             assignment :  ID EQUALS notNumExpr

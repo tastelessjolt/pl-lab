@@ -1,3 +1,4 @@
+from utils import inc_tabsize
 class AST(object):
     pass
 
@@ -6,7 +7,7 @@ class Program(AST):
         self.funclist = funclist
 
     def __str__(self, depth = 0):
-        raise NotImplementedError
+        return 'Program {\n' + inc_tabsize('\n'.join([func.__str__() for func in self.funclist])) + '\n}'
 
 class Func(AST):
     def __init__(self, rtype, fname, params, stlist):
@@ -16,7 +17,7 @@ class Func(AST):
         self.stlist = stlist
 
     def __str__(self, depth = 0):
-        raise NotImplementedError
+        return 'Func(' + ', '.join([self.fname, str(self.params), str(self.rtype)]) + ') {\n' + inc_tabsize('\n'.join([st.__str__() for st in self.stlist])) + '\n}'
 
 class IfStatement(AST):
     def __init__(self, operator, condition, stlist1, stlist2=[]):
@@ -26,7 +27,12 @@ class IfStatement(AST):
         self.stlist2 = stlist2
 
     def __str__(self, depth = 0):
-        raise NotImplementedError
+        tmp = 'If(' + self.condition.__repr__() + ') '
+        if len(self.stlist1) != 0:
+            '{\n' + '\n'.join([st.__str__() for st in self.stlist1]) + '\n}'
+        if len(self.stlist2) != 0:
+            tmp += '\nelse {' + '\n'.join([st.__str__() for st in self.stlist2]) + '\n}'
+        return tmp
 
 class WhileStatement(AST):
     def __init__(self, operator, condition, stlist):
@@ -35,6 +41,19 @@ class WhileStatement(AST):
         self.stlist = stlist
 
     def __str__(self, depth = 0):
+        tmp = 'While(' + self.condition.__repr__() + ') '
+        if len(self.stlist) != 0:
+            '{\n' + '\n'.join([st.__str__() for st in self.stlist]) + '\n}'
+        return tmp
+
+class ScopeBlock(AST, list):
+    '''
+        This describes anything of the form 'LCURLY stlist RCURLY'
+    '''
+    def __init__(self, stlist):
+        self.stlist = stlist
+
+    def __str__(self, depth=0):
         raise NotImplementedError
 
 class Declaration(AST):
@@ -62,6 +81,9 @@ class BinOp(AST):
         s += "%s\n" % self.operand2.__str__(depth=depth + 1)
         s += tab + ")"
         return s
+    
+    def __repr__(self):
+        return repr(self.operator) + '(' + repr(self.operand1) + ', ' + repr(self.operand2) + ')'
 
 
 class UnaryOp(AST):
@@ -77,6 +99,9 @@ class UnaryOp(AST):
         s += tab + ")"
         return s
 
+    def __repr__(self):
+        return repr(self.operator) + '(' + repr(self.operand) + ')'
+
 
 class Var(AST):
     def __init__(self, label):
@@ -85,6 +110,8 @@ class Var(AST):
     def __str__(self, depth=0):
         return "\t" * depth + "VAR(%s)" % self.label
 
+    def __repr__(self):
+        return self.label
 
 class Num(AST):
     def __init__(self, val):
@@ -92,3 +119,6 @@ class Num(AST):
 
     def __str__(self, depth=0):
         return "\t" * depth + "CONST(%d)" % self.val
+
+    def __repr__(self):
+        return str(self.val)

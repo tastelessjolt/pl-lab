@@ -5,6 +5,9 @@ from enum import Enum
 def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
 
+def inc_tabsize(string):
+	return '\t' + string.replace('\n', '\n\t')
+
 class DataType(object):
 	pass
 
@@ -17,12 +20,18 @@ class IntType(DataType):
 	def __str__(self):
 		return self.basetype + '*'*self.ptr_depth
 
+	def __repr__(self):
+		return self.__str__()
+
 class VoidType(DataType):
 	def __init__(self):
 		self.basetype = 'void'
 
 	def __str__(self):
 		return self.basetype
+	
+	def __repr__(self):
+		return self.__str__()
 
 class Operator(Enum):
 	plus = 0
@@ -39,6 +48,9 @@ class Operator(Enum):
 	greater_or_eq = 11
 	ref = 12
 	ptr = 13
+	logical_and = 14
+	logical_or = 15
+	logical_not = 16
 
 	@classmethod
 	def arith_sym_to_op(cls, sym):
@@ -53,6 +65,8 @@ class Operator(Enum):
 			'>': cls.greater,
 			'<=': cls.less_or_eq,
 			'>=': cls.greater_or_eq,
+			'|': cls.logical_or,
+			'!': cls.logical_not,
 		}[sym]
 
 	def __str__(self):
@@ -76,3 +90,24 @@ class Operator(Enum):
 		except Exception as e:
 			import pdb; pdb.set_trace()
 			print (e)
+
+	def __repr__(self):
+		return {
+			self.__class__.plus.value: '+',
+			self.__class__.minus.value: '-',
+			self.__class__.uminus.value: '-',
+			self.__class__.equal.value: '=',
+			self.__class__.mul.value: '*',
+			self.__class__.divide.value: '/',
+			self.__class__.ref.value: '&',
+			self.__class__.ptr.value: '*',
+			self.__class__.cmp_eq.value: '==',
+			self.__class__.cmp_not_eq.value: '!=',
+			self.__class__.less.value: '<',
+			self.__class__.greater.value: '>',
+			self.__class__.less_or_eq.value: '<=',
+			self.__class__.greater_or_eq.value: '>=',
+			self.__class__.logical_or.value: '|',
+			self.__class__.logical_and.value: '&',
+			self.__class__.logical_not.value: '!',
+		}[self.value]

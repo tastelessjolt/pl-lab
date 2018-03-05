@@ -1,6 +1,4 @@
-
 from st import *
-
 
 class BasicBlock(object):
     def __init__(self, astlist=[], blocknum=-1, goto=-1):
@@ -59,26 +57,26 @@ class CFG(object):
         localblocks = []
 
         while(j < len(stlist)):
-            if not (isinstance(stlist[j], IfStatement) or isinstance(stlist[j], WhileStatement)):
-                while(not (isinstance(stlist[j], IfStatement) or isinstance(stlist[j], WhileStatement))):
-                    block_list.append(stlist[j])
-                    j += 1
-                # Basic Block
-                localblocks.append(BasicBlock(block_list, self.numblocks))
-                self.numblocks += 1
-                block_list = []
-            elif isinstance(stlist[j], IfStatement):
-                # IfBlock
+            # IfBlock
+            if isinstance(stlist[j], IfStatement):
                 localblocks.append(IfBlock([stlist[j]], self.numblocks))
                 self.numblocks += 1
                 block_list = []
                 j += 1
-            else:
-                # While Block
+            # While Block
+            elif isinstance(stlist[j], WhileStatement):
                 localblocks.append(WhileBlock([stlist[j]], self.numblocks))
                 self.numblocks += 1
                 block_list = []
                 j += 1
+            # Basic Block
+            else:
+                while(not (isinstance(stlist[j], IfStatement) or isinstance(stlist[j], WhileStatement))):
+                    block_list.append(stlist[j])
+                    j += 1
+                localblocks.append(BasicBlock(block_list, self.numblocks))
+                self.numblocks += 1
+                block_list = []
 
         localblocks.append(nextblock)
 
