@@ -3,6 +3,7 @@
 from utils import *
 from lex import *
 from yacc import *
+from cfg import *
 import sys
 import os
 import argparse
@@ -61,5 +62,10 @@ if __name__ == '__main__':
     if args.cfg or not (args.yacc or args.lex or args.ast):
         parser = APLYacc(output = YaccOutput.AST)
         parser.build(lexer)
-        cfg = parser.parse(data)
-        print(cfg)
+        ast = parser.parse(data)
+        print(ast)
+
+        cfg = CFG(ast)
+        print (cfg)
+
+        

@@ -105,19 +105,19 @@ class APLYacc(object):
             if p[1] == 'if':
                 if isinstance(p[5], ScopeBlock):
                     p[5] = p[5].stlist
-                else:
+                elif not isinstance(p[5], list):
                     p[5] = [p[5]]
 
                 if isinstance(p[7], ScopeBlock):
                     p[7] = p[7].stlist
-                else:
+                elif not isinstance(p[7], list):
                     p[7] = [p[7]]
 
                 p[0] = IfStatement(p[1], p[3], p[5], p[7])
             elif p[1] == 'while':
                 if isinstance(p[5], ScopeBlock):
                     p[5] = p[5].stlist
-                else:
+                elif not isinstance(p[5], list):
                     p[5] = [p[5]]
                 
                 p[0] = WhileStatement(p[1], p[3], p[5])
@@ -133,20 +133,23 @@ class APLYacc(object):
         if self.output == YaccOutput.AST:
             if p[1] == 'if':
                 try:
-                    p[7] = [p[7]]
+                    if not isinstance(p[7], list):
+                        p[7] = [p[7]]
                     if isinstance(p[5], ScopeBlock):
                         p[5] = p[5].stlist
-                    else:
+                    elif not isinstance(p[5], list):
                         p[5] = [p[5]]
                     p[0] = IfStatement(p[1], p[3], p[5], p[7])
                 except Exception:
                     if isinstance(p[5], ScopeBlock):
                         p[5] = p[5].stlist
-                    else:
+                    elif not isinstance(p[5], list):
                         p[5] = [p[5]]
                     p[0] = IfStatement(p[1], p[3], p[5])
             elif p[1] == 'while':
-                p[0] = WhileStatement(p[1], p[3], [p[5]])
+                if not isinstance(p[5], list):
+                    p[5] = [p[5]]
+                p[0] = WhileStatement(p[1], p[3], p[5])
             
 
     def p_condition(self, p):
