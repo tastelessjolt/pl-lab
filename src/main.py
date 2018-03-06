@@ -63,9 +63,10 @@ if __name__ == '__main__':
         parser = APLYacc(output = YaccOutput.AST)
         parser.build(lexer)
         ast = parser.parse(data)
-        print(ast)
+        if ast:
+            print(ast)
 
-        cfg = CFG(ast)
-        print (cfg)
+            cfg = CFG(ast)
+            print (cfg)
 
         

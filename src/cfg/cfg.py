@@ -83,7 +83,6 @@ class CFG(object):
         self.blocks.sort(key=lambda block: block.blocknum)
 
     def traverse_if(self, ifblock, nextblock):
-        import pdb; pdb.set_trace()
         ifblock.gotoif = self.traverse_ast(ifblock.astlist[0].stlist1, nextblock)
         if ifblock.astlist[0].stlist2:
             ifblock.gotoelse = self.traverse_ast(ifblock.astlist[0].stlist2, nextblock)
