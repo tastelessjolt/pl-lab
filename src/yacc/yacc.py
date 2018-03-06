@@ -103,8 +103,23 @@ class APLYacc(object):
         '''
         if self.output == YaccOutput.AST:
             if p[1] == 'if':
+                if isinstance(p[5], ScopeBlock):
+                    p[5] = p[5].stlist
+                else:
+                    p[5] = [p[5]]
+
+                if isinstance(p[7], ScopeBlock):
+                    p[7] = p[7].stlist
+                else:
+                    p[7] = [p[7]]
+
                 p[0] = IfStatement(p[1], p[3], p[5], p[7])
             elif p[1] == 'while':
+                if isinstance(p[5], ScopeBlock):
+                    p[5] = p[5].stlist
+                else:
+                    p[5] = [p[5]]
+                
                 p[0] = WhileStatement(p[1], p[3], p[5])
             else:
                 p[0] = p[1]
@@ -118,11 +133,20 @@ class APLYacc(object):
         if self.output == YaccOutput.AST:
             if p[1] == 'if':
                 try:
+                    p[7] = [p[7]]
+                    if isinstance(p[5], ScopeBlock):
+                        p[5] = p[5].stlist
+                    else:
+                        p[5] = [p[5]]
                     p[0] = IfStatement(p[1], p[3], p[5], p[7])
                 except Exception:
+                    if isinstance(p[5], ScopeBlock):
+                        p[5] = p[5].stlist
+                    else:
+                        p[5] = [p[5]]
                     p[0] = IfStatement(p[1], p[3], p[5])
             elif p[1] == 'while':
-                p[0] = WhileStatement(p[1], p[3], p[5])
+                p[0] = WhileStatement(p[1], p[3], [p[5]])
             
 
     def p_condition(self, p):
@@ -143,25 +167,32 @@ class APLYacc(object):
         if self.output == YaccOutput.AST:
             p[0] = UnaryOp(Operator.arith_sym_to_op(p[1]), p[2])
 
-    def p_condition_paren(self, p):
-        '''
-            condition : LPAREN condition RPAREN
-        '''
-        if self.output == YaccOutput.AST:
-            p[0] = p[2]
+    # def p_condition_paren(self, p):
+    #     '''
+    #         condition : LPAREN condition RPAREN
+    #     '''
+    #     if self.output == YaccOutput.AST:
+    #         p[0] = p[2]
 
-    def p_condition_end(self, p):
+    def p_condition_op(self, p):
         '''
-            condition : expr DOUBLE_EQUAL expr
-                        | expr NOT_EQUAL expr
-                        | expr LESS_THAN expr
-                        | expr GREATER_THAN expr
-                        | expr LESS_EQUAL expr
-                        | expr GREATER_EQUAL expr
+            condition : condition DOUBLE_EQUAL condition
+                        | condition NOT_EQUAL condition
+                        | condition LESS_THAN condition
+                        | condition GREATER_THAN condition
+                        | condition LESS_EQUAL condition
+                        | condition GREATER_EQUAL condition
         '''
         if self.output == YaccOutput.AST:
             p[0] = BinOp(Operator.arith_sym_to_op(p[2]), p[1], p[3])
     
+    def p_condition_end(self, p):
+        '''
+            condition : expr
+        '''
+        if self.output == YaccOutput.AST:
+            p[0] = p[1]
+
     def p_expr(self, p):
         '''
             expr : notNumExpr
@@ -202,6 +233,11 @@ class APLYacc(object):
         '''
         if self.output == YaccOutput.STATS:
             p[0] = p[2] + p[3]
+        elif self.output == YaccOutput.AST:
+            p[0] = [p[2]] + p[3]
+            for var in p[0]:
+                var.datatype = p[1](var.datatype)
+            p[0] = Declaration(p[0])
 
     def p_dec_varlist(self, p):
         '''
@@ -213,12 +249,17 @@ class APLYacc(object):
                 p[0] = p[2] + p[3]
             except:
                 p[0] = Stats((0, 0, 0))
+        elif self.output == YaccOutput.AST:
+            try: 
+                p[0] = [p[2]] + p[3]
+            except:
+                p[0] = []
 
     def p_type(self, p):
         '''
             type : INT
         '''
-        pass
+        p[0] = IntType
 
     def p_var(self, p):
         '''
@@ -230,6 +271,11 @@ class APLYacc(object):
                 p[0] = Stats((0, 1, 0))
             else:
                 p[0] = Stats((1, 0, 0))
+        elif self.output == YaccOutput.AST:
+            if p[1] == '*':
+                p[0] = p[2] + 1
+            else:
+                p[0] = Symbol(p[1])
 
     def p_assignments(self, p):
         '''

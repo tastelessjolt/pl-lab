@@ -17,7 +17,7 @@ class Func(AST):
         self.stlist = stlist
 
     def __str__(self, depth = 0):
-        return 'Func(' + ', '.join([self.fname, str(self.params), str(self.rtype)]) + ') {\n' + inc_tabsize('\n'.join([st.__str__() for st in self.stlist])) + '\n}'
+        return 'Func(' + ', '.join([self.fname, str(self.params), str(self.rtype)]) + ') {\n' + inc_tabsize('\n'.join([str(st) for st in self.stlist])) + '\n}'
 
 class IfStatement(AST):
     def __init__(self, operator, condition, stlist1, stlist2=[]):
@@ -29,9 +29,9 @@ class IfStatement(AST):
     def __str__(self, depth = 0):
         tmp = 'If(' + self.condition.__repr__() + ') '
         if len(self.stlist1) != 0:
-            '{\n' + '\n'.join([st.__str__() for st in self.stlist1]) + '\n}'
+            tmp += '{\n' + inc_tabsize('\n'.join([st.__str__() for st in self.stlist1])) + '\n}'
         if len(self.stlist2) != 0:
-            tmp += '\nelse {' + '\n'.join([st.__str__() for st in self.stlist2]) + '\n}'
+            tmp += '\nelse {\n' + inc_tabsize('\n'.join([st.__str__() for st in self.stlist2])) + '\n}'
         return tmp
 
 class WhileStatement(AST):
@@ -43,10 +43,10 @@ class WhileStatement(AST):
     def __str__(self, depth = 0):
         tmp = 'While(' + self.condition.__repr__() + ') '
         if len(self.stlist) != 0:
-            '{\n' + '\n'.join([st.__str__() for st in self.stlist]) + '\n}'
+            tmp += '{\n' + inc_tabsize('\n'.join([st.__str__() for st in self.stlist])) + '\n}'
         return tmp
 
-class ScopeBlock(AST, list):
+class ScopeBlock(AST):
     '''
         This describes anything of the form 'LCURLY stlist RCURLY'
     '''
@@ -57,14 +57,31 @@ class ScopeBlock(AST, list):
         raise NotImplementedError
 
 class Declaration(AST):
-    # datatype is of class Datatype
-    # varlist is list of VAR ASTs
-    def __init__(self, datatype, varlist):
-        self.datatype = datatype
-        self.varlist = varlist
+    # varlist is list of Symbol ASTs
+    def __init__(self, symlist):
+        self.symlist = symlist
 
     def __str__(self, depth = 0):
-        raise NotImplementedError
+        return repr(self)
+
+    def __repr__(self):
+        return ','.join ([ repr(sym) for sym in self.symlist ])
+
+class Symbol(AST):
+    # datatype is of class Datatype
+    def __init__(self, label, datatype=0):
+        self.label = label
+        self.datatype = datatype
+
+    def __str__(self, depth=0):
+        return "\t" * depth + "VAR(%s)" % self.label
+
+    def __repr__(self):
+        return str((self.label, self.datatype))
+
+    def __add__(self, other):
+        self.datatype += other
+        return self
 
 class BinOp(AST):
     def __init__(self, operator, operand1, operand2):
@@ -103,7 +120,7 @@ class UnaryOp(AST):
         return repr(self.operator) + '(' + repr(self.operand) + ')'
 
 
-class Var(AST):
+class Var(AST):    
     def __init__(self, label):
         self.label = label
 

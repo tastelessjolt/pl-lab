@@ -16,6 +16,10 @@ class IntType(DataType):
 	def __init__(self, ptr_depth):
 		self.basetype = 'int'
 		self.ptr_depth = ptr_depth
+	
+	def __add__(self, other):
+		self.ptr_depth += other
+		return self
 
 	def __str__(self):
 		return self.basetype + '*'*self.ptr_depth
