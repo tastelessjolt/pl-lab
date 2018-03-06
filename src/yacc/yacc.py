@@ -191,7 +191,8 @@ class APLYacc(object):
             elif self.output == YaccOutput.AST:
                 p[0] = p[1]
         else:
-            p[0] = []
+            if self.output == YaccOutput.AST:
+                p[0] = []
 
 #######################################################################3
 
