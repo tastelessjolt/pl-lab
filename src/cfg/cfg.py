@@ -81,6 +81,11 @@ class CFG(object):
         self.traverse_ast(main_func.stlist)
 
         self.blocks.sort(key=lambda block: block.blocknum)
+        self.generateExprEvals()
+    
+    def generateExprEvals(self):
+        for block in self.blocks:
+            block.astlist
 
     def traverse_if(self, ifblock, nextblock):
         ifblock.gotoif = self.traverse_ast(ifblock.astlist[0].stlist1, nextblock)

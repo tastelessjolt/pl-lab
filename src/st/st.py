@@ -1,4 +1,4 @@
-from utils import inc_tabsize
+from utils import inc_tabsize, DataType
 class AST(object):
     pass
 
@@ -69,9 +69,9 @@ class Declaration(AST):
 
 class Symbol(AST):
     # datatype is of class Datatype
-    def __init__(self, label, datatype=0):
+    def __init__(self, label):
         self.label = label
-        self.datatype = datatype
+        self.datatype = DataType()
 
     def __str__(self, depth=0):
         return "\t" * depth + "VAR(%s)" % self.label
