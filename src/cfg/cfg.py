@@ -1,6 +1,5 @@
 from st import *
 
-
 class BasicBlock(object):
     def __init__(self, astlist=[], blocknum=-1, goto=-1):
         self.astlist = astlist
@@ -15,6 +14,12 @@ class BasicBlock(object):
         else:
             s += 'end\n'
         return s
+
+        condition = self.astlist[0].condition
+    def expandTree(self, cfg):
+        # cfg.numtemps ++
+        import pdb
+        pdb.set_trace()
 
 class IfBlock(object):
     def __init__(self, astlist=[], blocknum=-1, gotoif=-1, gotoelse=-1):
@@ -38,6 +43,16 @@ class IfBlock(object):
 
         return s + '\n'
 
+    def expandTree(self, cfg):
+        # cfg.numtemps ++
+        self.expandedAst = []
+        condition = self.astlist[0].condition
+
+        tmp = condition.expand(cfg, self)
+
+        print('\n'.join([ st.src() for st in self.expandedAst]))
+        import pdb
+        pdb.set_trace()
 
 class WhileBlock(object):
     def __init__(self, astlist=[], blocknum=-1, gotoif=-1, gotoelse=-1):
@@ -61,11 +76,23 @@ class WhileBlock(object):
 
         return s + '\n'
 
+    def expandTree(self, cfg):
+        # cfg.numtemps ++
+        self.expandedAst = []
+        condition = self.astlist[0].condition
+
+        tmp = condition.expand(cfg, self)
+        
+        print(self.expandedAst)
+        import pdb; pdb.set_trace()
+
+
 class CFG(object):
     def __init__(self, programAST):
         self.ast = programAST
         self.blocks = []
         self.numblocks = 0
+        self.numtemps = 0
 
         function_list = self.ast.funclist
         main_func = [func for func in function_list if func.fname == 'main'][0]
@@ -76,7 +103,7 @@ class CFG(object):
     
     def generateExprEvals(self):
         for block in self.blocks:
-            block.astlist
+            block.expandTree(self)
 
     def traverse_if(self, ifblock, nextblock):
         ifblock.gotoif = self.traverse_ast(ifblock.astlist[0].stlist1, nextblock)

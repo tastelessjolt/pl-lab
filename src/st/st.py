@@ -1,4 +1,4 @@
-from utils import inc_tabsize, DataType
+from utils import inc_tabsize, DataType, Operator
 class AST(object):
     pass
 
@@ -154,6 +154,17 @@ class BinOp(AST):
     def __repr__(self):
         return "%s(%s,%s)" % (repr(self.operator), repr(self.operand1), repr(self.operand2))
 
+    def expand(self, cfg, block):
+        place1 = self.operand1.expand(cfg, block)
+        place2 = self.operand2.expand(cfg, block)
+
+        tmp = Var('t%d' % cfg.numtemps )
+        cfg.numtemps += 1
+
+        block.expandedAst += [BinOp(Operator.equal,
+                                    tmp, BinOp(self.operator, place1, place2))]
+        return tmp
+
 
 class UnaryOp(AST):
     def __init__(self, operator, operand):
@@ -170,6 +181,19 @@ class UnaryOp(AST):
     def __repr__(self):
         return "%s%s" % (repr(self.operator), repr(self.operand))
 
+    def expand(self, cfg, block):
+        if self.operator == Operator.logical_not:
+            place = self.operand.expand(cfg, block)
+
+            tmp = Var('t%d' % cfg.numtemps)
+            cfg.numtemps += 1
+
+            block.expandedAst += [BinOp(Operator.equal,
+                                        tmp, UnaryOp(self.operator, place))]
+        else:
+            tmp = self
+        return tmp
+        
 
 class Var(AST):    
     def __init__(self, label):
@@ -184,6 +208,9 @@ class Var(AST):
     def __repr__(self):
         return self.label
 
+    def expand(self, cfg, block):
+        return self
+
 class Num(AST):
     def __init__(self, val):
         self.val = val
@@ -196,3 +223,6 @@ class Num(AST):
 
     def __repr__(self):
         return str(self.val)
+
+    def expand(self, cfg, block):
+        return self
