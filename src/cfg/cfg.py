@@ -8,16 +8,13 @@ class BasicBlock(object):
         self.goto = goto
 
     def __str__(self):
-        return NotImplementedError
-
-    def __repr__(self):
-        tmp = 'bb' + str(self.blocknum) + '\n' + '\n'.join(
-            [repr(st) for st in self.astlist if not isinstance(st, Declaration)]) + '\ngoto '
+        s = '<bb %d>\n%s\ngoto ' % (self.blocknum, '\n'.join(
+            [st[0].src() for st in self.astlist if not isinstance(st, Declaration)]))
         if self.goto.blocknum != -1:
-            tmp += str(self.goto.blocknum) + '\n'
+            s += "<bb %d>\n" % self.goto.blocknum
         else:
-            tmp += 'end\n' 
-        return tmp
+            s += 'end\n'
+        return s
 
 class IfBlock(object):
     def __init__(self, astlist=[], blocknum=-1, gotoif=-1, gotoelse=-1):
@@ -27,22 +24,19 @@ class IfBlock(object):
         self.gotoelse = gotoelse
 
     def __str__(self):
-        return NotImplementedError
-
-    def __repr__(self):
-        tmp = 'bb' + str(self.blocknum) + '\ngotoif: '
+        s = '<bb %d>\ngotoif: ' % self.blocknum
         if self.gotoif.blocknum != -1:
-            tmp += str(self.gotoif.blocknum)
+            s += "<bb %d>" % self.gotoif.blocknum
         else:
-            tmp += 'end'
+            s += 'end'
 
-        tmp += '\ngotoelse: '
+        s += '\ngotoelse: '
         if self.gotoelse.blocknum != -1:
-            tmp += str(self.gotoelse.blocknum)
+            s += "<bb %d>" % self.gotoelse.blocknum
         else:
-            tmp += 'end'
+            s += 'end'
 
-        return tmp + '\n'
+        return s + '\n'
 
 
 class WhileBlock(object):
@@ -53,22 +47,19 @@ class WhileBlock(object):
         self.gotoelse = gotoelse
 
     def __str__(self):
-        return NotImplementedError
-
-    def __repr__(self):
-        tmp = 'bb' + str(self.blocknum) + '\ngotoif: '
+        s = '<bb %d>\ngotoif: ' % self.blocknum
         if self.gotoif.blocknum != -1:
-            tmp += str(self.gotoif.blocknum)
+            s += "<bb %d>" % self.gotoif.blocknum
         else:
-            tmp += 'end'
+            s += 'end'
 
-        tmp += '\ngotoelse: '
+        s += '\ngotoelse: '
         if self.gotoelse.blocknum != -1:
-            tmp += str(self.gotoelse.blocknum)
+            s += "<bb %d>" % self.gotoelse.blocknum
         else:
-            tmp += 'end'
+            s += 'end'
 
-        return tmp + '\n'
+        return s + '\n'
 
 class CFG(object):
     def __init__(self, programAST):
@@ -154,4 +145,4 @@ class CFG(object):
         return ret
 
     def __str__(self):
-        return 'CFG\n' + inc_tabsize('\n'.join ([repr(block) for block in self.blocks])) + '\nENDCFG'
+        return 'CFG\n' + inc_tabsize('\n'.join ([str(block) for block in self.blocks])) + '\nENDCFG'
