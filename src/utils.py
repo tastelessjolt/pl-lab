@@ -69,12 +69,12 @@ class Operator(Enum):
 			'>': cls.greater,
 			'<=': cls.less_or_eq,
 			'>=': cls.greater_or_eq,
-			'|': cls.logical_or,
+			'||': cls.logical_or,
+			'&&': cls.logical_and,
 			'!': cls.logical_not,
 		}[sym]
 
 	def __str__(self):
-		try:
 			return {
 				self.__class__.plus.value: 'PLUS',
 				self.__class__.minus.value: 'MINUS',
@@ -84,16 +84,16 @@ class Operator(Enum):
 				self.__class__.divide.value: 'DIV',
 				self.__class__.ref.value: 'ADDR',
 				self.__class__.ptr.value: 'DEREF',
-				self.__class__.cmp_eq.value: 'DOUBLE_EQUAL',
-				self.__class__.cmp_not_eq.value: 'NOT_EQUAL',
-				self.__class__.less.value: 'LESS_THAN',
-				self.__class__.greater.value: 'GREATER_THAN',
-				self.__class__.less_or_eq.value: 'LESS_EQUAL',
-				self.__class__.greater_or_eq.value: 'GREATER_EQUAL',
+				self.__class__.cmp_eq.value: 'EQ',
+				self.__class__.cmp_not_eq.value: 'NE',
+				self.__class__.less.value: 'LT',
+				self.__class__.greater.value: 'GT',
+				self.__class__.less_or_eq.value: 'LE',
+				self.__class__.greater_or_eq.value: 'GE',
+				self.__class__.logical_and.value: 'AND',
+				self.__class__.logical_or.value: 'OR',
+				self.__class__.logical_not.value: 'NOT'
 			}[self.value]
-		except Exception as e:
-			import pdb; pdb.set_trace()
-			print (e)
 
 	def __repr__(self):
 		return {
@@ -111,7 +111,7 @@ class Operator(Enum):
 			self.__class__.greater.value: '>',
 			self.__class__.less_or_eq.value: '<=',
 			self.__class__.greater_or_eq.value: '>=',
-			self.__class__.logical_or.value: '|',
-			self.__class__.logical_and.value: '&',
+			self.__class__.logical_or.value: '||',
+			self.__class__.logical_and.value: '&&',
 			self.__class__.logical_not.value: '!',
 		}[self.value]
