@@ -10,19 +10,19 @@ void main()
 
    i2 = &i1;
    *f2 = 4;
-
+   
 
    if(*f1 != 0)
    {
      if(*f2 != 0)
         *iftmp0 = 1;
-
+   
      else
         *iftmp0 = 0;
    }
-
+   
    else
-
+   
      *iftmp0 = 0;
 
      **i1 = *iftmp0;
