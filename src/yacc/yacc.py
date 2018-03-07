@@ -155,13 +155,10 @@ class APLYacc(object):
     def p_condition(self, p):
         '''
             condition : condition LOGICAL_OR condition
-                        | condition REF condition %prec LOGICAL_AND
+                        | condition LOGICAL_AND condition 
         '''
         if self.output == YaccOutput.AST:
-            if p[2] != '&':
-                p[0] = BinOp(Operator.arith_sym_to_op(p[2]), p[1], p[3])
-            else:
-                p[0] = BinOp(Operator.logical_and, p[1], p[3])
+            p[0] = BinOp(Operator.arith_sym_to_op(p[2]), p[1], p[3])
 
     def p_condition_not(self, p):
         '''
@@ -170,31 +167,31 @@ class APLYacc(object):
         if self.output == YaccOutput.AST:
             p[0] = UnaryOp(Operator.arith_sym_to_op(p[1]), p[2])
 
-    # def p_condition_paren(self, p):
-    #     '''
-    #         condition : LPAREN condition RPAREN
-    #     '''
-    #     if self.output == YaccOutput.AST:
-    #         p[0] = p[2]
-
-    def p_condition_op(self, p):
+    def p_condition_paren(self, p):
         '''
-            condition : condition DOUBLE_EQUAL condition
-                        | condition NOT_EQUAL condition
-                        | condition LESS_THAN condition
-                        | condition GREATER_THAN condition
-                        | condition LESS_EQUAL condition
-                        | condition GREATER_EQUAL condition
+            condition : LPAREN condition RPAREN
+        '''
+        if self.output == YaccOutput.AST:
+            p[0] = p[2]
+
+    def p_condition_end(self, p):
+        '''
+            condition : expr DOUBLE_EQUAL expr
+                        | expr NOT_EQUAL expr
+                        | expr LESS_THAN expr
+                        | expr GREATER_THAN expr
+                        | expr LESS_EQUAL expr
+                        | expr GREATER_EQUAL expr
         '''
         if self.output == YaccOutput.AST:
             p[0] = BinOp(Operator.arith_sym_to_op(p[2]), p[1], p[3])
     
-    def p_condition_end(self, p):
-        '''
-            condition : expr
-        '''
-        if self.output == YaccOutput.AST:
-            p[0] = p[1]
+    # def p_condition_end(self, p):
+    #     '''
+    #         condition : expr
+    #     '''
+    #     if self.output == YaccOutput.AST:
+    #         p[0] = p[1]
 
     def p_expr(self, p):
         '''
