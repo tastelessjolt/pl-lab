@@ -125,6 +125,9 @@ class Symbol(AST):
         self.label = label
         self.datatype = datatype
 
+    def src(self):
+        raise NotImplementedError
+
     def __str__(self):
         return "VAR(%s)" % self.label
 
@@ -141,6 +144,9 @@ class BinOp(AST):
         self.operand1 = operand1
         self.operand2 = operand2
 
+    def src(self):
+        return "%s %s %s" % (self.operand1.src(), repr(self.operator), self.operand2.src())
+
     def __str__(self):
         s = "%s\n(\n%s\n\t,\n%s\n)" % (self.operator, inc_tabsize(str(self.operand1)), inc_tabsize(str(self.operand2)))
         return s
@@ -154,17 +160,23 @@ class UnaryOp(AST):
         self.operator = operator
         self.operand = operand
 
+    def src(self):
+        return "%s%s" % (repr(self.operator), self.operand.src())
+
     def __str__(self):
         s = "%s\n(\n\t%s\n)" % (self.operator, str(self.operand))
         return s
 
     def __repr__(self):
-        return "%s(%s)" % (repr(self.operator), repr(self.operand))
+        return "%s%s" % (repr(self.operator), repr(self.operand))
 
 
 class Var(AST):    
     def __init__(self, label):
         self.label = label
+
+    def src(self):
+        return self.label
 
     def __str__(self):
         return "VAR(%s)" % self.label
@@ -175,6 +187,9 @@ class Var(AST):
 class Num(AST):
     def __init__(self, val):
         self.val = val
+
+    def src(self):
+        return str(self.val)
 
     def __str__(self):
         return "CONST(%d)" % self.val
