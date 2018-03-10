@@ -2,6 +2,23 @@ from utils import inc_tabsize, DataType, Operator
 class AST(object):
     pass
 
+class StmtList(AST, list):
+    '''
+        Used to represent list of statements
+    '''
+
+    def __str__(self):
+        return '\n'.join([str(st) for st in self])
+
+    def __repr__(self):
+        return '\n'.join([repr(st) for st in self])
+
+    def __add__(self, other):
+        return StmtList(super(StmtList, self).__add__(other))
+
+    def src(self):
+        return '\n'.join([st.src() for st in self])
+
 class Program(AST):
     def __init__(self, funclist):
         self.funclist = funclist
@@ -27,7 +44,7 @@ class Func(AST):
                                         inc_tabsize('\n'.join([repr(st) for st in self.stlist])))
 
 class IfStatement(AST):
-    def __init__(self, operator, condition, stlist1, stlist2=[]):
+    def __init__(self, operator, condition, stlist1, stlist2=StmtList()):
         self.operator = operator
         self.condition = condition
         self.stlist1 = stlist1
@@ -74,22 +91,6 @@ class WhileStatement(AST):
         if len(self.stlist) != 0:
             s += '{\n' + inc_tabsize('\n'.join([repr(st) for st in self.stlist])) + '\n}'
         return s
-
-class StmtList(list):
-    '''
-        Used to represent list of statements
-    '''
-    def __str__(self):
-        return '\n'.join([str(st) for st in self])
-
-    def __repr__(self):
-        return '\n'.join([repr(st) for st in self])
-
-    def __add__(self, other):
-        return StmtList(super(StmtList, self).__add__(other))
-
-    def src(self):
-        return '\n'.join([st.src() for st in self])
 
 class ScopeBlock(AST):
     '''
