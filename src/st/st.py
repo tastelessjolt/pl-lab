@@ -153,15 +153,19 @@ class BinOp(AST):
         return "%s(%s,%s)" % (repr(self.operator), repr(self.operand1), repr(self.operand2))
 
     def expand(self, cfg, block):
-        place1 = self.operand1.expand(cfg, block)
-        place2 = self.operand2.expand(cfg, block)
+        if self.operator == Operator.equal:
+            block.expandedAst += [BinOp(Operator.equal,
+                                        self.operand1, self.operand2.expand(cfg, block))]
+        else:
+            place1 = self.operand1.expand(cfg, block)
+            place2 = self.operand2.expand(cfg, block)
 
-        newTmp = Var('t%d' % cfg.numtemps )
-        cfg.numtemps += 1
+            newTmp = Var('t%d' % cfg.numtemps )
+            cfg.numtemps += 1
 
-        block.expandedAst += [BinOp(Operator.equal,
-                                    newTmp, BinOp(self.operator, place1, place2))]
-        return newTmp
+            block.expandedAst += [BinOp(Operator.equal,
+                                        newTmp, BinOp(self.operator, place1, place2))]
+            return newTmp
 
 
 class UnaryOp(AST):
@@ -180,7 +184,7 @@ class UnaryOp(AST):
         return "%s%s" % (repr(self.operator), repr(self.operand))
 
     def expand(self, cfg, block):
-        if self.operator == Operator.logical_not:
+        if self.operator == Operator.logical_not or self.operator == Operator.uminus:
             place = self.operand.expand(cfg, block)
 
             newTmp = Var('t%d' % cfg.numtemps)

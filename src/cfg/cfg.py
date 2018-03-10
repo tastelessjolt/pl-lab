@@ -6,12 +6,13 @@ class BasicBlock(object):
         self.blocknum = blocknum
         self.goto = goto
         self.end = end
+        self.expandedAst = StmtList()
 
     def __str__(self):
         if self.end:
             return '<bb %d>\n%s\n' % (self.blocknum, 'End')
         else:
-            s = '<bb %d>\n%s\ngoto ' % (self.blocknum, self.astlist.src())
+            s = '<bb %d>\n%s\ngoto ' % (self.blocknum, self.expandedAst.src())
             if self.goto != -1:
                 s += "<bb %d>\n" % self.goto
             else:
@@ -22,7 +23,9 @@ class BasicBlock(object):
         # cfg.numtemps ++
         # import pdb
         # pdb.set_trace()
-        pass
+        self.expandedAst = StmtList()
+        for stmt in self.astlist:
+            stmt.expand(cfg, self)
 
 
     def assign_goto(self, goto):
