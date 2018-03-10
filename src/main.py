@@ -64,7 +64,7 @@ if __name__ == '__main__':
         parser.build(lexer)
         ast = parser.parse(data)
         if ast:
-            print(ast)
+            # print(ast)
 
             cfg = CFG(ast)
             print (cfg)

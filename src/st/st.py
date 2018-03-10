@@ -20,13 +20,7 @@ class Func(AST):
         self.stlist = stlist
     
     def __str__(self):
-        s = ''
-        for st in self.stlist:
-            if isinstance(st, list):
-                s += '\n'.join([str(i) for i in st]) + "\n"
-            elif not isinstance(st, Declaration):
-                s += '\n' + str(st) + "\n"
-        return s
+        return str(self.stlist)
 
     def __repr__(self):
         return 'Func(%s) {\n%s\n}' % (', '.join([self.fname, str(self.params), str(self.rtype)]),
@@ -40,28 +34,20 @@ class IfStatement(AST):
         self.stlist2 = stlist2
 
     def __str__(self):
-        s = 'IF(\n%s\n\t,\n' % inc_tabsize(str(self.condition))
+        inner = '%s\n' % str(self.condition)
 
-        # Statements in the if block
         if len(self.stlist1) != 0:
-            for st in self.stlist1:
-                if isinstance(st, list):
-                    s += '%s\n' % inc_tabsize('\n'.join([str(i) for i in st]))
-                else:
-                    s += '%s\n' % inc_tabsize(str(st))
-        # Statements in else block
-        if len(self.stlist2) != 0:
-            for st in self.stlist2:
-                if isinstance(st, list):
-                    s += '%s\n' % inc_tabsize('\n'.join([str(i) for i in st]))
-                else:
-                    s += '%s\n' % inc_tabsize(str(st))
+            inner += ',\n'
+            inner += str(self.stlist1)
 
-        s += '\n)'
-        return s
+        if len(self.stlist2) != 0:
+            inner += '\n,\n'
+            inner += str(self.stlist2)
+
+        return 'IF\n(\n%s\n)' % inc_tabsize(inner)
 
     def __repr__(self):
-        s = 'If(' + str(self.condition) + ') '
+        s = 'If(' + repr(self.condition) + ') '
         if len(self.stlist1) != 0:
             s += '{\n' + inc_tabsize('\n'.join([repr(st) for st in self.stlist1])) + '\n}'
         if len(self.stlist2) != 0:
@@ -75,24 +61,35 @@ class WhileStatement(AST):
         self.stlist = stlist
 
     def __str__(self):
-        s = 'WHILE(\n%s\n\t,\n' % inc_tabsize(str(self.condition))
+        inner = '%s\n' % str(self.condition)
 
-        # Statements inside while
         if len(self.stlist) != 0:
-            for st in self.stlist:
-                if isinstance(st, list):
-                    s += '%s\n' % inc_tabsize('\n'.join([str(i) for i in st]))
-                else:
-                    s += '%s\n' % inc_tabsize(str(st))
-        
-        s += '\n)'
-        return s
+            inner += ',\n'
+            inner += str(self.stlist)
+
+        return 'WHILE\n(\n%s\n)' % inc_tabsize(inner)
 
     def __repr__(self):
         s = 'While(' + repr(self.condition) + ') '
         if len(self.stlist) != 0:
             s += '{\n' + inc_tabsize('\n'.join([repr(st) for st in self.stlist])) + '\n}'
         return s
+
+class StmtList(list):
+    '''
+        Used to represent list of statements
+    '''
+    def __str__(self):
+        return '\n'.join([str(st) for st in self])
+
+    def __repr__(self):
+        return '\n'.join([repr(st) for st in self])
+
+    def __add__(self, other):
+        return StmtList(super(StmtList, self).__add__(other))
+
+    def src(self):
+        return '\n'.join([st.src() for st in self])
 
 class ScopeBlock(AST):
     '''
@@ -158,12 +155,12 @@ class BinOp(AST):
         place1 = self.operand1.expand(cfg, block)
         place2 = self.operand2.expand(cfg, block)
 
-        tmp = Var('t%d' % cfg.numtemps )
+        newTmp = Var('t%d' % cfg.numtemps )
         cfg.numtemps += 1
 
         block.expandedAst += [BinOp(Operator.equal,
-                                    tmp, BinOp(self.operator, place1, place2))]
-        return tmp
+                                    newTmp, BinOp(self.operator, place1, place2))]
+        return newTmp
 
 
 class UnaryOp(AST):
@@ -185,14 +182,14 @@ class UnaryOp(AST):
         if self.operator == Operator.logical_not:
             place = self.operand.expand(cfg, block)
 
-            tmp = Var('t%d' % cfg.numtemps)
+            newTmp = Var('t%d' % cfg.numtemps)
             cfg.numtemps += 1
 
             block.expandedAst += [BinOp(Operator.equal,
-                                        tmp, UnaryOp(self.operator, place))]
+                                        newTmp, UnaryOp(self.operator, place))]
         else:
-            tmp = self
-        return tmp
+            newTmp = self
+        return newTmp
         
 
 class Var(AST):    

@@ -82,9 +82,9 @@ class APLYacc(object):
                 p[0] = Stats((0, 0, 0))
         elif self.output == YaccOutput.AST:
             try:
-                p[0] = [p[1]] + p[2]
+                p[0] = StmtList([p[1]]) + p[2]
             except:
-                p[0] = []
+                p[0] = StmtList()
 
 #######################################################################3
 
@@ -105,20 +105,20 @@ class APLYacc(object):
             if p[1] == 'if':
                 if isinstance(p[5], ScopeBlock):
                     p[5] = p[5].stlist
-                elif not isinstance(p[5], list):
-                    p[5] = [p[5]]
+                elif not isinstance(p[5], StmtList):
+                    p[5] = StmtList([p[5]])
 
                 if isinstance(p[7], ScopeBlock):
                     p[7] = p[7].stlist
-                elif not isinstance(p[7], list):
-                    p[7] = [p[7]]
+                elif not isinstance(p[7], StmtList):
+                    p[7] = StmtList([p[7]])
 
                 p[0] = IfStatement(p[1], p[3], p[5], p[7])
             elif p[1] == 'while':
                 if isinstance(p[5], ScopeBlock):
                     p[5] = p[5].stlist
-                elif not isinstance(p[5], list):
-                    p[5] = [p[5]]
+                elif not isinstance(p[5], StmtList):
+                    p[5] = StmtList([p[5]])
                 
                 p[0] = WhileStatement(p[1], p[3], p[5])
             else:
@@ -133,22 +133,22 @@ class APLYacc(object):
         if self.output == YaccOutput.AST:
             if p[1] == 'if':
                 try:
-                    if not isinstance(p[7], list):
-                        p[7] = [p[7]]
+                    if not isinstance(p[7], StmtList):
+                        p[7] = StmtList([p[7]])
                     if isinstance(p[5], ScopeBlock):
                         p[5] = p[5].stlist
-                    elif not isinstance(p[5], list):
-                        p[5] = [p[5]]
+                    elif not isinstance(p[5], StmtList):
+                        p[5] = StmtList([p[5]])
                     p[0] = IfStatement(p[1], p[3], p[5], p[7])
                 except Exception:
                     if isinstance(p[5], ScopeBlock):
                         p[5] = p[5].stlist
-                    elif not isinstance(p[5], list):
-                        p[5] = [p[5]]
+                    elif not isinstance(p[5], StmtList):
+                        p[5] = StmtList([p[5]])
                     p[0] = IfStatement(p[1], p[3], p[5])
             elif p[1] == 'while':
-                if not isinstance(p[5], list):
-                    p[5] = [p[5]]
+                if not isinstance(p[5], StmtList):
+                    p[5] = StmtList([p[5]])
                 p[0] = WhileStatement(p[1], p[3], p[5])
             
 
@@ -206,7 +206,7 @@ class APLYacc(object):
         '''
             other : declaration SEMICOLON
                     | block
-                    | assignments SEMICOLON
+                    | assignment SEMICOLON
                     | SEMICOLON
         '''
         if p[1] != ';':
@@ -216,7 +216,7 @@ class APLYacc(object):
                 p[0] = p[1]
         else:
             if self.output == YaccOutput.AST:
-                p[0] = []
+                p[0] = StmtList()
 
 #######################################################################3
 
@@ -270,30 +270,30 @@ class APLYacc(object):
             else:
                 p[0] = Symbol(p[1])
 
-    def p_assignments(self, p):
-        '''
-            assignments : assignment assignlist
-        '''
-        if self.output == YaccOutput.STATS:
-            p[0] = p[1] + p[2]
-        elif self.output == YaccOutput.AST:
-            p[0] = [p[1]] + p[2]
+    # def p_assignments(self, p):
+    #     '''
+    #         assignments : assignment assignlist
+    #     '''
+    #     if self.output == YaccOutput.STATS:
+    #         p[0] = p[1] + p[2]
+    #     elif self.output == YaccOutput.AST:
+    #         p[0] = [p[1]] + p[2]
 
-    def p_assignlist(self, p):
-        '''
-            assignlist : COMMA assignment assignlist
-                        | epsilon
-        '''
-        if self.output == YaccOutput.STATS:
-            try:
-                p[0] = p[2] + p[3]
-            except:
-                p[0] = Stats((0, 0, 0))
-        elif self.output == YaccOutput.AST:
-            try:
-                p[0] = [p[2]] + p[3]
-            except:
-                p[0] = []
+    # def p_assignlist(self, p):
+    #     '''
+    #         assignlist : COMMA assignment assignlist
+    #                     | epsilon
+    #     '''
+    #     if self.output == YaccOutput.STATS:
+    #         try:
+    #             p[0] = p[2] + p[3]
+    #         except:
+    #             p[0] = Stats((0, 0, 0))
+    #     elif self.output == YaccOutput.AST:
+    #         try:
+    #             p[0] = [p[2]] + p[3]
+    #         except:
+    #             p[0] = []
         
     def p_assignment(self, p):
         '''

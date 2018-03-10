@@ -1,41 +1,42 @@
 from st import *
 
 class BasicBlock(object):
-    def __init__(self, astlist=[], blocknum=-1, goto=-1):
+    def __init__(self, astlist=StmtList(), blocknum=-1, goto=-1):
         self.astlist = astlist
         self.blocknum = blocknum
         self.goto = goto
 
     def __str__(self):
-        s = '<bb %d>\n%s\ngoto ' % (self.blocknum, '\n'.join(
-            [st[0].src() for st in self.astlist if not isinstance(st, Declaration)]))
+        s = '<bb %d>\n%s\ngoto ' % (self.blocknum, self.astlist.src())
         if self.goto.blocknum != -1:
             s += "<bb %d>\n" % self.goto.blocknum
         else:
             s += 'end\n'
         return s
 
-        condition = self.astlist[0].condition
     def expandTree(self, cfg):
         # cfg.numtemps ++
-        import pdb
-        pdb.set_trace()
+        # import pdb
+        # pdb.set_trace()
+        pass
 
 class IfBlock(object):
-    def __init__(self, astlist=[], blocknum=-1, gotoif=-1, gotoelse=-1):
+    def __init__(self, astlist=StmtList(), blocknum=-1, gotoif=-1, gotoelse=-1):
         self.astlist = astlist
         self.blocknum = blocknum
         self.gotoif = gotoif
         self.gotoelse = gotoelse
+        self.expandedAst = StmtList()
 
     def __str__(self):
-        s = '<bb %d>\ngotoif: ' % self.blocknum
+        s = '<bb %d>\n%s\n' % (self.blocknum, self.expandedAst.src())
+        s += 'if(%s) goto: ' % (repr(self.condition))
         if self.gotoif.blocknum != -1:
             s += "<bb %d>" % self.gotoif.blocknum
         else:
             s += 'end'
 
-        s += '\ngotoelse: '
+        s += '\nelse goto: '
         if self.gotoelse.blocknum != -1:
             s += "<bb %d>" % self.gotoelse.blocknum
         else:
@@ -44,31 +45,26 @@ class IfBlock(object):
         return s + '\n'
 
     def expandTree(self, cfg):
-        # cfg.numtemps ++
-        self.expandedAst = []
-        condition = self.astlist[0].condition
-
-        tmp = condition.expand(cfg, self)
-
-        print('\n'.join([ st.src() for st in self.expandedAst]))
-        import pdb
-        pdb.set_trace()
+        self.expandedAst = StmtList()
+        self.condition = self.astlist[0].condition.expand(cfg, self)
 
 class WhileBlock(object):
-    def __init__(self, astlist=[], blocknum=-1, gotoif=-1, gotoelse=-1):
+    def __init__(self, astlist=StmtList(), blocknum=-1, gotoif=-1, gotoelse=-1):
         self.astlist = astlist
         self.blocknum = blocknum
         self.gotoif = gotoif
         self.gotoelse = gotoelse
+        self.expandedAst = StmtList()
 
     def __str__(self):
-        s = '<bb %d>\ngotoif: ' % self.blocknum
+        s = '<bb %d>\n%s\n' % (self.blocknum, self.expandedAst.src())
+        s += 'if(%s) goto: ' % (repr(self.condition))
         if self.gotoif.blocknum != -1:
             s += "<bb %d>" % self.gotoif.blocknum
         else:
             s += 'end'
 
-        s += '\ngotoelse: '
+        s += '\nelse goto: '
         if self.gotoelse.blocknum != -1:
             s += "<bb %d>" % self.gotoelse.blocknum
         else:
@@ -77,14 +73,8 @@ class WhileBlock(object):
         return s + '\n'
 
     def expandTree(self, cfg):
-        # cfg.numtemps ++
-        self.expandedAst = []
-        condition = self.astlist[0].condition
-
-        tmp = condition.expand(cfg, self)
-        
-        print(self.expandedAst)
-        import pdb; pdb.set_trace()
+        self.expandedAst = StmtList()
+        self.condition = self.astlist[0].condition.expand(cfg, self)
 
 
 class CFG(object):
@@ -121,8 +111,8 @@ class CFG(object):
         blockblock.goto = nextblock
 
     def traverse_ast(self, stlist, nextblock=BasicBlock()):
-        block_list = []
         localblocks = []
+        block_list = StmtList()
 
         j = 0
         while(j < len(stlist)):
@@ -130,19 +120,19 @@ class CFG(object):
             if isinstance(stlist[j], IfStatement):
                 localblocks.append(IfBlock([stlist[j]], self.numblocks))
                 self.numblocks += 1
-                block_list = []
+                block_list = StmtList()
                 j += 1
             # While Block
             elif isinstance(stlist[j], WhileStatement):
                 localblocks.append(WhileBlock([stlist[j]], self.numblocks))
                 self.numblocks += 1
-                block_list = []
+                block_list = StmtList()
                 j += 1
             # Basic Block
             elif isinstance(stlist[j], ScopeBlock):
                 localblocks.append(BasicBlock(stlist[j].stlist, self.numblocks))
                 self.numblocks += 1
-                block_list = []
+                block_list = StmtList()
                 j += 1
             elif isinstance(stlist[j], Declaration):
                 j += 1
@@ -155,7 +145,7 @@ class CFG(object):
                     j += 1
                 localblocks.append(BasicBlock(block_list, self.numblocks))
                 self.numblocks += 1
-                block_list = []
+                block_list = StmtList()
 
         localblocks.append(nextblock)
 
@@ -177,4 +167,4 @@ class CFG(object):
         return ret
 
     def __str__(self):
-        return 'CFG\n' + inc_tabsize('\n'.join ([str(block) for block in self.blocks])) + '\nENDCFG'
+        return '\n'.join ([str(block) for block in self.blocks])
