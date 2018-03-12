@@ -1,5 +1,7 @@
 Generating LALR tables
 Successfully Parsed
+
+
 ASGN
 (
 	VAR(p)
@@ -9,7 +11,6 @@ ASGN
 		VAR(Main)
 	)
 )
-
 ASGN
 (
 	DEREF
@@ -19,4 +20,5 @@ ASGN
 	,
 	CONST(5)
 )
+
 

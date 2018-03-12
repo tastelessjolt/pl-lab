@@ -21,7 +21,6 @@ class TestAST(object):
 
                 f = open(filepath)
                 ast = parser.parse(f.read())
-                import pdb; pdb.set_trace()
 
                 ast_str = ''
                 if ast:
@@ -34,9 +33,6 @@ class TestAST(object):
                 # print(errout)
                 print(file)
                 # print(ast_str)
-                import pdb
-                pdb.set_trace()
-
                 assert output.strip() == (errout + ast_str).strip()
 
     def test_ast_only(self, capsys):
@@ -57,9 +53,9 @@ class TestAST(object):
                     ast_str += 'Successfully Parsed\n'
                     ast_str += ast.__str__()
                 output = open(os.path.join(TestAST.tests_out, file)).read()
+                import pdb; pdb.set_trace()
                 errout = capsys.readouterr().err
                 # print(errout)
                 print(file)
                 # print(ast_str)
-                import pdb; pdb.set_trace()
                 assert output.strip() == (errout + ast_str).strip()
