@@ -4,5 +4,5 @@ void main()
 	int b;
         int *p, *q;
  
-        p = &a, q = &b;
+        p = &a;
 }
