@@ -62,9 +62,11 @@ if __name__ == '__main__':
         parser.build(lexer)
         ast = parser.parse(data)
         if ast:
-            # print(repr(ast))
+            with open(filename + '.ast', 'w') as f:
+                f.write(str(ast))
 
             cfg = CFG(ast)
-            print (cfg)
+            with open(filename + '.cfg', 'w') as f:
+                f.write(str(cfg))
 
         
