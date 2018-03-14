@@ -37,7 +37,7 @@ class APLLexer(object):
         'LOGICAL_AND',
     ] + list(reserved.values())
 
-    t_ignore = " \t"
+    t_ignore = " \t\r"
 
     t_LPAREN = r'\('
     t_RPAREN = r'\)'
