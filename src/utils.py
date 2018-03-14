@@ -8,11 +8,6 @@ def eprint(*args, **kwargs):
 def inc_tabsize(string):
 	return '\t' + string.replace('\n', '\n\t')
 
-class Scope(Enum):
-	GLOBAL = 0
-	LOCAL = 1
-	ARGUMENT = 2
-
 class DataType(object):
 	def __init__(self):
 		self.ptr_depth = 0

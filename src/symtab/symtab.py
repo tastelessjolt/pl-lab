@@ -1,5 +1,11 @@
 from utils import *
 
+
+class Scope(Enum):
+	GLOBAL = 0
+	LOCAL = 1
+	ARGUMENT = 2
+
 class TableEntry(object):
     def __init__(self, name, type, scope, table_ptr=None):
         self.name = name
