@@ -106,3 +106,6 @@ Parser_ast_*
 .vscode/
 *.ast
 *.cfg
+
+# Pytest Cache
+.pytest_cache/

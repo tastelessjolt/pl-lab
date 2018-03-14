@@ -49,6 +49,7 @@ class TestAST(object):
                 if ast:
                     ast_str += 'Successfully Parsed\n'
                     ast_str += str(ast)
+                    
                 output = open(os.path.join(TestAST.tests_out, file)).read()
                 errout = capsys.readouterr().err
                 print(file)
