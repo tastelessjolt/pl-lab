@@ -4,6 +4,7 @@ from utils import *
 class APLLexer(object):
     reserved = {
         'int': 'INT',
+        'float': 'FLOAT',
         'main': 'MAIN',
         'void': 'VOID',
         'if': 'IF',

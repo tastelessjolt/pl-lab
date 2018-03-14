@@ -49,7 +49,7 @@ class APLYacc(object):
     start = 'program'
     def p_program(self, p):
         '''
-            program : main
+            program : global_list
         '''
         if self.output == YaccOutput.STATS:
             p[0] = p[1]
@@ -59,6 +59,56 @@ class APLYacc(object):
     def p_epsilon(self, p):
         '''
             epsilon :
+        '''
+        pass
+
+    def p_global_list(self, p):
+        '''
+            global_list : procedure_dec SEMICOLON global_list
+                        | procedure_def global_list
+                        | main global_list
+                        | declaration SEMICOLON global_list
+                        | epsilon
+        '''
+        pass
+
+    def p_procedure_dec(self, p):
+        '''
+            procedure_dec : type ID LPAREN proto_arglist RPAREN
+        '''
+        pass
+
+    def p_proto_arglist(self, p):
+        '''
+            proto_arglist : type ID proto_arglist_helper
+                            | epsilon
+        '''
+        pass
+
+    def p_proto_arglist_helper(self, p):
+        '''
+            proto_arglist_helper : COMMA type ID proto_arglist_helper
+                                | epsilon 
+        '''
+        pass
+
+    def p_procedure_def(self, p):
+        '''
+            procedure_def : type ID LPAREN arglist RPAREN block
+        '''
+        pass
+
+    def p_arglist(self, p):
+        '''
+            arglist : type ID arglist_helper
+                    | epsilon
+        '''
+        pass
+    
+    def p_arglist_helper(self, p):
+        '''
+            arglist_helper : COMMA type ID arglist_helper
+                            | epsilon
         '''
         pass
 
@@ -270,8 +320,12 @@ class APLYacc(object):
     def p_type(self, p):
         '''
             type : INT
+                | FLOAT
         '''
-        p[0] = IntType
+        if p[1] == 'int':
+            p[0] = IntType
+        elif p[1] == 'float':
+            p[0] = FloatType
 
     def p_var(self, p):
         '''
@@ -289,31 +343,6 @@ class APLYacc(object):
             else:
                 p[0] = Symbol(p[1])
 
-    # def p_assignments(self, p):
-    #     '''
-    #         assignments : assignment assignlist
-    #     '''
-    #     if self.output == YaccOutput.STATS:
-    #         p[0] = p[1] + p[2]
-    #     elif self.output == YaccOutput.AST:
-    #         p[0] = [p[1]] + p[2]
-
-    # def p_assignlist(self, p):
-    #     '''
-    #         assignlist : COMMA assignment assignlist
-    #                     | epsilon
-    #     '''
-    #     if self.output == YaccOutput.STATS:
-    #         try:
-    #             p[0] = p[2] + p[3]
-    #         except:
-    #             p[0] = Stats((0, 0, 0))
-    #     elif self.output == YaccOutput.AST:
-    #         try:
-    #             p[0] = [p[2]] + p[3]
-    #         except:
-    #             p[0] = []
-        
     def p_assignment(self, p):
         '''
             assignment :  ID EQUALS notNumExpr

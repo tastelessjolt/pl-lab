@@ -18,6 +18,7 @@ def buildArgParser():
     parser.add_argument('-y', '--yacc', help='generate yacc output', action='store_true')
     parser.add_argument('-a', '--ast', help='generate AST output', action='store_true')
     parser.add_argument('-c', '--cfg', help='generate CFG output', action='store_true')    
+    parser.add_argument('-e', '--ecfg', help='generate Extended CFG output', action='store_true')    
     return parser
 
 if __name__ == '__main__':
@@ -57,7 +58,7 @@ if __name__ == '__main__':
             f.write('')
         f.close()
     
-    if args.cfg or not (args.yacc or args.lex or args.ast):
+    if args.cfg:
         parser = APLYacc(output = YaccOutput.AST)
         parser.build(lexer)
         ast = parser.parse(data)
@@ -69,4 +70,8 @@ if __name__ == '__main__':
             with open(filename + '.cfg', 'w') as f:
                 f.write(str(cfg))
 
-        
+    if args.ecfg or not (args.yacc or args.lex or args.ast or args.cfg):
+        parser = APLYacc(output=YaccOutput.AST)
+        parser.build(lexer)
+        ast = parser.parse(data)
+        print (repr(ast))
