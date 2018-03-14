@@ -1,5 +1,7 @@
 Generating LALR tables
 Successfully Parsed
+
+
 ASGN
 (
 	DEREF
@@ -9,7 +11,6 @@ ASGN
 	,
 	CONST(2147483647)
 )
-
 ASGN
 (
 	DEREF
@@ -30,4 +31,5 @@ ASGN
 		)
 	)
 )
+
 

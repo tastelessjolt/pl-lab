@@ -53,7 +53,7 @@ class TestAST(object):
                     ast_str += 'Successfully Parsed\n'
                     ast_str += ast.__str__()
                 output = open(os.path.join(TestAST.tests_out, file)).read()
-                import pdb; pdb.set_trace()
+                # import pdb; pdb.set_trace()
                 errout = capsys.readouterr().err
                 # print(errout)
                 print(file)

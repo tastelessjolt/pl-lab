@@ -1,5 +1,9 @@
 Generating LALR tables
 Successfully Parsed
+
+
+
+
 ASGN
 (
 	DEREF
@@ -9,7 +13,6 @@ ASGN
 	,
 	CONST(5)
 )
-
 ASGN
 (
 	DEREF
@@ -19,7 +22,6 @@ ASGN
 	,
 	CONST(1)
 )
-
 ASGN
 (
 	DEREF
@@ -29,7 +31,6 @@ ASGN
 	,
 	CONST(1)
 )
-
 ASGN
 (
 	DEREF
@@ -44,9 +45,9 @@ ASGN
 			DEREF
 			(
 				DEREF
-				(
-					VAR(px)
-				)
+			(
+				VAR(px)
+			)
 			)
 			,
 			DEREF
@@ -58,16 +59,15 @@ ASGN
 		DEREF
 		(
 			DEREF
-			(
-				DEREF
-				(
-					VAR(px)
-				)
-			)
+		(
+			DEREF
+		(
+			VAR(px)
+		)
+		)
 		)
 	)
 )
-
 ASGN
 (
 	VAR(sdasz)
@@ -79,9 +79,9 @@ ASGN
 			UMINUS
 			(
 				ADDR
-				(
-					VAR(z)
-				)
+			(
+				VAR(z)
+			)
 			)
 			,
 			ADDR
@@ -96,4 +96,5 @@ ASGN
 		)
 	)
 )
+
 

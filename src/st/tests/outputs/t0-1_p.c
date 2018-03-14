@@ -1,5 +1,6 @@
 Generating LALR tables
 Successfully Parsed
+
 ASGN
 (
 	DEREF
@@ -12,9 +13,9 @@ ASGN
 		UMINUS
 		(
 			DEREF
-			(
-				VAR(i1)
-			)
+		(
+			VAR(i1)
+		)
 		)
 		,
 		DEREF
@@ -23,4 +24,5 @@ ASGN
 		)
 	)
 )
+
 

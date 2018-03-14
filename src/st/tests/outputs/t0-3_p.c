@@ -1,5 +1,7 @@
 Generating LALR tables
 Successfully Parsed
+
+
 ASGN
 (
 	VAR(pa)
@@ -9,7 +11,6 @@ ASGN
 		VAR(a)
 	)
 )
-
 ASGN
 (
 	VAR(pb)
@@ -19,7 +20,6 @@ ASGN
 		VAR(b)
 	)
 )
-
 ASGN
 (
 	VAR(pc)
@@ -29,7 +29,6 @@ ASGN
 		VAR(c)
 	)
 )
-
 ASGN
 (
 	DEREF
@@ -39,7 +38,6 @@ ASGN
 	,
 	CONST(2)
 )
-
 ASGN
 (
 	DEREF
@@ -54,7 +52,6 @@ ASGN
 		CONST(5)
 	)
 )
-
 ASGN
 (
 	DEREF
@@ -80,13 +77,14 @@ ASGN
 		UMINUS
 		(
 			DEREF
-			(
-				DEREF
-				(
-					VAR(pa)
-				)
-			)
+		(
+			DEREF
+		(
+			VAR(pa)
+		)
+		)
 		)
 	)
 )
+
 
