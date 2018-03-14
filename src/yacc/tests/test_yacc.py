@@ -17,7 +17,7 @@ class TestYacc(object):
                 lexer = APLLexer()
                 lexer.build()
 
-                parser = APLYacc(output=YaccOutput.STATS)
+                parser = APLYacc(output=YaccOutput.STATS, write_tables=False)
                 parser.build(lexer)
 
                 f = open(filepath)
@@ -39,7 +39,7 @@ class TestYacc(object):
             if os.path.isfile(filepath) and file.endswith(".c"):
                 lexer = APLLexer()
                 lexer.build()
-                parser = APLYacc(output=YaccOutput.STATS)
+                parser = APLYacc(output=YaccOutput.STATS, write_tables=False)
                 parser.build(lexer)
                 f = open(filepath)
                 l = parser.parse(f.read())

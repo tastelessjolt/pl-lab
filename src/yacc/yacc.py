@@ -42,8 +42,9 @@ class APLYacc(object):
         ('left', 'DOUBLE_EQUAL', 'NOT_EQUAL'),
     ]
 
-    def __init__(self, output=YaccOutput.AST):
+    def __init__(self, output=YaccOutput.AST, write_tables=True):
         self.output = output
+        self.write_tables = write_tables
 
     start = 'program'
     def p_program(self, p):
@@ -436,7 +437,7 @@ class APLYacc(object):
             eprint("syntax error at EOF")
 
     def build(self, lexer, **kwargs):
-        self.yacc = yacc.yacc(module=self, debug = True, **kwargs)
+        self.yacc = yacc.yacc(module=self, write_tables=self.write_tables, debug=True, **kwargs)
         self.lexer = lexer.lexer
 
     def parse(self, data):
