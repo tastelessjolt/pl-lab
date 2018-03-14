@@ -41,6 +41,24 @@ class IntType(DataType):
 	def __repr__(self):
 		return self.__str__()
 
+class FloatType(DataType):
+	def __init__(self, ptr_depth_or_datatype):
+		self.basetype = 'float'
+		if isinstance(ptr_depth_or_datatype, int):
+			self.ptr_depth = ptr_depth_or_datatype
+		elif isinstance(ptr_depth_or_datatype, DataType):
+			self.ptr_depth = ptr_depth_or_datatype.ptr_depth
+
+	def __add__(self, other):
+		self.ptr_depth += other
+		return self
+
+	def __str__(self):
+		return self.basetype + '*'*self.ptr_depth
+
+	def __repr__(self):
+		return self.__str__()
+
 class VoidType(DataType):
 	def __init__(self):
 		self.basetype = 'void'
