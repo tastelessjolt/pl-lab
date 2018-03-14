@@ -104,8 +104,6 @@ ENV/
 Parser_ast_*
 .cache/
 .vscode/
-*.ast
-*.cfg
 
 # Pytest Cache
 .pytest_cache/

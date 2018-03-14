@@ -1,0 +1,21 @@
+Generating LALR tables
+
+
+ASGN
+(
+	VAR(p)
+	,
+	ADDR
+	(
+		VAR(Main)
+	)
+)
+ASGN
+(
+	DEREF
+	(
+		VAR(p)
+	)
+	,
+	CONST(5)
+)
