@@ -437,7 +437,7 @@ class APLYacc(object):
             eprint("syntax error at EOF")
 
     def build(self, lexer, **kwargs):
-        self.yacc = yacc.yacc(module=self, write_tables=self.write_tables, debug=True, **kwargs)
+        self.yacc = yacc.yacc(module=self, write_tables=self.write_tables, debug=False, **kwargs)
         self.lexer = lexer.lexer
 
     def parse(self, data):

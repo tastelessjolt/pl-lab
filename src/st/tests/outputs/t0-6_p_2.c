@@ -1,4 +1,3 @@
-Generating LALR tables
 Successfully Parsed
 
 
@@ -106,5 +105,3 @@ ASGN
 		)
 	)
 )
-
-
