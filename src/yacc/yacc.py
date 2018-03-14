@@ -93,7 +93,10 @@ class APLYacc(object):
             stmt : matched_stmt
                 | unmatched_stmt
         '''
-        p[0] = p[1]
+        if self.output == YaccOutput.STATS:
+            p[0] = p[1]
+        elif self.output == YaccOutput.AST:
+            p[0] = p[1]
 
     def p_matched_stmt(self, p):
         '''
@@ -101,7 +104,14 @@ class APLYacc(object):
                         | WHILE LPAREN condition RPAREN matched_stmt
                         | other
         '''
-        if self.output == YaccOutput.AST:
+        if self.output == YaccOutput.STATS:
+            if p[1] == 'if':
+                p[0] = p[5] + p[7]
+            elif p[1] == 'while':
+                p[0] = p[5]
+            else:
+                p[0] = p[1]
+        elif self.output == YaccOutput.AST:
             if p[1] == 'if':
                 if isinstance(p[5], ScopeBlock):
                     p[5] = p[5].stlist
@@ -130,7 +140,15 @@ class APLYacc(object):
                             | WHILE LPAREN condition RPAREN unmatched_stmt
                             | IF LPAREN condition RPAREN matched_stmt ELSE unmatched_stmt
         '''
-        if self.output == YaccOutput.AST:
+        if self.output == YaccOutput.STATS:
+            if p[1] == 'if':
+                try:
+                    p[0] = p[5] + p[7]
+                except:
+                    p[0] = p[5]
+            elif p[1] == 'while':
+                p[0] = p[5]
+        elif self.output == YaccOutput.AST:
             if p[1] == 'if':
                 try:
                     if not isinstance(p[7], StmtList):

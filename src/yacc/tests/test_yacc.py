@@ -24,10 +24,13 @@ class TestYacc(object):
                 l = parser.parse(f.read())
 
                 output = open(os.path.join(TestYacc.tests_out, file)).read()
+                print(file)
+                errout = capsys.readouterr().err
+                # import pdb; pdb.set_trace()
                 if l is not None:
-                    assert output.strip() == (capsys.readouterr().err + l.t.__str__()).strip()
+                    assert output.strip() == (errout + str(l.t)).strip()
                 else:
-                    assert output.strip() == capsys.readouterr().err.strip()
+                    assert output.strip() == errout.strip()
 
     def test_yacc_only(self, capsys):
 
@@ -41,7 +44,9 @@ class TestYacc(object):
                 f = open(filepath)
                 l = parser.parse(f.read())
                 output = open(os.path.join(TestYacc.tests_out, file)).read()
+                print(file)
+                errout = capsys.readouterr().err
                 if l is not None:
-                    assert output.strip() == (capsys.readouterr().err + l.t.__str__()).strip()
+                    assert output.strip() == (errout + str(l.t)).strip()
                 else:
-                    assert output.strip() == capsys.readouterr().err.strip()
+                    assert output.strip() == errout.strip()

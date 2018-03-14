@@ -1,2 +1,2 @@
 Generating LALR tables
-syntax error at (5:35): &
+syntax error at (5:35): &&

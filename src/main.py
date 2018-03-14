@@ -52,7 +52,7 @@ if __name__ == '__main__':
         f = open ('Parser_ast_' + os.path.basename(filename), 'w')
         if ast:
             eprint("Successfully Parsed")
-            print(ast.__str__() + "\n\n")
+            print(str(ast))
         else:
             f.write('')
         f.close()

@@ -1,2 +1,2 @@
 Generating LALR tables
-(3, 3, 8)
+syntax error at (6:67): ,

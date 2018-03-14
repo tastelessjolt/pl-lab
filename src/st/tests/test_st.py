@@ -25,14 +25,11 @@ class TestAST(object):
                 ast_str = ''
                 if ast:
                     ast_str += 'Successfully Parsed\n'
-                    ast_str += ast.__str__() + "\n\n"
-                print(ast_str)
+                    ast_str += str(ast)
 
                 output = open(os.path.join(TestAST.tests_out, file)).read()
                 errout = capsys.readouterr().err
-                # print(errout)
                 print(file)
-                # print(ast_str)
                 assert output.strip() == (errout + ast_str).strip()
 
     def test_ast_only(self, capsys):
@@ -51,11 +48,8 @@ class TestAST(object):
                 ast_str = ''
                 if ast:
                     ast_str += 'Successfully Parsed\n'
-                    ast_str += ast.__str__()
+                    ast_str += str(ast)
                 output = open(os.path.join(TestAST.tests_out, file)).read()
-                # import pdb; pdb.set_trace()
                 errout = capsys.readouterr().err
-                # print(errout)
                 print(file)
-                # print(ast_str)
                 assert output.strip() == (errout + ast_str).strip()
