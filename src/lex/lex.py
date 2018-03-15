@@ -62,6 +62,10 @@ class APLLexer(object):
     t_LOGICAL_NOT = r'\!'
     t_LOGICAL_AND = r'\&\&'
 
+    def t_COMMENT(self, t):
+        r'(?://[^\n]*|/\*(?:(?!\*/)(.|\n))*\*/)'
+        pass
+
     def t_NUM(self, t):
         r'\d+'
         t.value = int(t.value)
@@ -76,7 +80,6 @@ class APLLexer(object):
     def t_newline(self, t):
         r'\n+'
         t.lexer.lineno += len(t.value)
-
 
     def t_error(self, t):
         eprint("Illegal character '%s'" % t.value[0])

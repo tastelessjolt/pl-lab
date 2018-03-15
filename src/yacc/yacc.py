@@ -65,6 +65,7 @@ class APLYacc(object):
     def p_global_list(self, p):
         '''
             global_list : procedure_def global_list
+                        | procedure_dec SEMICOLON global_list
                         | main global_list
                         | declaration SEMICOLON global_list
                         | epsilon
@@ -83,23 +84,22 @@ class APLYacc(object):
             procedure_def : type var LPAREN arglist RPAREN block
                             | type var LPAREN RPAREN block
         '''
-        # TODO: here there's a grave mistake // Correct it before submission
         if self.output == YaccOutput.AST:
             try: 
-                p[0] = Func(p[1], p[2], p[4], p[6].stlist)
+                p[0] = Func(p[1](p[2].datatype), p[2].label, p[4], p[6].stlist)
             except:
-                p[0] = Func(p[1], p[2], [], p[5].stlist)
+                p[0] = Func(p[1](p[2].datatype), p[2].label, [], p[5].stlist)
 
-    # def p_procedure_dec(self, p):
-    #     '''
-    #         procedure_dec : type var LPAREN proto_arglist RPAREN
-    #                         | type var LPAREN RPAREN
-    #     '''
-    #     pass
+    def p_procedure_dec(self, p):
+        '''
+            procedure_dec : type var LPAREN arglist RPAREN
+                            | type var LPAREN RPAREN
+        '''
+        pass
 
     # def p_proto_arglist(self, p):
     #     '''
-    #         proto_arglist : d_type ID proto_arglist_helper
+    #         proto_arglist : type var proto_arglist_helper
     #                         | d_type proto_arglist_helper
     #                         | d_type arglist_helper
     #     '''
@@ -107,7 +107,7 @@ class APLYacc(object):
 
     # def p_proto_arglist_helper(self, p):
     #     '''
-    #         proto_arglist_helper : COMMA d_type ID proto_arglist_helper
+    #         proto_arglist_helper : COMMA type var proto_arglist_helper
     #                             | COMMA d_type proto_arglist_helper
     #                             | COMMA d_type arglist_helper
     #     '''
@@ -117,15 +117,19 @@ class APLYacc(object):
         '''
             arglist : type var arglist_helper
         '''
-        pass
+        p[2].datatype = p[1](p[2].datatype)
+        p[0] = [p[2]] + p[3]
     
     def p_arglist_helper(self, p):
         '''
             arglist_helper : COMMA type var arglist_helper
                             | epsilon
         '''
-        # try:
-        #     p[0] = p[]
+        try:
+            p[3].datatype = p[2](p[3].datatype)
+            p[0] = [p[3]] + p[4] 
+        except:
+            p[0] = []
 
     # def p_derived_type(self, p):
     #     '''
@@ -304,6 +308,7 @@ class APLYacc(object):
             other : declaration SEMICOLON
                     | block
                     | assignment SEMICOLON
+                    | proc_call SEMICOLON
                     | SEMICOLON
         '''
         if p[1] != ';':
@@ -315,6 +320,16 @@ class APLYacc(object):
             if self.output == YaccOutput.AST:
                 p[0] = StmtList()
 
+#######################################################################3
+#######################################################################3
+
+    def p_proc_call(self, p):
+        '''
+            proc_call : ID LPAREN RPAREN
+        '''
+        pass
+
+#######################################################################3
 #######################################################################3
 
     def p_declaration(self, p):

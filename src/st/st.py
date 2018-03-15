@@ -56,7 +56,7 @@ class Func(AST):
         return str(self.stlist)
 
     def __repr__(self):
-        return 'Func(%s) {\n%s\n}' % (', '.join([repr(self.fname), str(self.params), str(self.rtype)]),
+        return 'Func %s(%s) -> %s {\n%s\n}' % (repr(self.fname), str(self.params), str(self.rtype),
                                         inc_tabsize('\n'.join([repr(st) for st in self.stlist])))
 
 class IfStatement(AST):
