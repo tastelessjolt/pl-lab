@@ -46,6 +46,10 @@ class APLYacc(object):
         self.output = output
         self.write_tables = write_tables
 
+#######################################################################
+######################### Grammar Starts Here #########################
+#######################################################################
+
     start = 'program'
     def p_program(self, p):
         '''
@@ -65,8 +69,8 @@ class APLYacc(object):
     def p_global_list(self, p):
         '''
             global_list : procedure_def global_list
-                        | procedure_dec SEMICOLON global_list
                         | main global_list
+                        | procedure_dec SEMICOLON global_list
                         | declaration SEMICOLON global_list
                         | epsilon
         '''
@@ -81,68 +85,109 @@ class APLYacc(object):
 
     def p_procedure_def(self, p):
         '''
-            procedure_def : type var LPAREN arglist RPAREN block
-                            | type var LPAREN RPAREN block
+            procedure_def : type STR var LPAREN arglist RPAREN block
         '''
         if self.output == YaccOutput.AST:
-            try: 
-                p[0] = Func(p[1](p[2].datatype), p[2].label, p[4], p[6].stlist)
-            except:
-                p[0] = Func(p[1](p[2].datatype), p[2].label, [], p[5].stlist)
+            p[0] = Func(p[1](p[3].datatype), p[3].label, p[5], p[7].stlist)
+                
+    def p_procedure_def_empty(self, p):
+        ''' 
+            procedure_def : type STR var LPAREN RPAREN block
+        '''
+        if self.output == YaccOutput.AST:
+            p[0] = Func(p[1](p[3].datatype), p[3].label, [], p[6].stlist)
+
 
     def p_procedure_dec(self, p):
         '''
-            procedure_dec : type var LPAREN arglist RPAREN
-                            | type var LPAREN RPAREN
+            procedure_dec : type STR var LPAREN proto_arglist RPAREN
+                            | type STR var LPAREN arglist RPAREN
         '''
-        pass
+        if self.output == YaccOutput.AST:
+            p[0] = Func(p[1](p[3].datatype), p[3].label, p[5], declaration=True)
+                
 
-    # def p_proto_arglist(self, p):
-    #     '''
-    #         proto_arglist : type var proto_arglist_helper
-    #                         | d_type proto_arglist_helper
-    #                         | d_type arglist_helper
-    #     '''
-    #     pass
+    def p_procedure_dec_empty(self, p):
+        '''
+            procedure_dec : type STR var LPAREN RPAREN
+        '''
+        if self.output == YaccOutput.AST:
+            p[0] = Func(p[1](p[3].datatype), p[3].label, [], declaration=True)
 
-    # def p_proto_arglist_helper(self, p):
-    #     '''
-    #         proto_arglist_helper : COMMA type var proto_arglist_helper
-    #                             | COMMA d_type proto_arglist_helper
-    #                             | COMMA d_type arglist_helper
-    #     '''
-    #     pass
+    def p_proto_arglist(self, p):
+        '''
+            proto_arglist : d_type proto_arglist_helper
+                            | d_type arglist_helper
+        '''
+        if self.output == YaccOutput.AST:
+            p[0] = [p[1]] + p[2]
+
+    def p_proto_arglist_var(self, p):
+        '''
+            proto_arglist : type STR var proto_arglist_helper
+        '''
+        if self.output == YaccOutput.AST:
+            p[3].datatype = p[1](p[3].datatype)
+            p[0] = [p[3]] + p[4]
+
+    def p_proto_arglist_helper(self, p):
+        '''
+            proto_arglist_helper : COMMA d_type proto_arglist_helper
+                                | COMMA d_type arglist_helper
+        '''
+        if self.output == YaccOutput.AST:
+            p[0] = [p[2]] + p[3]
+
+    def p_proto_arglist_helper_transition(self, p):
+        '''
+            proto_arglist_helper : COMMA type STR var proto_arglist_helper
+        '''
+        if self.output == YaccOutput.AST:
+            p[4].datatype = p[2](p[4].datatype)
+            p[0] = [p[4]] + p[5]
 
     def p_arglist(self, p):
         '''
-            arglist : type var arglist_helper
+            arglist : type STR var arglist_helper
         '''
-        p[2].datatype = p[1](p[2].datatype)
-        p[0] = [p[2]] + p[3]
+        if self.output == YaccOutput.AST:
+            p[3].datatype = p[1](p[3].datatype)
+            p[0] = [p[3]] + p[4]
     
     def p_arglist_helper(self, p):
         '''
-            arglist_helper : COMMA type var arglist_helper
-                            | epsilon
+            arglist_helper : COMMA type STR var arglist_helper
         '''
-        try:
-            p[3].datatype = p[2](p[3].datatype)
-            p[0] = [p[3]] + p[4] 
-        except:
+        if self.output == YaccOutput.AST:
+            p[4].datatype = p[2](p[4].datatype)
+            p[0] = [p[4]] + p[5] 
+                
+
+    def p_arglist_helper_empty(self, p):
+        '''
+            arglist_helper : epsilon
+        '''
+        if self.output == YaccOutput.AST:
             p[0] = []
 
-    # def p_derived_type(self, p):
-    #     '''
-    #         d_type : type 
-    #     '''
-    #     pass
+    def p_derived_type(self, p):
+        '''
+            d_type : type STR str
+        '''
+        if self.output == YaccOutput.AST:
+            p[0] = p[1](p[3] + 1)
 
-    # def p_str(self, p):
-    #     '''
-    #         str : STR str %prec DEREF
-    #             | epsilon
-    #     '''
-    #     pass
+    def p_str(self, p):
+        '''
+            str : STR str %prec DEREF
+                | epsilon
+        '''
+        if self.output == YaccOutput.AST:
+            try: 
+                p[0] = p[2] + 1
+            except:
+                p[0] = 0
+
 
     def p_main(self, p):
         '''
@@ -292,7 +337,8 @@ class APLYacc(object):
             expr : notNumExpr
                 | onlyNumExpr
         '''
-        p[0] = p[1]
+        if self.output == YaccOutput.AST:
+            p[0] = p[1]
 
     def p_block(self, p):
         '''
@@ -320,8 +366,7 @@ class APLYacc(object):
             if self.output == YaccOutput.AST:
                 p[0] = StmtList()
 
-#######################################################################3
-#######################################################################3
+#######################################################################
 
     def p_proc_call(self, p):
         '''
@@ -352,8 +397,7 @@ class APLYacc(object):
             except:
                 p[0] = []
 
-#######################################################################3
-#######################################################################3
+#######################################################################
 
     def p_declaration(self, p):
         '''
@@ -388,10 +432,11 @@ class APLYacc(object):
             type : INT
                 | FLOAT
         '''
-        if p[1] == 'int':
-            p[0] = IntType
-        elif p[1] == 'float':
-            p[0] = FloatType
+        if self.output == YaccOutput.AST:
+            if p[1] == 'int':
+                p[0] = IntType
+            elif p[1] == 'float':
+                p[0] = FloatType
 
     def p_var(self, p):
         '''
@@ -535,6 +580,10 @@ class APLYacc(object):
             eprint("syntax error at ({1}:{2}): {0}".format(p.value, p.lineno, p.lexpos))
         else:
             eprint("syntax error at EOF")
+
+#######################################################################
+########################## Grammar Ends Here ##########################
+#######################################################################
 
     def build(self, lexer, **kwargs):
         self.yacc = yacc.yacc(module=self, write_tables=self.write_tables, debug=True, **kwargs)

@@ -46,18 +46,22 @@ class Program(AST):
         return 'Program {\n%s\n}' % inc_tabsize('\n'.join([repr(func) for func in self.funclist]))
 
 class Func(AST):
-    def __init__(self, rtype, fname, params, stlist):
+    def __init__(self, rtype, fname, params, stlist=None, declaration=False):
         self.rtype = rtype
         self.fname = fname
         self.params = params
         self.stlist = stlist
+        self.declaration = declaration
     
     def __str__(self):
         return str(self.stlist)
 
     def __repr__(self):
-        return 'Func %s(%s) -> %s {\n%s\n}' % (repr(self.fname), str(self.params), str(self.rtype),
-                                        inc_tabsize('\n'.join([repr(st) for st in self.stlist])))
+        if self.declaration:
+            return 'Func %s(%s) -> %s' % (repr(self.fname), str(self.params), str(self.rtype))
+        else:
+            return 'Func %s(%s) -> %s {\n%s\n}' % (repr(self.fname), str(self.params), str(self.rtype),
+                                            inc_tabsize('\n'.join([repr(st) for st in self.stlist])))
 
 class FuncCall(AST):
     def __init__(self, fname, params):
