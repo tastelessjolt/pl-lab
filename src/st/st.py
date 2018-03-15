@@ -2,6 +2,22 @@ from utils import inc_tabsize, DataType, Operator
 class AST(object):
     pass
 
+class DefList(AST, list):
+    '''
+        Used to represent list of proc-declarations and global var-declarations
+    '''
+    def __str__(self):
+        return '\n'.join([str(st) for st in self])
+
+    def __repr__(self):
+        return '\n'.join([repr(st) for st in self])
+
+    def __add__(self, other):
+        return DefList(super(DefList, self).__add__(other))
+
+    def src(self):
+        return '\n'.join([st.src() for st in self])
+
 class StmtList(AST, list):
     '''
         Used to represent list of statements
@@ -40,7 +56,7 @@ class Func(AST):
         return str(self.stlist)
 
     def __repr__(self):
-        return 'Func(%s) {\n%s\n}' % (', '.join([self.fname, str(self.params), str(self.rtype)]),
+        return 'Func(%s) {\n%s\n}' % (', '.join([repr(self.fname), str(self.params), str(self.rtype)]),
                                         inc_tabsize('\n'.join([repr(st) for st in self.stlist])))
 
 class IfStatement(AST):

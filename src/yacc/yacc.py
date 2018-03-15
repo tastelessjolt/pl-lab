@@ -64,62 +64,90 @@ class APLYacc(object):
 
     def p_global_list(self, p):
         '''
-            global_list : procedure_dec SEMICOLON global_list
-                        | procedure_def global_list
+            global_list : procedure_def global_list
                         | main global_list
                         | declaration SEMICOLON global_list
                         | epsilon
         '''
-        pass
-
-    def p_procedure_dec(self, p):
-        '''
-            procedure_dec : type ID LPAREN proto_arglist RPAREN
-        '''
-        pass
-
-    def p_proto_arglist(self, p):
-        '''
-            proto_arglist : type ID proto_arglist_helper
-                            | epsilon
-        '''
-        pass
-
-    def p_proto_arglist_helper(self, p):
-        '''
-            proto_arglist_helper : COMMA type ID proto_arglist_helper
-                                | epsilon 
-        '''
-        pass
+        if self.output == YaccOutput.AST:
+            try: 
+                p[0] = DefList([p[1]]) + p[3]
+            except:
+                try:
+                    p[0] = DefList([p[1]]) + p[2]
+                except:
+                    p[0] = DefList()
 
     def p_procedure_def(self, p):
         '''
-            procedure_def : type ID LPAREN arglist RPAREN block
+            procedure_def : type var LPAREN arglist RPAREN block
+                            | type var LPAREN RPAREN block
         '''
-        pass
+        # TODO: here there's a grave mistake // Correct it before submission
+        if self.output == YaccOutput.AST:
+            try: 
+                p[0] = Func(p[1], p[2], p[4], p[6].stlist)
+            except:
+                p[0] = Func(p[1], p[2], [], p[5].stlist)
+
+    # def p_procedure_dec(self, p):
+    #     '''
+    #         procedure_dec : type var LPAREN proto_arglist RPAREN
+    #                         | type var LPAREN RPAREN
+    #     '''
+    #     pass
+
+    # def p_proto_arglist(self, p):
+    #     '''
+    #         proto_arglist : d_type ID proto_arglist_helper
+    #                         | d_type proto_arglist_helper
+    #                         | d_type arglist_helper
+    #     '''
+    #     pass
+
+    # def p_proto_arglist_helper(self, p):
+    #     '''
+    #         proto_arglist_helper : COMMA d_type ID proto_arglist_helper
+    #                             | COMMA d_type proto_arglist_helper
+    #                             | COMMA d_type arglist_helper
+    #     '''
+    #     pass
 
     def p_arglist(self, p):
         '''
-            arglist : type ID arglist_helper
-                    | epsilon
+            arglist : type var arglist_helper
         '''
         pass
     
     def p_arglist_helper(self, p):
         '''
-            arglist_helper : COMMA type ID arglist_helper
+            arglist_helper : COMMA type var arglist_helper
                             | epsilon
         '''
-        pass
+        # try:
+        #     p[0] = p[]
+
+    # def p_derived_type(self, p):
+    #     '''
+    #         d_type : type 
+    #     '''
+    #     pass
+
+    # def p_str(self, p):
+    #     '''
+    #         str : STR str %prec DEREF
+    #             | epsilon
+    #     '''
+    #     pass
 
     def p_main(self, p):
         '''
-            main : VOID MAIN LPAREN RPAREN LCURLY stlist RCURLY
+            main : VOID MAIN LPAREN RPAREN block
         '''
         if self.output == YaccOutput.STATS:
             p[0] = p[6]
         elif self.output == YaccOutput.AST:
-            p[0] = Func(VoidType(), 'main', [], p[6])
+            p[0] = Func(VoidType(), 'main', [], p[5].stlist)
 
     def p_statements(self, p):
         '''
@@ -466,7 +494,7 @@ class APLYacc(object):
             eprint("syntax error at EOF")
 
     def build(self, lexer, **kwargs):
-        self.yacc = yacc.yacc(module=self, write_tables=self.write_tables, debug=False, **kwargs)
+        self.yacc = yacc.yacc(module=self, write_tables=self.write_tables, debug=True, **kwargs)
         self.lexer = lexer.lexer
 
     def parse(self, data):
