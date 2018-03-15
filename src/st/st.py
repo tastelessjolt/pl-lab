@@ -59,6 +59,17 @@ class Func(AST):
         return 'Func %s(%s) -> %s {\n%s\n}' % (repr(self.fname), str(self.params), str(self.rtype),
                                         inc_tabsize('\n'.join([repr(st) for st in self.stlist])))
 
+class FuncCall(AST):
+    def __init__(self, fname, params):
+        self.fname = fname
+        self.params = params
+
+    def __str__(self):
+        return str ((self.fname, self.params))
+
+    def __repr__(self):
+        return '%s (%s)' % ( self.fname, repr(self.params) )
+
 class IfStatement(AST):
     def __init__(self, operator, condition, stlist1, stlist2=StmtList()):
         self.operator = operator

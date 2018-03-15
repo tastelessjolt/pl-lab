@@ -325,9 +325,32 @@ class APLYacc(object):
 
     def p_proc_call(self, p):
         '''
-            proc_call : ID LPAREN RPAREN
+            proc_call : ID LPAREN exprlist RPAREN
         '''
-        pass
+        if self.output == YaccOutput.AST:
+            p[0] = FuncCall(p[1], p[3])
+
+    def p_exprlist(self, p):
+        '''
+            exprlist : expr exprlist_helper
+                    | epsilon
+        '''
+        if self.output == YaccOutput.AST:
+            try:
+                p[0] = [p[1]] + p[2]
+            except:
+                p[0] = []
+
+    def p_exprlist_helper(self, p):
+        '''
+            exprlist_helper : COMMA expr exprlist_helper
+                            | epsilon
+        '''
+        if self.output == YaccOutput.AST:
+            try:
+                p[0] = [p[2]] + p[3]
+            except:
+                p[0] = []
 
 #######################################################################3
 #######################################################################3
@@ -447,9 +470,13 @@ class APLYacc(object):
     def p_notNumExpr_leaf(self, p):
         '''
             notNumExpr : ptr ID
+                        | ptr proc_call
         '''
         if self.output == YaccOutput.AST:
-            temp = Var(p[2])
+            if isinstance(p[2], str):
+                temp = Var(p[2])
+            elif isinstance(p[2], FuncCall):
+                temp = p[2]
             if p[1] != '':
                 for i in range(len(p[1]) - 1, -1, -1):
                     if p[1][i] == '&':
@@ -457,6 +484,7 @@ class APLYacc(object):
                     else:
                         temp = UnaryOp(Operator.ptr, temp)
             p[0] = temp
+            
 
     def p_onlyNumExpr(self, p):
         '''
