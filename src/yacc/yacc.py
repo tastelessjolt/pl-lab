@@ -46,9 +46,8 @@ class APLYacc(object):
     def __init__(self, output=YaccOutput.AST, write_tables=True, isSymtab=True):
         self.output = output
         self.write_tables = write_tables
-        self.isSymtab = isSymtab
-        if isSymtab and output == YaccOutput.AST:
-            self.symtab = SymTab()
+        self.all_symtab = [SymTab()]
+        self.curr_symtab = self.all_symtab[0] 
 
 #######################################################################
 ######################### Grammar Starts Here #########################
@@ -94,9 +93,9 @@ class APLYacc(object):
         if self.output == YaccOutput.AST:
             p[3] += 1
             temp = Func(p[1](p[3].datatype), p[3].label, p[5], p[7].stlist)
-            if not self.symtab.insert_if_same_type(TableEntry(temp.fname, (temp.rtype, temp.params), Scope.GLOBAL)):
+            if not self.curr_symtab.insert_if_same_type(TableEntry(temp.fname, (temp.rtype, temp.params), Scope.GLOBAL)):
                 eprint('%s already defined in the same scope: \n\t %s' %
-                       (temp.fname, repr(self.symtab.get(temp.fname))))
+                       (temp.fname, repr(self.curr_symtab.get(temp.fname))))
                 raise SyntaxError
             p[0] = temp
                 
@@ -107,9 +106,9 @@ class APLYacc(object):
         if self.output == YaccOutput.AST:
             p[3] += 1
             temp = Func(p[1](p[3].datatype), p[3].label, [], p[6].stlist)
-            if not self.symtab.insert_if_same_type(TableEntry(temp.fname, (temp.rtype, temp.params), Scope.GLOBAL)):
+            if not self.curr_symtab.insert_if_same_type(TableEntry(temp.fname, (temp.rtype, temp.params), Scope.GLOBAL)):
                 eprint('%s already defined in the same scope: \n\t %s' %
-                       (temp.fname, repr(self.symtab.get(temp.fname))))
+                       (temp.fname, repr(self.curr_symtab.get(temp.fname))))
                 raise SyntaxError
             p[0] = temp
 
@@ -121,8 +120,8 @@ class APLYacc(object):
         if self.output == YaccOutput.AST:
             p[3] += 1
             temp = Func(p[1](p[3].datatype), p[3].label, p[5], declaration=True)
-            if not self.symtab.insert(TableEntry(temp.fname, (temp.rtype, temp.params), Scope.GLOBAL)):
-                eprint('%s already defined in the same scope: \n\t %s' % (temp.fname, repr(self.symtab.get(temp.fname))))
+            if not self.curr_symtab.insert(TableEntry(temp.fname, (temp.rtype, temp.params), Scope.GLOBAL)):
+                eprint('%s already defined in the same scope: \n\t %s' % (temp.fname, repr(self.curr_symtab.get(temp.fname))))
                 raise SyntaxError
             p[0] = temp
 
@@ -133,9 +132,9 @@ class APLYacc(object):
         if self.output == YaccOutput.AST:
             p[3] += 1
             temp = Func(p[1](p[3].datatype), p[3].label, [], declaration=True)
-            if not self.symtab.insert(TableEntry(temp.fname, (temp.rtype, temp.params), Scope.GLOBAL)):
+            if not self.curr_symtab.insert(TableEntry(temp.fname, (temp.rtype, temp.params), Scope.GLOBAL)):
                 eprint('%s already defined in the same scope: \n\t %s' %
-                       (temp.fname, repr(self.symtab.get(temp.fname))))
+                       (temp.fname, repr(self.curr_symtab.get(temp.fname))))
                 raise SyntaxError
             p[0] = temp
 

@@ -17,7 +17,8 @@ class TableEntry(object):
         return repr ((self.name, self.type, self.scope, self.table_ptr))
 
 class SymTab(object):
-    def __init__(self):
+    def __init__(self, name='__global__'):
+        self.name = name
         self.table = OrderedDict()
     
     def insert(self, entry):
@@ -44,6 +45,6 @@ class SymTab(object):
             return self.table[key]
 
     def __repr__(self):
-        return '\n'.join([ repr (self.table[key]) for key in self.table])
+        return self.name + '\n' + inc_tabsize('\n'.join([ repr (self.table[key]) for key in self.table]))
             
          
