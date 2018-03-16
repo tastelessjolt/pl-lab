@@ -63,12 +63,6 @@ class APLYacc(object):
             p[0] = p[1]
         elif self.output == YaccOutput.AST:
             p[0] = Program([p[1]])
-            for glob in p[1]:
-                if isinstance(glob, Func):
-                    self.symtab.insert(TableEntry(glob.fname, (glob.rtype, glob.params), Scope.GLOBAL))
-                elif isinstance(glob, Declaration):
-                    for var in glob.symlist:
-                        self.symtab.insert(TableEntry(var.label, var.datatype, Scope.GLOBAL))
 
     def p_epsilon(self, p):
         '''
@@ -98,15 +92,26 @@ class APLYacc(object):
             procedure_def : type STR var LPAREN arglist RPAREN block
         '''
         if self.output == YaccOutput.AST:
-            p[0] = Func(p[1](p[3].datatype), p[3].label, p[5], p[7].stlist)
+            p[3] += 1
+            temp = Func(p[1](p[3].datatype), p[3].label, p[5], p[7].stlist)
+            if not self.symtab.insert_if_same_type(TableEntry(temp.fname, (temp.rtype, temp.params), Scope.GLOBAL)):
+                eprint('%s already defined in the same scope: \n\t %s' %
+                       (temp.fname, repr(self.symtab.get(temp.fname))))
+                raise SyntaxError
+            p[0] = temp
                 
     def p_procedure_def_empty(self, p):
         ''' 
             procedure_def : type STR var LPAREN RPAREN block
         '''
         if self.output == YaccOutput.AST:
-            p[0] = Func(p[1](p[3].datatype), p[3].label, [], p[6].stlist)
-
+            p[3] += 1
+            temp = Func(p[1](p[3].datatype), p[3].label, [], p[6].stlist)
+            if not self.symtab.insert_if_same_type(TableEntry(temp.fname, (temp.rtype, temp.params), Scope.GLOBAL)):
+                eprint('%s already defined in the same scope: \n\t %s' %
+                       (temp.fname, repr(self.symtab.get(temp.fname))))
+                raise SyntaxError
+            p[0] = temp
 
     def p_procedure_dec(self, p):
         '''
@@ -114,15 +119,25 @@ class APLYacc(object):
                             | type STR var LPAREN arglist RPAREN
         '''
         if self.output == YaccOutput.AST:
-            p[0] = Func(p[1](p[3].datatype), p[3].label, p[5], declaration=True)
-                
+            p[3] += 1
+            temp = Func(p[1](p[3].datatype), p[3].label, p[5], declaration=True)
+            if not self.symtab.insert(TableEntry(temp.fname, (temp.rtype, temp.params), Scope.GLOBAL)):
+                eprint('%s already defined in the same scope: \n\t %s' % (temp.fname, repr(self.symtab.get(temp.fname))))
+                raise SyntaxError
+            p[0] = temp
 
     def p_procedure_dec_empty(self, p):
         '''
             procedure_dec : type STR var LPAREN RPAREN
         '''
         if self.output == YaccOutput.AST:
-            p[0] = Func(p[1](p[3].datatype), p[3].label, [], declaration=True)
+            p[3] += 1
+            temp = Func(p[1](p[3].datatype), p[3].label, [], declaration=True)
+            if not self.symtab.insert(TableEntry(temp.fname, (temp.rtype, temp.params), Scope.GLOBAL)):
+                eprint('%s already defined in the same scope: \n\t %s' %
+                       (temp.fname, repr(self.symtab.get(temp.fname))))
+                raise SyntaxError
+            p[0] = temp
 
     def p_proto_arglist(self, p):
         '''
@@ -137,6 +152,7 @@ class APLYacc(object):
             proto_arglist : type STR var proto_arglist_helper
         '''
         if self.output == YaccOutput.AST:
+            p[3] += 1
             p[3].datatype = p[1](p[3].datatype)
             p[0] = [p[3]] + p[4]
 
@@ -153,6 +169,7 @@ class APLYacc(object):
             proto_arglist_helper : COMMA type STR var proto_arglist_helper
         '''
         if self.output == YaccOutput.AST:
+            p[4] += 1
             p[4].datatype = p[2](p[4].datatype)
             p[0] = [p[4]] + p[5]
 
@@ -161,6 +178,7 @@ class APLYacc(object):
             arglist : type STR var arglist_helper
         '''
         if self.output == YaccOutput.AST:
+            p[3] += 1
             p[3].datatype = p[1](p[3].datatype)
             p[0] = [p[3]] + p[4]
     
@@ -169,6 +187,7 @@ class APLYacc(object):
             arglist_helper : COMMA type STR var arglist_helper
         '''
         if self.output == YaccOutput.AST:
+            p[4] += 1
             p[4].datatype = p[2](p[4].datatype)
             p[0] = [p[4]] + p[5] 
                 

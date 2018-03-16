@@ -167,6 +167,10 @@ class Symbol(AST):
         self.datatype += other
         return self
 
+    def __eq__(self, other):
+        return ((other.__class__.__bases__[0] == DataType) and (self.datatype == other)) or \
+                ( (other.__class__ == self.__class__) and (self.datatype == other.datatype) )
+
 class BinOp(AST):
     def __init__(self, operator, operand1, operand2):
         self.operator = operator

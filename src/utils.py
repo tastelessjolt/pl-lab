@@ -22,6 +22,10 @@ class DataType(object):
 	def __repr__(self):
 		return self.__str__()
 
+	def __eq__(self, other):
+		return ((other.__class__ == self.__class__) and (other.ptr_depth == self.ptr_depth)) or \
+                    (other == self)
+
 class IntType(DataType):
 	# `int**` has ptr_depth = 2; `int` has ptr_depth = 0
 	def __init__(self, ptr_depth_or_datatype):
@@ -40,6 +44,7 @@ class IntType(DataType):
 
 	def __repr__(self):
 		return self.__str__()
+	
 
 class FloatType(DataType):
 	def __init__(self, ptr_depth_or_datatype):

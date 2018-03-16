@@ -23,9 +23,25 @@ class SymTab(object):
     def insert(self, entry):
         if not self.table.__contains__(entry.name):
             self.table[entry.name] = entry
-            return True
+            return entry
+
+    def insert_replace(self, entry):
+        self.table[entry.name] = entry
+
+    def insert_if_same_type(self, entry):
+        if self.table.__contains__(entry.name):
+            entry_type = self.table[entry.name].type
+            ins_type = entry.type
+            if entry_type == ins_type:
+                self.table[entry.name] = entry
+                return entry
         else:
-            return False
+            self.table[entry.name] = entry
+            return entry
+
+    def get(self, key):
+        if self.table.__contains__(key):
+            return self.table[key]
 
     def __repr__(self):
         return '\n'.join([ repr (self.table[key]) for key in self.table])
