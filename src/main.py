@@ -75,3 +75,5 @@ if __name__ == '__main__':
         parser.build(lexer)
         ast = parser.parse(data)
         print (repr(ast))
+        if parser.isSymtab:
+            print (repr(parser.symtab))

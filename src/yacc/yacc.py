@@ -3,6 +3,7 @@ from enum import Enum
 from lex import *
 from st import *
 from utils import *
+from symtab import *
 import operator
 
 '''
@@ -42,9 +43,12 @@ class APLYacc(object):
         ('left', 'DOUBLE_EQUAL', 'NOT_EQUAL'),
     ]
 
-    def __init__(self, output=YaccOutput.AST, write_tables=True):
+    def __init__(self, output=YaccOutput.AST, write_tables=True, isSymtab=True):
         self.output = output
         self.write_tables = write_tables
+        self.isSymtab = isSymtab
+        if isSymtab and output == YaccOutput.AST:
+            self.symtab = SymTab()
 
 #######################################################################
 ######################### Grammar Starts Here #########################
@@ -59,6 +63,12 @@ class APLYacc(object):
             p[0] = p[1]
         elif self.output == YaccOutput.AST:
             p[0] = Program([p[1]])
+            for glob in p[1]:
+                if isinstance(glob, Func):
+                    self.symtab.insert(TableEntry(glob.fname, (glob.rtype, glob.params), Scope.GLOBAL))
+                elif isinstance(glob, Declaration):
+                    for var in glob.symlist:
+                        self.symtab.insert(TableEntry(var.label, var.datatype, Scope.GLOBAL))
 
     def p_epsilon(self, p):
         '''
@@ -68,10 +78,10 @@ class APLYacc(object):
 
     def p_global_list(self, p):
         '''
-            global_list : procedure_def global_list
-                        | main global_list
-                        | procedure_dec SEMICOLON global_list
+            global_list : procedure_dec SEMICOLON global_list
                         | declaration SEMICOLON global_list
+                        | procedure_def global_list
+                        | main global_list
                         | epsilon
         '''
         if self.output == YaccOutput.AST:
@@ -453,6 +463,8 @@ class APLYacc(object):
                 p[0] = p[2] + 1
             else:
                 p[0] = Symbol(p[1])
+
+#######################################################################
 
     def p_assignment(self, p):
         '''
