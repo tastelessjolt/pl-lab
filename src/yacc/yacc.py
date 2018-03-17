@@ -61,8 +61,13 @@ class APLYacc(object):
             p[0] = p[1]
         elif self.output == YaccOutput.AST:
             p[0] = Program([p[1]])
-            scopes = symtab.SymTab.from_stlist(p[1], scope=symtab.Scope.GLOBAL)
-            self.all_symtab.extend(scopes)
+            scopes = symtab.SymTab.from_stlist(p[1], scope=symtab.Scope.GLOBAL, name='global')
+            if scopes:
+                scopes, errors = scopes
+                self.all_symtab.extend(scopes)
+                if len(errors) > 0:
+                    eprint( '\n\n'.join (errors) )
+                    p[0] = None
             
 
     def p_epsilon(self, p):
@@ -95,7 +100,7 @@ class APLYacc(object):
         if self.output == YaccOutput.STATS:
             p[0] = p[6]
         elif self.output == YaccOutput.AST:
-            temp = Func(VoidType(), 'main', [], p[5].stlist)
+            temp = Func(VoidType(), 'main', [], p[5].stlist,lineno=p.lineno(2))
             # entry = temp.tableEntry(Scope.GLOBAL)
             # if not self.symtab.insert_if_same_type(entry):
             #     eprint('%s already defined in the same scope: \n\t %s' %
@@ -111,7 +116,7 @@ class APLYacc(object):
         '''
         if self.output == YaccOutput.AST:
             p[3] += 1
-            temp = Func(p[1](p[3].datatype), p[3].label, p[5], p[7].stlist)
+            temp = Func(p[1](p[3].datatype), p[3].label, p[5], p[7].stlist, lineno=p.lineno(3))
             # entry = temp.tableEntry(Scope.GLOBAL)
             # if not self.symtab.insert_if_same_type(entry):
             #     eprint('%s already defined in the same scope: \n\t %s' %
@@ -127,7 +132,7 @@ class APLYacc(object):
         '''
         if self.output == YaccOutput.AST:
             p[3] += 1
-            temp = Func(p[1](p[3].datatype), p[3].label, [], p[6].stlist)
+            temp = Func(p[1](p[3].datatype), p[3].label, [], p[6].stlist, lineno=p.lineno(3))
             # entry = temp.tableEntry(Scope.GLOBAL)
             # if not self.symtab.insert_if_same_type(entry):
             #     eprint('%s already defined in the same scope: \n\t %s' %
@@ -144,7 +149,7 @@ class APLYacc(object):
         '''
         if self.output == YaccOutput.AST:
             p[3] += 1
-            temp = Func(p[1](p[3].datatype), p[3].label, p[5], declaration=True)
+            temp = Func(p[1](p[3].datatype), p[3].label, p[5], declaration=True, lineno=p.lineno(3))
             # entry = temp.tableEntry(Scope.GLOBAL)
             # if not self.symtab.insert_if_same_type(entry):
             #     eprint('%s already defined in the same scope: \n\t %s' %
@@ -160,7 +165,7 @@ class APLYacc(object):
         '''
         if self.output == YaccOutput.AST:
             p[3] += 1
-            temp = Func(p[1](p[3].datatype), p[3].label, [], declaration=True)
+            temp = Func(p[1](p[3].datatype), p[3].label, [], declaration=True, lineno=p.lineno(3))
             # entry = temp.tableEntry(Scope.GLOBAL)
             # if not self.symtab.insert_if_same_type(entry):
             #     eprint('%s already defined in the same scope: \n\t %s' %
@@ -500,9 +505,11 @@ class APLYacc(object):
                 p[0] = Stats((1, 0, 0))
         elif self.output == YaccOutput.AST:
             if p[1] == '*':
+                p.set_lineno(0, p.lineno(2))
                 p[0] = p[2] + 1
             else:
-                p[0] = Symbol(p[1])
+                p.set_lineno(0, p.lineno(1))
+                p[0] = Symbol(p[1], lineno=p.lineno(1))
 
 #######################################################################
 
