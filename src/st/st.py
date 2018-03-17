@@ -1,6 +1,12 @@
 from utils import inc_tabsize, DataType, Operator
+import symtab
 class AST(object):
-    pass
+    def tableEntry(self, scope=symtab.Scope.NA):
+        '''
+            Basically creates a Symbol table entry
+            Output: Tuple ( table_entry_or_entries, symtables_created_in_the_process ) 
+        '''
+        pass
 
 class DefList(AST, list):
     '''
@@ -62,6 +68,15 @@ class Func(AST):
         else:
             return 'Func %s(%s) -> %s {\n%s\n}' % (repr(self.fname), str(self.params), str(self.rtype),
                                             inc_tabsize('\n'.join([repr(st) for st in self.stlist])))
+
+    def tableEntry(self, scope=symtab.Scope.NA):
+        new_table = None
+        scopes = []
+        if not self.declaration:
+            scopes = symtab.SymTab.from_stlist(self.stlist, scope=symtab.Scope.LOCAL, name=self.fname)
+            if scopes:
+                new_table = scopes[0]
+        return (symtab.TableEntry(self.fname, (self.rtype, self.params), scope, new_table), scopes)
 
 class FuncCall(AST):
     def __init__(self, fname, params):
@@ -136,6 +151,9 @@ class ScopeBlock(AST):
     def __repr__(self):
         return '\n'.join([repr(st) for st in self.stlist])
 
+    def tableEntry(self, scope=symtab.Scope.NA):
+        pass
+
 class Declaration(AST):
     # varlist is list of Symbol ASTs
     def __init__(self, symlist):
@@ -147,6 +165,10 @@ class Declaration(AST):
 
     def __repr__(self):
         return ','.join ([ repr(sym) for sym in self.symlist ])
+
+    def tableEntry(self, scope=symtab.Scope.NA):
+        return ([sym.tableEntry(scope) for sym in self.symlist], [])
+
 
 class Symbol(AST):
     # datatype is of class Datatype
@@ -170,6 +192,9 @@ class Symbol(AST):
     def __eq__(self, other):
         return ((other.__class__.__bases__[0] == DataType) and (self.datatype == other)) or \
                 ( (other.__class__ == self.__class__) and (self.datatype == other.datatype) )
+    
+    def tableEntry(self, scope=symtab.Scope.NA):
+        return symtab.TableEntry(self.label, self.datatype, scope)
 
 class BinOp(AST):
     def __init__(self, operator, operand1, operand2):
