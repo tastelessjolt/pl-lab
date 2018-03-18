@@ -24,18 +24,29 @@ class TableEntry(object):
             return 'Line %d: %s' % (self.lineno, repr((self.name, self.type, str(self.scope))))
 
 class SymTab(object):
-    def __init__(self, name='global'):
+    def __init__(self, name='global', parent=None):
         self.name = name
         self.table = OrderedDict()
+        self.parent = parent
 
     @classmethod
-    def from_stlist(cls, stlist, scope=Scope.NA, name='untitled'):
+    def from_stlist(cls, stlist, scope=Scope.NA, name='untitled', parent=None, params=[]):
         scopes = []
-        symtab = cls(name=name)
+        symtab = cls(name=name, parent=parent)
         errors = []
+
+        # params are the function params 
+        for symbol in params:
+            try:
+                symtab.insert( symbol.tableEntry(Scope.ARGUMENT) )
+            except Exception as e:
+                for err_entry in e.args[0]:
+                    errors.append('symbol re-declaration at %s: \n\tAlready declared at %s' % (
+                        repr(err_entry), repr(symtab.table[err_entry.name])))
+        
         for stmt in stlist:
             # TODO: check error handling here 
-            tupl = stmt.tableEntry(scope)
+            tupl = stmt.tableEntry(scope, parent=symtab)
             if tupl:
                 tmp_tabEntry, tmp_scopes, t_errors = tupl
                 errors.extend(t_errors)
@@ -94,6 +105,6 @@ class SymTab(object):
             return self.table[key]
 
     def __repr__(self):
-        return self.name + '{\n%s\n}' % inc_tabsize('\n'.join([ repr (self.table[key]) for key in self.table]))
+        return '%s (%s) {\n%s\n}' % (self.name, self.parent.name if self.parent else '' , inc_tabsize('\n'.join([repr(self.table[key]) for key in self.table])))
             
          

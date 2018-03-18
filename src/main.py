@@ -74,7 +74,8 @@ if __name__ == '__main__':
         parser = APLYacc(output=YaccOutput.AST)
         parser.build(lexer)
         ast = parser.parse(data)
-        print (repr(ast))
-        print('\n<~~~ Symbol Tables ~~~>')
-        for symtab in parser.all_symtab:
-            print(repr(symtab))
+        if ast:
+            print (repr(ast))
+            print('\n<~~~ Symbol Tables ~~~>')
+            for symtab in parser.all_symtab:
+                print(repr(symtab))

@@ -1,7 +1,7 @@
 from utils import inc_tabsize, DataType, Operator
 import symtab
 class AST(object):
-    def tableEntry(self, scope=symtab.Scope.NA):
+    def tableEntry(self, scope=symtab.Scope.NA, parent=None):
         '''
             Basically creates a Symbol table entry
             Output: Tuple ( table_entry_or_entries, symtables_created_in_the_process ) 
@@ -42,14 +42,16 @@ class StmtList(AST, list):
         return '\n'.join([st.src() for st in self])
 
 class Program(AST):
-    def __init__(self, funclist):
+    def __init__(self, funclist, all_symtabs=None):
         self.funclist = funclist
+        self.all_symtabs = all_symtabs
     
     def __str__(self):
         return '\n'.join([str(func) for func in self.funclist])
 
     def __repr__(self):
         return 'Program {\n%s\n}' % inc_tabsize('\n'.join([repr(func) for func in self.funclist]))
+             
 
 class Func(AST):
     def __init__(self, rtype, fname, params, stlist=None, declaration=False, lineno=-1):
@@ -70,12 +72,12 @@ class Func(AST):
             return 'Func %s(%s) -> %s {\n%s\n}' % (repr(self.fname), str(self.params), str(self.rtype),
                                             inc_tabsize('\n'.join([repr(st) for st in self.stlist])))
 
-    def tableEntry(self, scope=symtab.Scope.NA):
+    def tableEntry(self, scope=symtab.Scope.NA, parent=None):
         new_table = None
         scopes = []
         errors = []
         if not self.declaration:
-            scopes = symtab.SymTab.from_stlist(self.stlist, scope=symtab.Scope.LOCAL, name=self.fname)
+            scopes = symtab.SymTab.from_stlist(self.stlist, scope=symtab.Scope.LOCAL, name=self.fname, parent=parent, params=self.params)
             if scopes:
                 scopes, errors = scopes
                 new_table = scopes[0]
@@ -121,6 +123,32 @@ class IfStatement(AST):
         if len(self.stlist2) != 0:
             s += '\nelse {\n' + inc_tabsize('\n'.join([repr(st) for st in self.stlist2])) + '\n}'
         return s
+
+    def __tableEntry(self, scope=symtab.Scope.NA, parent=None):
+        new_table = None
+        scopes = []
+        scopes2 = []
+        errors = []
+        errors2 = []
+        entries = []
+        if len(self.stlist1) != 0:
+            scopes = symtab.SymTab.from_stlist(self.stlist1, scope=symtab.Scope.LOCAL, name='if_cond', parent=parent)
+            if scopes:
+                scopes, errors = scopes
+                new_table = scopes[0]
+                entries.append(new_table)
+            else:
+                scopes = []
+        if len(self.stlist2) != 0:
+            scopes2 = symtab.SymTab.from_stlist(self.stlist1, scope=symtab.Scope.LOCAL, name='else', parent=parent)
+            if scopes2:
+                scopes2, errors2 = scopes2
+                new_table = scopes2[0]
+                entries.append(new_table)
+            else:
+                scopes2 = []
+        return (symtab.TableEntry('if_cond', None, scope, new_table), scopes + scopes2, errors + errors2)
+
 
 class WhileStatement(AST):
     def __init__(self, operator, condition, stlist):
@@ -171,7 +199,7 @@ class Declaration(AST):
     def __repr__(self):
         return ','.join ([ repr(sym) for sym in self.symlist ])
 
-    def tableEntry(self, scope=symtab.Scope.NA):
+    def tableEntry(self, scope=symtab.Scope.NA, parent=None):
         return ([sym.tableEntry(scope) for sym in self.symlist], [], [])
 
 class Return(AST):
@@ -212,7 +240,7 @@ class Symbol(AST):
         return ((other.__class__.__bases__[0] == DataType) and (self.datatype == other)) or \
                 ( (other.__class__ == self.__class__) and (self.datatype == other.datatype) )
     
-    def tableEntry(self, scope=symtab.Scope.NA):
+    def tableEntry(self, scope=symtab.Scope.NA, parent=None):
         return symtab.TableEntry(self.label, self.datatype, scope, lineno=self.lineno)
 
 class BinOp(AST):
