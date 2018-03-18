@@ -174,6 +174,19 @@ class Declaration(AST):
     def tableEntry(self, scope=symtab.Scope.NA):
         return ([sym.tableEntry(scope) for sym in self.symlist], [], [])
 
+class Return(AST):
+    # represents a return statement
+    def __init__(self, ast):
+        self.ast = ast
+
+    def __str__(self):
+        return repr(self)
+
+    def __repr__(self):
+        return 'return(%s)' % repr(self.ast)
+
+    def src(self):
+        return 'return %s' % self.ast.src()
 
 class Symbol(AST):
     # datatype is of class Datatype

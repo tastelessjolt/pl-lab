@@ -9,7 +9,8 @@ class APLLexer(object):
         'void': 'VOID',
         'if': 'IF',
         'else': 'ELSE',
-        'while': 'WHILE'
+        'while': 'WHILE',
+        'return': 'RETURN',
     }
 
     tokens = [

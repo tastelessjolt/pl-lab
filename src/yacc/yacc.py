@@ -410,6 +410,7 @@ class APLYacc(object):
                     | block
                     | assignment SEMICOLON
                     | proc_call SEMICOLON
+                    | return SEMICOLON
                     | SEMICOLON
         '''
         if p[1] != ';':
@@ -422,6 +423,13 @@ class APLYacc(object):
                 p[0] = StmtList()
 
 #######################################################################
+
+    def p_return(self, p):
+        '''
+            return : RETURN expr
+        '''
+        if self.output == YaccOutput.AST:
+            p[0] = Return(p[2])
 
     def p_proc_call(self, p):
         '''
