@@ -72,7 +72,7 @@ class Func(AST):
             return 'Func %s(%s) -> %s {\n%s\n}' % (repr(self.fname), str(self.params), str(self.rtype),
                                             inc_tabsize('\n'.join([repr(st) for st in self.stlist])))
 
-    def tableEntry(self, scope=symtab.Scope.NA, parent=None):
+    def __tableEntry(self, scope=symtab.Scope.NA, parent=None):
         new_table = None
         scopes = []
         errors = []
@@ -84,6 +84,9 @@ class Func(AST):
             else:
                 scopes = []
         return (symtab.TableEntry(self.fname, (self.rtype, self.params), scope, new_table, lineno=self.lineno, definition= not self.declaration), scopes, errors)
+
+    def tableEntry(self, scope=symtab.Scope.NA, table_ptr=None):
+        return symtab.TableEntry(self.fname, (self.rtype, self.params), scope, table_ptr, lineno=self.lineno, definition=not self.declaration)
 
 class FuncCall(AST):
     def __init__(self, fname, params):
@@ -200,7 +203,7 @@ class Declaration(AST):
         return ','.join ([ repr(sym) for sym in self.symlist ])
 
     def tableEntry(self, scope=symtab.Scope.NA, parent=None):
-        return ([sym.tableEntry(scope) for sym in self.symlist], [], [])
+        return [sym.tableEntry(scope) for sym in self.symlist]
 
 class Return(AST):
     # represents a return statement

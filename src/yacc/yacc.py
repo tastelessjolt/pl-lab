@@ -46,7 +46,10 @@ class APLYacc(object):
     def __init__(self, output=YaccOutput.AST, write_tables=True, isSymtab=True):
         self.output = output
         self.write_tables = write_tables
-        self.all_symtab = []
+        self.all_symtab = [SymTab()]
+        self.global_symtab = self.all_symtab[0]
+        self.curr_symtab = self.global_symtab
+        self.curr_scope = Scope.GLOBAL
 
 #######################################################################
 ######################### Grammar Starts Here #########################
@@ -61,14 +64,6 @@ class APLYacc(object):
             p[0] = p[1]
         elif self.output == YaccOutput.AST:
             p[0] = Program([p[1]])
-            scopes = symtab.SymTab.from_stlist(p[1], scope=symtab.Scope.GLOBAL, name='global')
-            if scopes:
-                scopes, errors = scopes
-                self.all_symtab.extend(scopes)
-                if len(errors) > 0:
-                    eprint( '\n\n'.join (errors) )
-                    p[0] = None
-            
 
     def p_epsilon(self, p):
         '''
@@ -93,87 +88,92 @@ class APLYacc(object):
                 except:
                     p[0] = DefList()
 
+    def function_insert (self, func):
+        entry = func.tableEntry(Scope.GLOBAL, self.curr_symtab)
+        self.all_symtab.append(self.curr_symtab)
+        self.curr_symtab.name = func.fname
+        self.curr_symtab = self.curr_symtab.parent
+        self.curr_scope = Scope.GLOBAL
+        if not self.curr_symtab.insert_if_same_type(entry):
+            eprint('%s already defined in the same scope: \n\t %s' %
+                    (func.fname, repr(self.curr_symtab.get(func.fname))))
+            raise SyntaxError
+
+    def symbol_insert (self, entry):
+        try:
+            self.curr_symtab.insert(entry)
+        except Exception as e:
+            err_entries = e.args[0]
+            for err_entry in err_entries:
+                eprint('symbol re-declaration at %s: \n\tAlready declared at %s' % (
+                    repr(err_entry), repr(self.curr_symtab.table[err_entry.name])))
+            if len(err_entries) > 0:
+                raise SyntaxError
+    
+
     def p_main(self, p):
         '''
-            main : VOID MAIN LPAREN RPAREN block
+            main : VOID MAIN LPAREN pdf_symtab RPAREN block
         '''
         if self.output == YaccOutput.STATS:
             p[0] = p[6]
         elif self.output == YaccOutput.AST:
-            temp = Func(VoidType(), 'main', [], p[5].stlist,lineno=p.lineno(2))
-            # entry = temp.tableEntry(Scope.GLOBAL)
-            # if not self.symtab.insert_if_same_type(entry):
-            #     eprint('%s already defined in the same scope: \n\t %s' %
-            #            (temp.fname, repr(self.symtab.get(temp.fname))))
-            #     raise SyntaxError
-            # if entry.table_ptr:
-            #     self.all_symtab.append(entry.table_ptr)
-            p[0] = temp
+            func = Func(VoidType(), 'main', [], p[6].stlist,lineno=p.lineno(3))
+            self.function_insert(func) 
+            p[0] = func
 
     def p_procedure_def(self, p):
         '''
-            procedure_def : type STR var LPAREN arglist RPAREN block
+            procedure_def : type STR var LPAREN pdf_symtab arglist RPAREN block
         '''
         if self.output == YaccOutput.AST:
             p[3] += 1
-            temp = Func(p[1](p[3].datatype), p[3].label, p[5], p[7].stlist, lineno=p.lineno(3))
-            # entry = temp.tableEntry(Scope.GLOBAL)
-            # if not self.symtab.insert_if_same_type(entry):
-            #     eprint('%s already defined in the same scope: \n\t %s' %
-            #            (temp.fname, repr(self.symtab.get(temp.fname))))
-            #     raise SyntaxError
-            # if entry.table_ptr:
-            #     self.all_symtab.append(entry.table_ptr)
-            p[0] = temp
+            func = Func(p[1](p[3].datatype), p[3].label, p[6], p[8].stlist, lineno=p.lineno(3))
+            self.function_insert(func)
+            p[0] = func
                 
     def p_procedure_def_empty(self, p):
         ''' 
-            procedure_def : type STR var LPAREN RPAREN block
+            procedure_def : type STR var LPAREN pdf_symtab RPAREN block
         '''
         if self.output == YaccOutput.AST:
             p[3] += 1
-            temp = Func(p[1](p[3].datatype), p[3].label, [], p[6].stlist, lineno=p.lineno(3))
-            # entry = temp.tableEntry(Scope.GLOBAL)
-            # if not self.symtab.insert_if_same_type(entry):
-            #     eprint('%s already defined in the same scope: \n\t %s' %
-            #            (temp.fname, repr(self.symtab.get(temp.fname))))
-            #     raise SyntaxError
-            # if entry.table_ptr:
-            #     self.all_symtab.append(entry.table_ptr)
-            p[0] = temp
+            func = Func(p[1](p[3].datatype), p[3].label, [], p[7].stlist, lineno=p.lineno(3))
+            self.function_insert(func)
+            p[0] = func
+
+    def p_pdf_symtab(self, p):
+        '''
+            pdf_symtab : 
+        '''
+        if self.output == YaccOutput.AST:
+            self.curr_symtab = SymTab(name='new_scope', parent=self.curr_symtab)
+            self.curr_scope = Scope.LOCAL
 
     def p_procedure_dec(self, p):
         '''
-            procedure_dec : type STR var LPAREN proto_arglist RPAREN
-                            | type STR var LPAREN arglist RPAREN
+            procedure_dec : type STR var LPAREN pdf_symtab proto_arglist RPAREN
+                            | type STR var LPAREN pdf_symtab arglist RPAREN
         '''
         if self.output == YaccOutput.AST:
             p[3] += 1
-            temp = Func(p[1](p[3].datatype), p[3].label, p[5], declaration=True, lineno=p.lineno(3))
-            # entry = temp.tableEntry(Scope.GLOBAL)
-            # if not self.symtab.insert_if_same_type(entry):
-            #     eprint('%s already defined in the same scope: \n\t %s' %
-            #            (temp.fname, repr(self.symtab.get(temp.fname))))
-            #     raise SyntaxError
-            # if entry.table_ptr:
-            #     self.all_symtab.append(entry.table_ptr)
-            p[0] = temp
+            func = Func(p[1](p[3].datatype), p[3].label, p[6], declaration=True, lineno=p.lineno(3))
+            self.curr_scope = Scope.GLOBAL
+            self.curr_symtab = self.curr_symtab.parent
+            p[0] = func
+            self.symbol_insert(func.tableEntry(self.curr_scope))
 
     def p_procedure_dec_empty(self, p):
         '''
-            procedure_dec : type STR var LPAREN RPAREN
+            procedure_dec : type STR var LPAREN pdf_symtab RPAREN
         '''
         if self.output == YaccOutput.AST:
             p[3] += 1
-            temp = Func(p[1](p[3].datatype), p[3].label, [], declaration=True, lineno=p.lineno(3))
-            # entry = temp.tableEntry(Scope.GLOBAL)
-            # if not self.symtab.insert_if_same_type(entry):
-            #     eprint('%s already defined in the same scope: \n\t %s' %
-            #            (temp.fname, repr(self.symtab.get(temp.fname))))
-            #     raise SyntaxError
-            # if entry.table_ptr:
-            #     self.all_symtab.append(entry.table_ptr)
-            p[0] = temp
+            func = Func(p[1](p[3].datatype), p[3].label, [], declaration=True, lineno=p.lineno(3))
+            self.curr_scope = Scope.GLOBAL
+            self.curr_symtab = self.curr_symtab.parent
+            p[0] = func
+            self.symbol_insert(func.tableEntry(self.curr_scope))
 
     def p_proto_arglist(self, p):
         '''
@@ -216,6 +216,10 @@ class APLYacc(object):
         if self.output == YaccOutput.AST:
             p[3] += 1
             p[3].datatype = p[1](p[3].datatype)
+            entries = [ p[3].tableEntry(scope=Scope.ARGUMENT) ]
+            for var in p[4]:
+                entries.append(var.tableEntry(scope=Scope.ARGUMENT))
+            self.symbol_insert(entries)
             p[0] = [p[3]] + p[4]
     
     def p_arglist_helper(self, p):
@@ -225,6 +229,7 @@ class APLYacc(object):
         if self.output == YaccOutput.AST:
             p[4] += 1
             p[4].datatype = p[2](p[4].datatype)
+            # self.symbol_insert(p[4].tableEntry(scope=Scope.ARGUMENT))
             p[0] = [p[4]] + p[5] 
                 
 
@@ -470,9 +475,24 @@ class APLYacc(object):
             p[0] = p[2] + p[3]
         elif self.output == YaccOutput.AST:
             p[0] = [p[2]] + p[3]
+            error_entries = []
             for var in p[0]:
                 var.datatype = p[1](var.datatype)
+                # try:
+                #     self.curr_symtab.insert(var.tableEntry(self.curr_scope))
+                # except Exception as e:
+                #     err_entry = e.args[0]
+                #     error_entries.extend(err_entry)
+
             p[0] = Declaration(p[0])
+            self.symbol_insert(p[0].tableEntry(scope=self.curr_scope))
+
+            # if len(error_entries) > 0:
+            # #     for err_entry in error_entries:
+            # #         eprint('symbol re-declaration at %s: \n\tAlready declared at %s' %
+            # #                (repr(err_entry), repr(self.curr_symtab.table[err_entry.name])))
+            #     eprint(error_entries)
+            #     raise SyntaxError
 
     def p_dec_varlist(self, p):
         '''
