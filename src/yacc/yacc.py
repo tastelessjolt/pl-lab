@@ -441,7 +441,12 @@ class APLYacc(object):
             proc_call : ID LPAREN exprlist RPAREN
         '''
         if self.output == YaccOutput.AST:
-            p[0] = FuncCall(p[1], p[3])
+            entry = self.curr_symtab.search(p[1]) 
+            if entry and isinstance(entry.type, tuple):
+                p[0] = FuncCall(p[1], p[3], entry.type[0], lineno=p.lineno(1))
+            else:
+                eprint('Function declaration not found: line %d: %s' % (p.lineno(1), p[1]))
+                raise SyntaxError
 
     def p_exprlist(self, p):
         '''
@@ -541,6 +546,16 @@ class APLYacc(object):
 
 #######################################################################
 
+    def get_var(self, varID, lineno=-1):
+        entry = self.curr_symtab.search(varID)
+        if entry and issubclass(type(entry.type), DataType):
+            return Var(varID, type=entry.type, lineno=lineno)
+        else:
+            eprint('Symbol not declared at line %d: %s' %
+                    (lineno, varID))
+            raise SyntaxError
+
+
     def p_assignment(self, p):
         '''
             assignment :  ID EQUALS notNumExpr
@@ -551,7 +566,7 @@ class APLYacc(object):
             p[0] = Stats((0, 0, 1))
         elif self.output == YaccOutput.AST:
             if len(p) == 6:
-                temp = Var(p[3])
+                temp = self.get_var(p[3], lineno=p.lineno(3))
                 if p[2] != '':
                     for i in range(len(p[2]) - 1, -1, -1):
                         if p[2][i] == '&':
@@ -563,7 +578,7 @@ class APLYacc(object):
 
                 p[0] = BinOp(Operator.equal, temp, p[5])
             elif len(p) == 4:
-                p[0] = BinOp(Operator.equal, Var(p[1]), p[3])
+                p[0] = BinOp(Operator.equal, self.get_var(p[1], lineno=p.lineno(1)), p[3])
 
     def p_notNumExpr(self, p):
         '''
@@ -606,7 +621,7 @@ class APLYacc(object):
         '''
         if self.output == YaccOutput.AST:
             if isinstance(p[2], str):
-                temp = Var(p[2])
+                temp = self.get_var(p[2], lineno=p.lineno(2))
             elif isinstance(p[2], FuncCall):
                 temp = p[2]
             if p[1] != '':
@@ -646,6 +661,7 @@ class APLYacc(object):
     def p_onlyNumExpr_leaf(self, p):
         '''
             onlyNumExpr : NUM
+                        | FLOAT_NUM
         '''
         if self.output == YaccOutput.AST:
             p[0] = Num(p[1])

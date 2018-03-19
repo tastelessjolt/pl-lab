@@ -31,7 +31,7 @@ class SymTab(object):
 
     def search(self, key):
         if self.table.__contains__(key):
-            entry = self.table[key]
+            return self.table[key]
         elif self.parent is not None:
             return self.parent.search(key)
 

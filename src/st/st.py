@@ -1,4 +1,4 @@
-from utils import inc_tabsize, DataType, Operator
+from utils import inc_tabsize, DataType, IntType, FloatType, Operator, eprint
 import symtab
 class AST(object):
     def tableEntry(self, scope=symtab.Scope.NA, parent=None):
@@ -89,9 +89,11 @@ class Func(AST):
         return symtab.TableEntry(self.fname, (self.rtype, self.params), scope, table_ptr, lineno=self.lineno, definition=not self.declaration)
 
 class FuncCall(AST):
-    def __init__(self, fname, params):
+    def __init__(self, fname, params, type=DataType(), lineno=-1):
         self.fname = fname
         self.params = params
+        self.type = type
+        self.lineno = lineno
 
     def __str__(self):
         return str ((self.fname, self.params))
@@ -191,7 +193,7 @@ class ScopeBlock(AST):
         pass
 
 class Declaration(AST):
-    # varlist is list of Symbol ASTs
+    # varlist is list of `Symbol` ASTs
     def __init__(self, symlist):
         self.symlist = symlist
 
@@ -220,6 +222,7 @@ class Return(AST):
         return 'return %s' % self.ast.src()
 
 class Symbol(AST):
+    # this is only used for Declarations
     # datatype is of class Datatype
     def __init__(self, label, lineno=-1):
         self.label = label
@@ -247,10 +250,12 @@ class Symbol(AST):
         return symtab.TableEntry(self.label, self.datatype, scope, lineno=self.lineno)
 
 class BinOp(AST):
-    def __init__(self, operator, operand1, operand2):
+    def __init__(self, operator, operand1, operand2, lineno=-1):
         self.operator = operator
         self.operand1 = operand1
         self.operand2 = operand2
+        self.type = operand1.type 
+        self.lineno = lineno
 
     def src(self):
         return "%s %s %s" % (self.operand1.src(), repr(self.operator), self.operand2.src())
@@ -277,11 +282,19 @@ class BinOp(AST):
                                         newTmp, BinOp(self.operator, place1, place2))]
             return newTmp
 
-
 class UnaryOp(AST):
-    def __init__(self, operator, operand):
+    def __init__(self, operator, operand, lineno=-1):
         self.operator = operator
         self.operand = operand
+        self.lineno = lineno
+        if self.operator == Operator.ptr:
+            if self.operand.type.ptr_depth == 0:
+                eprint ('Extra pointer indirections: line %d: %s' % (self.operand.lineno, repr(self.operand)))
+                raise SyntaxError
+            else: 
+                self.type = self.operand.type.__class__(self.operand.type.ptr_depth - 1)
+        elif self.operator == Operator.ref:
+            self.type = self.operand.type.__class__(self.operand.type.ptr_depth + 1)
 
     def src(self):
         return "%s%s" % (repr(self.operator), self.operand.src())
@@ -308,8 +321,10 @@ class UnaryOp(AST):
         
 
 class Var(AST):    
-    def __init__(self, label):
+    def __init__(self, label, type=DataType(), lineno=-1):
         self.label = label
+        self.type = type
+        self.lineno = lineno
 
     def src(self):
         return self.label
@@ -326,6 +341,10 @@ class Var(AST):
 class Num(AST):
     def __init__(self, val):
         self.val = val
+        if type(val) == int:
+            self.type = IntType(0)
+        elif type(val) == float:
+            self.type = FloatType(0)
 
     def src(self):
         return str(self.val)

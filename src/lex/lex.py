@@ -28,6 +28,7 @@ class APLLexer(object):
         'LCURLY',
         'RCURLY',
         'NUM',
+        'FLOAT_NUM',
         'DOUBLE_EQUAL',
         'NOT_EQUAL',
         'LESS_THAN',
@@ -66,11 +67,17 @@ class APLLexer(object):
     def t_COMMENT(self, t):
         r'(?://[^\n]*|/\*(?:(?!\*/)(.|\n))*\*/)'
         pass
+        
+    def t_FLOAT_NUM(self, t):
+        r'\d+\.\d*|\d*\.\d+'
+        t.value = float(t.value)
+        return t
 
     def t_NUM(self, t):
         r'\d+'
         t.value = int(t.value)
         return t
+    
 
     def t_ID(self, t):
         r'[a-zA-Z_][a-zA-Z0-9_]*'
