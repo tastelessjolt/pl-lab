@@ -29,6 +29,12 @@ class SymTab(object):
         self.table = OrderedDict()
         self.parent = parent
 
+    def search(self, key):
+        if self.table.__contains__(key):
+            entry = self.table[key]
+        elif self.parent is not None:
+            return self.parent.search(key)
+
     @classmethod
     def from_stlist(cls, stlist, scope=Scope.NA, name='untitled', parent=None, params=[]):
         scopes = []
