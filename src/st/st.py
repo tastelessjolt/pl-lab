@@ -19,7 +19,7 @@ class DefList(AST, list):
         return '\n'.join([repr(st) for st in self])
 
     def __add__(self, other):
-        return DefList(super(DefList, self) + other)
+        return DefList(super(DefList, self).__add__(other))
 
     def src(self):
         return '\n'.join([st.src() for st in self])
