@@ -19,7 +19,7 @@ class DefList(AST, list):
         return '\n'.join([repr(st) for st in self])
 
     def __add__(self, other):
-        return DefList(super(DefList, self).__add__(other))
+        return DefList(super(DefList, self) + other)
 
     def src(self):
         return '\n'.join([st.src() for st in self])
@@ -72,18 +72,18 @@ class Func(AST):
             return 'Func %s(%s) -> %s {\n%s\n}' % (repr(self.fname), str(self.params), str(self.rtype),
                                             inc_tabsize('\n'.join([repr(st) for st in self.stlist])))
 
-    def __tableEntry(self, scope=symtab.Scope.NA, parent=None):
-        new_table = None
-        scopes = []
-        errors = []
-        if not self.declaration:
-            scopes = symtab.SymTab.from_stlist(self.stlist, scope=symtab.Scope.LOCAL, name=self.fname, parent=parent, params=self.params)
-            if scopes:
-                scopes, errors = scopes
-                new_table = scopes[0]
-            else:
-                scopes = []
-        return (symtab.TableEntry(self.fname, (self.rtype, self.params), scope, new_table, lineno=self.lineno, definition= not self.declaration), scopes, errors)
+    # def __tableEntry(self, scope=symtab.Scope.NA, parent=None):
+    #     new_table = None
+    #     scopes = []
+    #     errors = []
+    #     if not self.declaration:
+    #         scopes = symtab.SymTab.from_stlist(self.stlist, scope=symtab.Scope.LOCAL, name=self.fname, parent=parent, params=self.params)
+    #         if scopes:
+    #             scopes, errors = scopes
+    #             new_table = scopes[0]
+    #         else:
+    #             scopes = []
+    #     return (symtab.TableEntry(self.fname, (self.rtype, self.params), scope, new_table, lineno=self.lineno, definition= not self.declaration), scopes, errors)
 
     def tableEntry(self, scope=symtab.Scope.NA, table_ptr=None):
         return symtab.TableEntry(self.fname, (self.rtype, self.params), scope, table_ptr, lineno=self.lineno, definition=not self.declaration)
@@ -92,8 +92,17 @@ class FuncCall(AST):
     def __init__(self, fname, params, type=DataType(), lineno=-1):
         self.fname = fname
         self.params = params
-        self.type = type
+        self.type = type[0]
         self.lineno = lineno
+        
+        if len(params) != len(type[1]):
+            eprint("Function %s expected %d arguments but provided %d at line %d" % (fname, len(type[1]), len(params), lineno))
+            raise SyntaxError
+
+        for i in range(len(params)):
+            if params[i].type != type[1][i]:
+                eprint("Function call to %s expected %s as argument number %d but given %s" % (fname, repr(type[1][i]), i, repr(params[i])))
+                raise SyntaxError
 
     def __str__(self):
         return str ((self.fname, self.params))
@@ -129,30 +138,30 @@ class IfStatement(AST):
             s += '\nelse {\n' + inc_tabsize('\n'.join([repr(st) for st in self.stlist2])) + '\n}'
         return s
 
-    def __tableEntry(self, scope=symtab.Scope.NA, parent=None):
-        new_table = None
-        scopes = []
-        scopes2 = []
-        errors = []
-        errors2 = []
-        entries = []
-        if len(self.stlist1) != 0:
-            scopes = symtab.SymTab.from_stlist(self.stlist1, scope=symtab.Scope.LOCAL, name='if_cond', parent=parent)
-            if scopes:
-                scopes, errors = scopes
-                new_table = scopes[0]
-                entries.append(new_table)
-            else:
-                scopes = []
-        if len(self.stlist2) != 0:
-            scopes2 = symtab.SymTab.from_stlist(self.stlist1, scope=symtab.Scope.LOCAL, name='else', parent=parent)
-            if scopes2:
-                scopes2, errors2 = scopes2
-                new_table = scopes2[0]
-                entries.append(new_table)
-            else:
-                scopes2 = []
-        return (symtab.TableEntry('if_cond', None, scope, new_table), scopes + scopes2, errors + errors2)
+    # def __tableEntry(self, scope=symtab.Scope.NA, parent=None):
+    #     new_table = None
+    #     scopes = []
+    #     scopes2 = []
+    #     errors = []
+    #     errors2 = []
+    #     entries = []
+    #     if len(self.stlist1) != 0:
+    #         scopes = symtab.SymTab.from_stlist(self.stlist1, scope=symtab.Scope.LOCAL, name='if_cond', parent=parent)
+    #         if scopes:
+    #             scopes, errors = scopes
+    #             new_table = scopes[0]
+    #             entries.append(new_table)
+    #         else:
+    #             scopes = []
+    #     if len(self.stlist2) != 0:
+    #         scopes2 = symtab.SymTab.from_stlist(self.stlist1, scope=symtab.Scope.LOCAL, name='else', parent=parent)
+    #         if scopes2:
+    #             scopes2, errors2 = scopes2
+    #             new_table = scopes2[0]
+    #             entries.append(new_table)
+    #         else:
+    #             scopes2 = []
+    #     return (symtab.TableEntry('if_cond', None, scope, new_table), scopes + scopes2, errors + errors2)
 
 
 class WhileStatement(AST):
@@ -255,8 +264,17 @@ class BinOp(AST):
         self.operator = operator
         self.operand1 = operand1
         self.operand2 = operand2
-        self.type = operand1.type 
         self.lineno = lineno
+        match = BinOp._match_types(operand1, operand2)
+        if match:
+            self.type = operand1.type
+        else:
+            eprint("Type mismatch at line %d: %s %s %s" % (lineno, repr(operand1), repr(operator), repr(operand2)))
+            raise SyntaxError
+
+    @staticmethod
+    def _match_types(operand1, operand2):
+        return operand1.type == operand2.type
 
     def src(self):
         return "%s %s %s" % (self.operand1.src(), repr(self.operator), self.operand2.src())

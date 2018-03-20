@@ -152,3 +152,6 @@ class Operator(Enum):
 			self.__class__.logical_and.value: '&&',
 			self.__class__.logical_not.value: '!',
 		}[self.value]
+
+class APLException(Exception):
+	pass
