@@ -61,13 +61,9 @@ class APLYacc(object):
     
     def function_insert(self, func):
         entry = func.tableEntry(Scope.GLOBAL, self.curr_symtab)
-        self.all_symtab.append(self.curr_symtab)
         self.curr_symtab.name = func.fname
-        self.curr_symtab = self.curr_symtab.parent
-        self.curr_scope = Scope.GLOBAL
-        if not self.curr_symtab.insert_if_same_type(entry):
-            eprint('%s already defined in the same scope: \n\t %s' %
-                   (func.fname, repr(self.curr_symtab.get(func.fname))))
+        if not self.curr_symtab.parent.insert_if_same_type(entry):
+            return '%s already defined in the same scope: \n\t %s' % (func.fname, repr(self.curr_symtab.parent.get(func.fname)))
 
     def symbol_insert(self, entry):
         try:
@@ -117,67 +113,115 @@ class APLYacc(object):
 
     def p_main(self, p):
         '''
-            main : VOID MAIN LPAREN pdf_symtab RPAREN block
+            main : main_symtab LPAREN RPAREN block
         '''
         if self.output == YaccOutput.STATS:
             p[0] = p[6]
         elif self.output == YaccOutput.AST:
-            func = Func(VoidType(), 'main', [], p[6].stlist,lineno=p.lineno(3))
-            self.function_insert(func) 
+            func, err = p[1]
+            func.stlist = p[4].stlist
             p[0] = func
+            if err:
+                fentry = self.curr_symtab.parent.search(func.fname)
+                if fentry.definition:
+                    eprint(err) 
+            self.all_symtab.append(self.curr_symtab)
+            self.curr_symtab = self.curr_symtab.parent
+            self.curr_scope = Scope.GLOBAL
 
-    def p_procedure_def(self, p):
+    def p_main_symtab(self, p):
         '''
-            procedure_def : type STR var LPAREN pdf_symtab arglist RPAREN block
-        '''
-        if self.output == YaccOutput.AST:
-            p[3] += 1
-            func = Func(p[1](p[3].datatype), p[3].label, p[6], p[8].stlist, lineno=p.lineno(3))
-            self.function_insert(func)
-            p[0] = func
-                
-    def p_procedure_def_empty(self, p):
-        ''' 
-            procedure_def : type STR var LPAREN pdf_symtab RPAREN block
+            main_symtab : VOID MAIN
         '''
         if self.output == YaccOutput.AST:
-            p[3] += 1
-            func = Func(p[1](p[3].datatype), p[3].label, [], p[7].stlist, lineno=p.lineno(3))
-            self.function_insert(func)
-            p[0] = func
+            func = Func(VoidType(), 'main', [], [], lineno=p.lineno(2))
+            self.curr_symtab = SymTab(
+                name=p[2], parent=self.curr_symtab)
+            err = self.function_insert(func)
+            self.curr_scope = Scope.LOCAL
+            p[0] = (func, err)
 
     def p_pdf_symtab(self, p):
         '''
-            pdf_symtab : 
+            pdf_symtab : type STR var
         '''
         if self.output == YaccOutput.AST:
-            self.curr_symtab = SymTab(name='new_scope', parent=self.curr_symtab)
+            p[3] += 1
+            func = Func(p[1](p[3].datatype), p[3].label,
+                        [], [], lineno=p.lineno(3))
+            self.curr_symtab = SymTab(name=p[3].label, parent=self.curr_symtab)
+            err = self.function_insert(func)
             self.curr_scope = Scope.LOCAL
+            p[0] = (func, err)
+
+    def p_procedure_def(self, p):
+        '''
+            procedure_def : pdf_symtab LPAREN arglist RPAREN block
+        '''
+        if self.output == YaccOutput.AST:
+            func, err = p[1]
+            p[0] = func
+            func.stlist = p[5].stlist
+            func.params = p[3]
+            func.declaration = False
+            if err and self.curr_symtab.parent.search(func.fname).definition:
+                eprint('Line %d: ' % p.lineno(2) + err)
+            else:
+                entry = self.curr_symtab.search(func.fname)
+                entry.type = (entry.type[0], p[3])
+                entry.definition = not func.declaration
+
+            self.all_symtab.append(self.curr_symtab)
+            self.curr_symtab = self.curr_symtab.parent
+            self.curr_scope = Scope.GLOBAL
+
+    def p_procedure_def_empty(self, p):
+        ''' 
+            procedure_def : pdf_symtab LPAREN RPAREN block
+        '''
+        if self.output == YaccOutput.AST:
+            func, err = p[1]
+            p[0] = func
+            func.stlist = p[4].stlist
+            func.declaration = False
+            if err and self.curr_symtab.parent.search(func.fname).definition:
+                eprint('Line %d: ' % p.lineno(2) + err)
+            else:
+                entry = self.curr_symtab.search(func.fname)
+                entry.definition = not func.declaration
+
+            self.all_symtab.append(self.curr_symtab)
+            self.curr_symtab = self.curr_symtab.parent
+            self.curr_scope = Scope.GLOBAL
 
     def p_procedure_dec(self, p):
         '''
-            procedure_dec : type STR var LPAREN pdf_symtab proto_arglist RPAREN
-                            | type STR var LPAREN pdf_symtab arglist RPAREN
+            procedure_dec : pdf_symtab LPAREN proto_arglist RPAREN
+                            | pdf_symtab LPAREN arglist RPAREN
         '''
         if self.output == YaccOutput.AST:
-            p[3] += 1
-            func = Func(p[1](p[3].datatype), p[3].label, p[6], declaration=True, lineno=p.lineno(3))
+
+            func, err = p[1]
+            entry = self.curr_symtab.search(func.fname)
+            entry.type = (entry.type[0], p[3])
+            func.params = p[3]
+            p[0] = func
+            if err:
+                eprint( 'Line %d: ' % p.lineno(2) + err)
             self.curr_scope = Scope.GLOBAL
             self.curr_symtab = self.curr_symtab.parent
-            p[0] = func
-            self.symbol_insert(func.tableEntry(self.curr_scope))
 
     def p_procedure_dec_empty(self, p):
         '''
-            procedure_dec : type STR var LPAREN pdf_symtab RPAREN
+            procedure_dec : pdf_symtab LPAREN RPAREN
         '''
         if self.output == YaccOutput.AST:
-            p[3] += 1
-            func = Func(p[1](p[3].datatype), p[3].label, [], declaration=True, lineno=p.lineno(3))
+            func, err = p[1]
+            p[0] = func
+            if err:
+                eprint('Line %d: ' % p.lineno(2) + err)
             self.curr_scope = Scope.GLOBAL
             self.curr_symtab = self.curr_symtab.parent
-            p[0] = func
-            self.symbol_insert(func.tableEntry(self.curr_scope))
 
     def p_proto_arglist(self, p):
         '''

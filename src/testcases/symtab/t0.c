@@ -2,8 +2,8 @@ int *n, *p;
 int *q, *global;
 
 int ***fun(int *);
-// int ***fun(int *);
-// int ***fun();
+int ***fun(int *);
+int ***fun();
 int *fun1(int **b, int *a);
 float *fun2(int *);
 float *fun3(int***, int* a, int* b);

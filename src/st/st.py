@@ -54,7 +54,7 @@ class Program(AST):
              
 
 class Func(AST):
-    def __init__(self, rtype, fname, params, stlist=None, declaration=False, lineno=-1):
+    def __init__(self, rtype, fname, params, stlist=None, declaration=True, lineno=-1):
         self.rtype = rtype
         self.fname = fname
         self.params = params
