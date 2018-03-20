@@ -24,7 +24,7 @@ class DataType(object):
 
 	def __eq__(self, other):
 		return ((other.__class__ == self.__class__) and (other.ptr_depth == self.ptr_depth)) or \
-                    (other == self)
+                    ( (not issubclass(type(other), DataType)) and other == self)
 
 class IntType(DataType):
 	# `int**` has ptr_depth = 2; `int` has ptr_depth = 0
