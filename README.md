@@ -10,3 +10,4 @@ Here I add random `python` stackoverflow/blog links
 * [Better to use `import X` rather than `from X import foo`](http://stackabuse.com/python-circular-imports/)
 * [Manually throw a syntax error in ply](http://www.dabeaz.com/ply/ply.html#ply_nn35)
 * [Checking an instance is a subclass of a class](https://stackoverflow.com/questions/27475063/test-an-object-is-a-subclass-of-the-type-of-another-instance)
+* [Multiple Inheritence](https://www.programiz.com/python-programming/multiple-inheritance)
