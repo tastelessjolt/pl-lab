@@ -209,8 +209,9 @@ class Declaration(AST):
 
 class Return(AST):
     # represents a return statement
-    def __init__(self, ast):
+    def __init__(self, ast, type=DataType(), lineno=-1):
         self.ast = ast
+        self.type = type
 
     def __str__(self):
         return repr(self)
@@ -289,12 +290,17 @@ class UnaryOp(AST):
         self.lineno = lineno
         if self.operator == Operator.ptr:
             if self.operand.type.ptr_depth == 0:
-                eprint ('Extra pointer indirections: line %d: %s' % (self.operand.lineno, repr(self.operand)))
+                eprint ('Extra pointer indirections: line %d: %s' % (self.lineno, repr(self.operand)))
                 raise SyntaxError
             else: 
-                self.type = self.operand.type.__class__(self.operand.type.ptr_depth - 1)
+                self.type = type(self.operand.type)(self.operand.type.ptr_depth - 1)
         elif self.operator == Operator.ref:
-            self.type = self.operand.type.__class__(self.operand.type.ptr_depth + 1)
+            self.type = type(self.operand.type)(self.operand.type.ptr_depth + 1)
+        elif self.operator == Operator.uminus:
+        #     if self.operand.type.ptr_depth > 0:
+        #         eprint ('Unary Minus operator on pointer: line %d: %s' % (self.lineno, repr(self.operand)) )
+        #         raise SyntaxError
+            self.type = self.operand.type
 
     def src(self):
         return "%s%s" % (repr(self.operator), self.operand.src())
@@ -339,8 +345,9 @@ class Var(AST):
         return self
 
 class Num(AST):
-    def __init__(self, val):
+    def __init__(self, val, lineno=-1):
         self.val = val
+        self.lineno = lineno
         if type(val) == int:
             self.type = IntType(0)
         elif type(val) == float:

@@ -51,6 +51,37 @@ class APLYacc(object):
         self.curr_symtab = self.global_symtab
         self.curr_scope = Scope.GLOBAL
 
+    def get_var(self, varID, lineno=-1):
+        entry = self.curr_symtab.search(varID)
+        if entry and issubclass(type(entry.type), DataType):
+            return Var(varID, type=entry.type, lineno=lineno)
+        else:
+            eprint('Symbol not declared at line %d: %s' %
+                   (lineno, varID))
+            raise SyntaxError
+    
+    def function_insert(self, func):
+        entry = func.tableEntry(Scope.GLOBAL, self.curr_symtab)
+        self.all_symtab.append(self.curr_symtab)
+        self.curr_symtab.name = func.fname
+        self.curr_symtab = self.curr_symtab.parent
+        self.curr_scope = Scope.GLOBAL
+        if not self.curr_symtab.insert_if_same_type(entry):
+            eprint('%s already defined in the same scope: \n\t %s' %
+                   (func.fname, repr(self.curr_symtab.get(func.fname))))
+            raise SyntaxError
+
+    def symbol_insert(self, entry):
+        try:
+            self.curr_symtab.insert(entry)
+        except Exception as e:
+            err_entries = e.args[0]
+            for err_entry in err_entries:
+                eprint('symbol re-declaration at %s: \n\tAlready declared at %s' % (
+                    repr(err_entry), repr(self.curr_symtab.table[err_entry.name])))
+            if len(err_entries) > 0:
+                raise SyntaxError
+
 #######################################################################
 ######################### Grammar Starts Here #########################
 #######################################################################
@@ -86,30 +117,7 @@ class APLYacc(object):
                 try:
                     p[0] = DefList([p[1]]) + p[2]
                 except:
-                    p[0] = DefList()
-
-    def function_insert (self, func):
-        entry = func.tableEntry(Scope.GLOBAL, self.curr_symtab)
-        self.all_symtab.append(self.curr_symtab)
-        self.curr_symtab.name = func.fname
-        self.curr_symtab = self.curr_symtab.parent
-        self.curr_scope = Scope.GLOBAL
-        if not self.curr_symtab.insert_if_same_type(entry):
-            eprint('%s already defined in the same scope: \n\t %s' %
-                    (func.fname, repr(self.curr_symtab.get(func.fname))))
-            raise SyntaxError
-
-    def symbol_insert (self, entry):
-        try:
-            self.curr_symtab.insert(entry)
-        except Exception as e:
-            err_entries = e.args[0]
-            for err_entry in err_entries:
-                eprint('symbol re-declaration at %s: \n\tAlready declared at %s' % (
-                    repr(err_entry), repr(self.curr_symtab.table[err_entry.name])))
-            if len(err_entries) > 0:
-                raise SyntaxError
-    
+                    p[0] = DefList()    
 
     def p_main(self, p):
         '''
@@ -364,14 +372,14 @@ class APLYacc(object):
                         | condition LOGICAL_AND condition 
         '''
         if self.output == YaccOutput.AST:
-            p[0] = BinOp(Operator.arith_sym_to_op(p[2]), p[1], p[3])
+            p[0] = BinOp(Operator.arith_sym_to_op(p[2]), p[1], p[3], lineno=p.lienop(2))
 
     def p_condition_not(self, p):
         '''
             condition : LOGICAL_NOT condition
         '''
         if self.output == YaccOutput.AST:
-            p[0] = UnaryOp(Operator.arith_sym_to_op(p[1]), p[2])
+            p[0] = UnaryOp(Operator.arith_sym_to_op(p[1]), p[2], lineno=p.lineno(1))
 
     def p_condition_paren(self, p):
         '''
@@ -390,7 +398,7 @@ class APLYacc(object):
                         | expr GREATER_EQUAL expr
         '''
         if self.output == YaccOutput.AST:
-            p[0] = BinOp(Operator.arith_sym_to_op(p[2]), p[1], p[3])
+            p[0] = BinOp(Operator.arith_sym_to_op(p[2]), p[1], p[3], lineno=p.lineno(2))
 
     def p_expr(self, p):
         '''
@@ -434,7 +442,11 @@ class APLYacc(object):
             return : RETURN expr
         '''
         if self.output == YaccOutput.AST:
-            p[0] = Return(p[2])
+            func = self.curr_symtab.parent.search(self.curr_symtab.name)
+            if func is None:
+                raise SyntaxError
+
+            p[0] = Return(p[2], type=func.type, lineno=p.lineno(1))
 
     def p_proc_call(self, p):
         '''
@@ -443,7 +455,7 @@ class APLYacc(object):
         if self.output == YaccOutput.AST:
             entry = self.curr_symtab.search(p[1]) 
             if entry and isinstance(entry.type, tuple):
-                p[0] = FuncCall(p[1], p[3], entry.type[0], lineno=p.lineno(1))
+                p[0] = FuncCall(p[1], p[3], entry.type, lineno=p.lineno(1))
             else:
                 eprint('Function declaration not found: line %d: %s' % (p.lineno(1), p[1]))
                 raise SyntaxError
@@ -480,24 +492,11 @@ class APLYacc(object):
             p[0] = p[2] + p[3]
         elif self.output == YaccOutput.AST:
             p[0] = [p[2]] + p[3]
-            error_entries = []
             for var in p[0]:
                 var.datatype = p[1](var.datatype)
-                # try:
-                #     self.curr_symtab.insert(var.tableEntry(self.curr_scope))
-                # except Exception as e:
-                #     err_entry = e.args[0]
-                #     error_entries.extend(err_entry)
 
             p[0] = Declaration(p[0])
             self.symbol_insert(p[0].tableEntry(scope=self.curr_scope))
-
-            # if len(error_entries) > 0:
-            # #     for err_entry in error_entries:
-            # #         eprint('symbol re-declaration at %s: \n\tAlready declared at %s' %
-            # #                (repr(err_entry), repr(self.curr_symtab.table[err_entry.name])))
-            #     eprint(error_entries)
-            #     raise SyntaxError
 
     def p_dec_varlist(self, p):
         '''
@@ -546,16 +545,6 @@ class APLYacc(object):
 
 #######################################################################
 
-    def get_var(self, varID, lineno=-1):
-        entry = self.curr_symtab.search(varID)
-        if entry and issubclass(type(entry.type), DataType):
-            return Var(varID, type=entry.type, lineno=lineno)
-        else:
-            eprint('Symbol not declared at line %d: %s' %
-                    (lineno, varID))
-            raise SyntaxError
-
-
     def p_assignment(self, p):
         '''
             assignment :  ID EQUALS notNumExpr
@@ -570,15 +559,15 @@ class APLYacc(object):
                 if p[2] != '':
                     for i in range(len(p[2]) - 1, -1, -1):
                         if p[2][i] == '&':
-                            temp = UnaryOp(Operator.ref, temp)
+                            temp = UnaryOp(Operator.ref, temp, lineno=p.lineno(3))
                         else:
-                            temp = UnaryOp(Operator.ptr, temp)
+                            temp = UnaryOp(Operator.ptr, temp, lineno=p.lineno(3))
 
-                temp = UnaryOp(Operator.ptr, temp)
+                temp = UnaryOp(Operator.ptr, temp, lineno=p.lineno(3))
 
-                p[0] = BinOp(Operator.equal, temp, p[5])
+                p[0] = BinOp(Operator.equal, temp, p[5], lineno=p.lineno(4))
             elif len(p) == 4:
-                p[0] = BinOp(Operator.equal, self.get_var(p[1], lineno=p.lineno(1)), p[3])
+                p[0] = BinOp(Operator.equal, self.get_var(p[1], lineno=p.lineno(1)), p[3], lineno=p.lineno(2))
 
     def p_notNumExpr(self, p):
         '''
@@ -595,17 +584,17 @@ class APLYacc(object):
                         | notNumExpr PLUS notNumExpr
                         | notNumExpr MINUS notNumExpr
                         | notNumExpr STR notNumExpr
-                        | notNumExpr DIVIDE notNumExpr             
+                        | notNumExpr DIVIDE notNumExpr
         '''
         if self.output == YaccOutput.AST:
-            p[0] = BinOp(Operator.arith_sym_to_op(p[2]), p[1], p[3])
+            p[0] = BinOp(Operator.arith_sym_to_op(p[2]), p[1], p[3], lineno=p.lineno(2))
 
     def p_notNumExpr_uminus(self, p):
         '''
             notNumExpr : MINUS notNumExpr %prec UMINUS
         '''
         if self.output == YaccOutput.AST:
-            p[0] = UnaryOp(Operator.uminus, p[2])
+            p[0] = UnaryOp(Operator.uminus, p[2], lineno=p.lineno(1))
 
     def p_notNumExpr_group(self, p):
         '''
@@ -627,9 +616,9 @@ class APLYacc(object):
             if p[1] != '':
                 for i in range(len(p[1]) - 1, -1, -1):
                     if p[1][i] == '&':
-                        temp = UnaryOp(Operator.ref, temp)
+                        temp = UnaryOp(Operator.ref, temp, lineno=p.lineno(2))
                     else:
-                        temp = UnaryOp(Operator.ptr, temp)
+                        temp = UnaryOp(Operator.ptr, temp, lineno=p.lineno(2))
             p[0] = temp
             
 
@@ -641,14 +630,14 @@ class APLYacc(object):
                 | onlyNumExpr DIVIDE onlyNumExpr
         '''
         if self.output == YaccOutput.AST:
-            p[0] = BinOp(Operator.arith_sym_to_op(p[2]), p[1], p[3])
+            p[0] = BinOp(Operator.arith_sym_to_op(p[2]), p[1], p[3], lineno=p.lineno(2))
 
     def p_onlyNumExpr_uminus(self, p):
         '''
             onlyNumExpr : MINUS onlyNumExpr %prec UMINUS
         '''
         if self.output == YaccOutput.AST:
-            p[0] = UnaryOp(Operator.uminus, p[2])
+            p[0] = UnaryOp(Operator.uminus, p[2], lineno=p.lineno(1))
 
 
     def p_onlyNumExpr_group(self, p):
@@ -664,7 +653,7 @@ class APLYacc(object):
                         | FLOAT_NUM
         '''
         if self.output == YaccOutput.AST:
-            p[0] = Num(p[1])
+            p[0] = Num(p[1], lineno=p.lineno(1))
 
     def p_ptr(self, p):
         '''
