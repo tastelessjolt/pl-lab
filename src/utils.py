@@ -74,6 +74,17 @@ class VoidType(DataType):
 	def __repr__(self):
 		return self.__str__()
 
+
+class BooleanType(DataType):
+	def __init__(self):
+		self.basetype = 'bool'
+
+	def __str__(self):
+		return self.basetype
+	
+	def __repr__(self):
+		return self.__str__()
+
 class Operator(Enum):
 	plus = 0
 	minus = 1
@@ -87,11 +98,11 @@ class Operator(Enum):
 	greater = 9
 	less_or_eq = 10
 	greater_or_eq = 11
-	ref = 12
-	ptr = 13
-	logical_and = 14
-	logical_or = 15
-	logical_not = 16
+	logical_and = 12
+	logical_or = 13
+	logical_not = 14
+	ref = 15
+	ptr = 16
 
 	@classmethod
 	def arith_sym_to_op(cls, sym):
@@ -110,6 +121,15 @@ class Operator(Enum):
 			'&&': cls.logical_and,
 			'!': cls.logical_not,
 		}[sym]
+
+	def _is_arithmetic_op(self):
+		return self.value >= 0 and self.value <= 5
+
+	def _is_logical_op(self):
+		return self.value >= 6 and self.value <= 14
+
+	def _is_reference_op(self):
+		return self.value == 15 or self.value == 16
 
 	def __str__(self):
 			return {

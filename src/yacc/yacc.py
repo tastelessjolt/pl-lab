@@ -58,7 +58,6 @@ class APLYacc(object):
         else:
             eprint('Symbol not declared at line %d: %s' %
                    (lineno, varID))
-            raise SyntaxError
     
     def function_insert(self, func):
         entry = func.tableEntry(Scope.GLOBAL, self.curr_symtab)
@@ -69,7 +68,6 @@ class APLYacc(object):
         if not self.curr_symtab.insert_if_same_type(entry):
             eprint('%s already defined in the same scope: \n\t %s' %
                    (func.fname, repr(self.curr_symtab.get(func.fname))))
-            raise SyntaxError
 
     def symbol_insert(self, entry):
         try:
@@ -79,8 +77,6 @@ class APLYacc(object):
             for err_entry in err_entries:
                 eprint('symbol re-declaration at %s: \n\tAlready declared at %s' % (
                     repr(err_entry), repr(self.curr_symtab.table[err_entry.name])))
-            if len(err_entries) > 0:
-                raise SyntaxError
 
 #######################################################################
 ######################### Grammar Starts Here #########################
@@ -444,9 +440,8 @@ class APLYacc(object):
         if self.output == YaccOutput.AST:
             func = self.curr_symtab.parent.search(self.curr_symtab.name)
             if func is None:
-                raise SyntaxError
-
-            p[0] = Return(p[2], type=func.type, lineno=p.lineno(1))
+                eprint("Programmer's Error: Function %s is not in the symbol table" % self.curr_symtab.name)
+            p[0] = Return(p[2], type=func.type[0], lineno=p.lineno(1))
 
     def p_proc_call(self, p):
         '''
@@ -458,7 +453,6 @@ class APLYacc(object):
                 p[0] = FuncCall(p[1], p[3], entry.type, lineno=p.lineno(1))
             else:
                 eprint('Function declaration not found: line %d: %s' % (p.lineno(1), p[1]))
-                raise SyntaxError
 
     def p_exprlist(self, p):
         '''

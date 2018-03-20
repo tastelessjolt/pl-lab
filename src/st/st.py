@@ -1,4 +1,4 @@
-from utils import inc_tabsize, DataType, IntType, FloatType, Operator, eprint
+from utils import inc_tabsize, DataType, IntType, FloatType, Operator, eprint, BooleanType
 import symtab
 class AST(object):
     def tableEntry(self, scope=symtab.Scope.NA, parent=None):
@@ -97,12 +97,10 @@ class FuncCall(AST):
         
         if len(params) != len(type[1]):
             eprint("Function %s expected %d arguments but provided %d at line %d" % (fname, len(type[1]), len(params), lineno))
-            raise SyntaxError
 
         for i in range(len(params)):
             if params[i].type != type[1][i]:
                 eprint("Function call to %s expected %s as argument number %d but given %s" % (fname, repr(type[1][i]), i, repr(params[i])))
-                raise SyntaxError
 
     def __str__(self):
         return str ((self.fname, self.params))
@@ -222,6 +220,9 @@ class Return(AST):
         self.ast = ast
         self.type = type
 
+        if ast.type != type:
+            print("The return type of the function doesn't match that of the return expression at line %d" % lineno)
+
     def __str__(self):
         return repr(self)
 
@@ -267,10 +268,12 @@ class BinOp(AST):
         self.lineno = lineno
         match = BinOp._match_types(operand1, operand2)
         if match:
-            self.type = operand1.type
+            if operator._is_logical_op():
+                self.type = BooleanType()
+            else:
+                self.type = operand1.type
         else:
             eprint("Type mismatch at line %d: %s %s %s" % (lineno, repr(operand1), repr(operator), repr(operand2)))
-            raise SyntaxError
 
     @staticmethod
     def _match_types(operand1, operand2):
@@ -309,16 +312,15 @@ class UnaryOp(AST):
         if self.operator == Operator.ptr:
             if self.operand.type.ptr_depth == 0:
                 eprint ('Extra pointer indirections: line %d: %s' % (self.lineno, repr(self.operand)))
-                raise SyntaxError
             else: 
                 self.type = type(self.operand.type)(self.operand.type.ptr_depth - 1)
         elif self.operator == Operator.ref:
             self.type = type(self.operand.type)(self.operand.type.ptr_depth + 1)
         elif self.operator == Operator.uminus:
-        #     if self.operand.type.ptr_depth > 0:
-        #         eprint ('Unary Minus operator on pointer: line %d: %s' % (self.lineno, repr(self.operand)) )
-        #         raise SyntaxError
-            self.type = self.operand.type
+            self.type = operand.type
+        elif self.operator == Operator.logical_not:
+            # No need to check operand is Boolean type. That is ensured by the parser
+            self.type = operand.type
 
     def src(self):
         return "%s%s" % (repr(self.operator), self.operand.src())
