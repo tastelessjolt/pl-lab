@@ -100,7 +100,7 @@ class FuncCall(AST):
 
         for i in range(len(params)):
             if params[i].type != type[1][i]:
-                eprint("Function call to %s expected %s as argument number %d but given %s" % (fname, repr(type[1][i]), i, repr(params[i])))
+                eprint("Function call to %s expected %s as argument number %d but given %s" % (fname, repr(type[1][i]), i, repr((params[i], params[i].type)) if issubclass(params[i].__class__, AST) else repr(params[i]) ))
 
     def __str__(self):
         return str ((self.fname, self.params))

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from utils import *
+from utils import eprint
 from lex import *
 from yacc import *
 from cfg import *
@@ -8,7 +8,7 @@ import sys
 import os
 import argparse
 
-VERSION = '0.3.1'
+VERSION = '0.4.0'
 
 def buildArgParser():
     parser = argparse.ArgumentParser(description='APL Compiler ver ' + VERSION)
