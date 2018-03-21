@@ -20,9 +20,6 @@ class BasicBlock(object):
             return s
 
     def expandTree(self, cfg):
-        # cfg.numtemps ++
-        # import pdb
-        # pdb.set_trace()
         self.expandedAst = StmtList()
         for stmt in self.astlist:
             stmt.expand(cfg, self)
@@ -189,6 +186,24 @@ class CFG(object):
             elif isinstance(stlist[j], Declaration):
                 j += 1
             # Other statements
+            elif isinstance(stlist[j], Return):
+                self.blocks.append(BasicBlock(StmtList([stlist[j]]), self.numblocks))
+                self.numblocks += 1
+                if j == len(stlist):
+                    unassigned.append(self.blocks[-1])
+                else:
+                    self.blocks[-1].goto = self.numblocks
+                j += 1
+            elif isinstance(stlist[j], FuncCall):
+                self.blocks.append(BasicBlock(
+                    StmtList([stlist[j]]), self.numblocks))
+                self.numblocks += 1
+                if j == len(stlist):
+                    unassigned.append(self.blocks[-1])
+                else:
+                    self.blocks[-1].goto = self.numblocks
+
+                j += 1
             else:
                 block_list = StmtList()
                 while(not (j >= len(stlist) or isinstance(stlist[j], IfStatement) or
