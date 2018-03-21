@@ -76,6 +76,25 @@ if __name__ == '__main__':
         ast = parser.parse(data)
         if ast:
             print (repr(ast))
-            print('\n<~~~ Symbol Tables ~~~>')
-            for symtab in parser.all_symtab:
-                print(repr(symtab))
+            print('Procedure table :-')
+            print('-----------------------------------------------------------------')
+            print('Name\t\t|\tReturn Type  |  Parameter List')
+            print('-----------------------------------------------------------------')
+            for key, value in parser.all_symtab[0].table.items():
+                if value.table_ptr and value.name != 'main':
+                     print(str(value))
+            print('-----------------------------------------------------------------')
+            print('Variable table :-')
+            print('-----------------------------------------------------------------')
+            print('Name\t|\tScope\t\t|\tBase Type  |  Derived Type')
+            print('-----------------------------------------------------------------')
+            all_symtab_copy = parser.all_symtab[1:]
+            all_symtab_copy.reverse()
+            all_symtab_copy.insert(0, parser.all_symtab[0])
+            for symtab in all_symtab_copy:
+                for key, value in symtab.table.items():
+                    if not value.table_ptr:
+                        print(value.__str__('procedure ' + str(symtab.name) if symtab.name != 'global' else 'global'))
+            print('-----------------------------------------------------------------')
+            print('-----------------------------------------------------------------')
+

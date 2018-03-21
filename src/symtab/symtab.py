@@ -17,6 +17,12 @@ class TableEntry(object):
         self.lineno = lineno
         self.definition = definition
     
+    def __str__(self, fname='global'):
+        if self.table_ptr:
+            return '%s\t\t|\t%s  |  %s' % (self.name, str(self.type[0]), str(self.type[1]))
+        else:
+            return '%s\t\t|\t%s\t|\t%s\t|\t%s' % (self.name, fname, self.type.basetype, '*'*self.type.ptr_depth)
+    
     def __repr__(self):
         if self.table_ptr:
             return 'Line %d: %s' % (self.lineno, repr ((self.name, self.type, str(self.scope), self.table_ptr.name)))
@@ -34,43 +40,6 @@ class SymTab(object):
             return self.table[key]
         elif self.parent is not None:
             return self.parent.search(key)
-
-    # @classmethod
-    # def from_stlist(cls, stlist, scope=Scope.NA, name='untitled', parent=None, params=[]):
-    #     scopes = []
-    #     symtab = cls(name=name, parent=parent)
-    #     errors = []
-
-    #     # params are the function params 
-    #     for symbol in params:
-    #         try:
-    #             symtab.insert( symbol.tableEntry(Scope.ARGUMENT) )
-    #         except Exception as e:
-    #             for err_entry in e.args[0]:
-    #                 errors.append('symbol re-declaration at %s: \n\tAlready declared at %s' % (
-    #                     repr(err_entry), repr(symtab.table[err_entry.name])))
-        
-    #     for stmt in stlist:
-    #         # TODO: check error handling here 
-    #         tupl = stmt.tableEntry(scope, parent=symtab)
-    #         if tupl:
-    #             tmp_tabEntry, tmp_scopes, t_errors = tupl
-    #             errors.extend(t_errors)
-    #             if isinstance(stmt, st.Func) and not stmt.declaration:
-    #                 if symtab.insert_if_same_type(tmp_tabEntry):
-    #                     scopes.extend(tmp_scopes)
-    #                 else:
-    #                     errors.append('function re-declaration at %s: \n\tAlready declared at %s' % (repr(tmp_tabEntry), repr(symtab.table[tmp_tabEntry.name])))
-    #             else:
-    #                 try:
-    #                     symtab.insert(tmp_tabEntry)
-    #                     scopes.extend(tmp_scopes)
-    #                 except Exception as e:
-    #                     for err_entry in e.args[0]:
-    #                         errors.append('symbol re-declaration at %s: \n\tAlready declared at %s' % (repr(err_entry), repr(symtab.table[err_entry.name])))
-        
-    #     if len(symtab.table) != 0:
-    #         return ([symtab] + scopes, errors)
     
     def insert(self, entry_or_entrys):
         if isinstance(entry_or_entrys, list):
@@ -112,5 +81,3 @@ class SymTab(object):
 
     def __repr__(self):
         return '%s (%s) {\n%s\n}' % (self.name, self.parent.name if self.parent else '' , inc_tabsize('\n'.join([repr(self.table[key]) for key in self.table])))
-            
-         
