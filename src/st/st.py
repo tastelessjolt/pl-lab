@@ -1,4 +1,4 @@
-from utils import inc_tabsize, DataType, IntType, FloatType, Operator, eprint, BooleanType
+from utils import inc_tabsize, DataType, IntType, FloatType, Operator, eprint, BooleanType, symbol_list_as_dict
 import symtab
 class AST(object):
     def tableEntry(self, scope=symtab.Scope.NA, parent=None):
@@ -54,6 +54,7 @@ class Program(AST):
              
 
 class Func(AST):
+    # params are a list of type either `Symbol` or DataType's children
     def __init__(self, rtype, fname, params, stlist=None, declaration=True, lineno=-1):
         self.rtype = rtype
         self.fname = fname
@@ -63,7 +64,14 @@ class Func(AST):
         self.lineno = lineno
     
     def __str__(self):
-        return str(self.stlist)
+        if not self.declaration:
+            return '%s\n%s' % ( 
+                        ('Main' if self.fname == 'main' else ('FUNCTION %s\nPARAMS %s\nRETURNS %s' % 
+                                                    ( self.fname, 
+                                                    symbol_list_as_dict(self.params), str(self.rtype) ))) ,
+                         inc_tabsize(str(self.stlist)))
+        else:
+            return ''
 
     def __repr__(self):
         if self.declaration:
@@ -71,19 +79,6 @@ class Func(AST):
         else:
             return 'Func %s(%s) -> %s {\n%s\n}' % (repr(self.fname), str(self.params), str(self.rtype),
                                             inc_tabsize('\n'.join([repr(st) for st in self.stlist])))
-
-    # def __tableEntry(self, scope=symtab.Scope.NA, parent=None):
-    #     new_table = None
-    #     scopes = []
-    #     errors = []
-    #     if not self.declaration:
-    #         scopes = symtab.SymTab.from_stlist(self.stlist, scope=symtab.Scope.LOCAL, name=self.fname, parent=parent, params=self.params)
-    #         if scopes:
-    #             scopes, errors = scopes
-    #             new_table = scopes[0]
-    #         else:
-    #             scopes = []
-    #     return (symtab.TableEntry(self.fname, (self.rtype, self.params), scope, new_table, lineno=self.lineno, definition= not self.declaration), scopes, errors)
 
     def tableEntry(self, scope=symtab.Scope.NA, table_ptr=None):
         return symtab.TableEntry(self.fname, (self.rtype, self.params), scope, table_ptr, lineno=self.lineno, definition=not self.declaration)
@@ -103,7 +98,7 @@ class FuncCall(AST):
                 eprint("Function call to %s expected %s as argument number %d but given %s" % (fname, repr(type[1][i]), i, repr((params[i], params[i].type)) if issubclass(params[i].__class__, AST) else repr(params[i]) ))
 
     def __str__(self):
-        return str ((self.fname, self.params))
+        return 'call %s( %s )' % ( (self.fname, ', '.join([ '%s' % repr(param) for param in self.params] )) )
 
     def __repr__(self):
         return '%s (%s)' % ( self.fname, repr(self.params) )
@@ -224,7 +219,8 @@ class Return(AST):
             print("The return type of the function doesn't match that of the return expression at line %d" % lineno)
 
     def __str__(self):
-        return repr(self)
+        # return repr(self)
+        return ''
 
     def __repr__(self):
         return 'return(%s)' % repr(self.ast)

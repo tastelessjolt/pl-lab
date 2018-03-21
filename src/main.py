@@ -97,4 +97,3 @@ if __name__ == '__main__':
                         print(value.__str__('procedure ' + str(symtab.name) if symtab.name != 'global' else 'global'))
             print('-----------------------------------------------------------------')
             print('-----------------------------------------------------------------')
-
