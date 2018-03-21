@@ -12,11 +12,10 @@ class BasicBlock(object):
         if self.end:
             return '<bb %d>\n%s\n' % (self.blocknum, 'End')
         else:
-            s = '<bb %d>\n%s\ngoto ' % (self.blocknum, self.expandedAst.src())
+            s = '<bb %d>\n%s\n' % (self.blocknum, self.expandedAst.src())
+            # Return Statement
             if self.goto != -1:
-                s += "<bb %d>\n" % self.goto
-            else:
-                s += 'end\n'
+                s += "goto <bb %d>\n" % self.goto
             return s
 
     def expandTree(self, cfg):
@@ -100,10 +99,19 @@ class CFG(object):
     def __init__(self, programAST):
         self.ast = programAST
         self.blocks = []
-        self.numblocks = 1
+        self.numblocks = 0
         self.numtemps = 0
 
         global_list = self.ast.global_list
+        for func in global_list:
+            if isinstance(func, Func) and func.fname != 'main':
+                unassigned = self.dfs_traverse_ast(func.stlist)
+                for blk in unassigned:
+                    blk.assign_goto(self.numblocks)
+
+                # self.blocks.append(BasicBlock(end=False, blocknum=self.numblocks))
+                # self.numblocks += 1
+
         main_func = [func for func in global_list if isinstance(func, Func) and func.fname == 'main'][0]
 
         unassigned = self.dfs_traverse_ast(main_func.stlist)
@@ -113,7 +121,6 @@ class CFG(object):
         self.blocks.append(BasicBlock(end=True, blocknum=self.numblocks))
         self.numblocks += 1
 
-        # self.blocks.sort(key=lambda block: block.blocknum)
         self.generate_expr_evals()
     
     def generate_expr_evals(self):
@@ -185,15 +192,14 @@ class CFG(object):
             # Declaration
             elif isinstance(stlist[j], Declaration):
                 j += 1
-            # Other statements
+            # Return Statement
             elif isinstance(stlist[j], Return):
+                # import pdb; pdb.set_trace()
                 self.blocks.append(BasicBlock(StmtList([stlist[j]]), self.numblocks))
                 self.numblocks += 1
-                if j == len(stlist):
-                    unassigned.append(self.blocks[-1])
-                else:
-                    self.blocks[-1].goto = self.numblocks
+                self.blocks[-1].goto = -1
                 j += 1
+            # FuncCall
             elif isinstance(stlist[j], FuncCall):
                 self.blocks.append(BasicBlock(
                     StmtList([stlist[j]]), self.numblocks))
@@ -204,12 +210,15 @@ class CFG(object):
                     self.blocks[-1].goto = self.numblocks
 
                 j += 1
+            # Other Statements
             else:
                 block_list = StmtList()
                 while(not (j >= len(stlist) or isinstance(stlist[j], IfStatement) or
                            isinstance(stlist[j], WhileStatement) or
                            isinstance(stlist[j], ScopeBlock) or
-                           isinstance(stlist[j], Declaration))):
+                           isinstance(stlist[j], Declaration) or
+                           isinstance(stlist[j], Return) or
+                           isinstance(stlist[j], FuncCall))):
                     block_list.append(stlist[j])
                     j += 1
                 

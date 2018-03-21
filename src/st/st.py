@@ -235,6 +235,7 @@ class Return(AST):
         return 'return %s' % self.ast.src()
     
     def expand(self, cfg, block):
+        block.expandedAst.append(self)
         return self
 
 class Symbol(AST):
