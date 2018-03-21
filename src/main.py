@@ -75,7 +75,7 @@ if __name__ == '__main__':
         parser.build(lexer)
         ast = parser.parse(data)
         if ast:
-            print (repr(ast))
+            print (str(ast))
             print('\n<~~~ Symbol Tables ~~~>')
             for symtab in parser.all_symtab:
                 print(repr(symtab))
