@@ -81,6 +81,7 @@ class VoidType(DataType):
 class BooleanType(DataType):
 	def __init__(self):
 		self.basetype = 'bool'
+		self.ptr_depth = 0
 
 	def __str__(self):
 		return self.basetype

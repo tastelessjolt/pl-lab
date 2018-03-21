@@ -106,8 +106,8 @@ class CFG(object):
         self.numblocks = 1
         self.numtemps = 0
 
-        function_list = self.ast.funclist
-        main_func = [func for func in function_list if func.fname == 'main'][0]
+        global_list = self.ast.global_list
+        main_func = [func for func in global_list if isinstance(func, Func) and func.fname == 'main'][0]
 
         unassigned = self.dfs_traverse_ast(main_func.stlist)
         for blk in unassigned:

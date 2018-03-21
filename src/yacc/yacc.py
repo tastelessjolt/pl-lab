@@ -86,7 +86,7 @@ class APLYacc(object):
         if self.output == YaccOutput.STATS:
             p[0] = p[1]
         elif self.output == YaccOutput.AST:
-            p[0] = Program([p[1]])
+            p[0] = Program(p[1])
 
     def p_epsilon(self, p):
         '''

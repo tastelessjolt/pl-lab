@@ -42,15 +42,15 @@ class StmtList(AST, list):
         return '\n'.join([st.src() for st in self])
 
 class Program(AST):
-    def __init__(self, funclist, all_symtabs=None):
-        self.funclist = funclist
+    def __init__(self, global_list, all_symtabs=None):
+        self.global_list = global_list
         self.all_symtabs = all_symtabs
     
     def __str__(self):
-        return '\n'.join([str(func) for func in self.funclist])
+        return '\n'.join([str(func) for func in self.global_list])
 
     def __repr__(self):
-        return 'Program {\n%s\n}' % inc_tabsize('\n'.join([repr(func) for func in self.funclist]))
+        return 'Program {\n%s\n}' % inc_tabsize('\n'.join([repr(func) for func in self.global_list]))
              
 
 class Func(AST):
@@ -102,6 +102,12 @@ class FuncCall(AST):
 
     def __repr__(self):
         return '%s (%s)' % ( self.fname, repr(self.params) )
+    
+    def src(self):
+        return '%s (%s)' % ( self.fname, ", ".join([repr(param) for param in self.params]) )
+
+    def expand(self, cfg, block):
+        return self
 
 class IfStatement(AST):
     def __init__(self, operator, condition, stlist1, stlist2=StmtList()):
@@ -227,6 +233,9 @@ class Return(AST):
 
     def src(self):
         return 'return %s' % self.ast.src()
+    
+    def expand(self, cfg, block):
+        return self
 
 class Symbol(AST):
     # this is only used for Declarations
@@ -293,7 +302,11 @@ class BinOp(AST):
             place1 = self.operand1.expand(cfg, block)
             place2 = self.operand2.expand(cfg, block)
 
-            newTmp = Var('t%d' % cfg.numtemps )
+            if self.operator._is_arithmetic_op():
+                newTmp = Var('t%d' % cfg.numtemps, type=self.operand1.type)
+            elif self.operator._is_logical_op():
+                newTmp = Var('t%d' % cfg.numtemps, type=BooleanType())
+
             cfg.numtemps += 1
 
             block.expandedAst += [BinOp(Operator.equal,
@@ -329,16 +342,25 @@ class UnaryOp(AST):
         return "%s%s" % (repr(self.operator), repr(self.operand))
 
     def expand(self, cfg, block):
-        if self.operator == Operator.logical_not or self.operator == Operator.uminus:
-            place = self.operand.expand(cfg, block)
+        if self.operator == Operator.ptr and self.operand.type.ptr_depth < 2:
+            return self
 
-            newTmp = Var('t%d' % cfg.numtemps)
-            cfg.numtemps += 1
+        place = self.operand.expand(cfg, block)
 
-            block.expandedAst += [BinOp(Operator.equal,
-                                        newTmp, UnaryOp(self.operator, place))]
-        else:
-            newTmp = self
+        if self.operator._is_logical_op() or self.operator._is_arithmetic_op():
+            newTmp = Var('t%d' % cfg.numtemps, type=self.operand.type)
+        elif self.operator == Operator.ptr:
+            new_type = self.operand.type.__class__(self.operand.type.ptr_depth - 1)
+            newTmp = Var('t%d' % cfg.numtemps, type=new_type)
+        elif self.operator == Operator.ref:
+            new_type = self.operand.type.__class__(
+                self.operand.type.ptr_depth + 1)
+            newTmp = Var('t%d' % cfg.numtemps, type=new_type)
+
+        cfg.numtemps += 1
+
+        block.expandedAst += [BinOp(Operator.equal,
+                                    newTmp, UnaryOp(self.operator, place))]
         return newTmp
         
 
