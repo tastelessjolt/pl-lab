@@ -1,18 +1,19 @@
 from st import *
 
 class BasicBlock(object):
-    def __init__(self, astlist=StmtList(), blocknum=-1, goto=-1, end=False):
+    def __init__(self, astlist=StmtList(), blocknum=-1, goto=-1, end=False, func=''):
         self.astlist = astlist
         self.blocknum = blocknum
         self.goto = goto
         self.end = end
         self.expandedAst = StmtList()
+        self.func = func
 
     def __str__(self):
         if self.end:
             return '<bb %d>\n%s\n' % (self.blocknum, 'End')
         else:
-            s = '<bb %d>\n%s\n' % (self.blocknum, self.expandedAst.src())
+            s = self.func + '<bb %d>\n%s\n' % (self.blocknum, self.expandedAst.src())
             # Return Statement
             if self.goto != -1:
                 s += "goto <bb %d>\n" % self.goto
@@ -28,15 +29,16 @@ class BasicBlock(object):
         self.goto = goto
 
 class IfBlock(object):
-    def __init__(self, ifstmt, blocknum=-1, gotoif=-1, gotoelse=-1):
+    def __init__(self, ifstmt, blocknum=-1, gotoif=-1, gotoelse=-1, func=''):
         self.ifstmt = ifstmt
         self.blocknum = blocknum
         self.gotoif = gotoif
         self.gotoelse = gotoelse
         self.expandedAst = StmtList()
+        self.func = func
 
     def __str__(self):
-        s = '<bb %d>\n%s\n' % (self.blocknum, self.expandedAst.src())
+        s = self.func + '<bb %d>\n%s\n' % (self.blocknum, self.expandedAst.src())
         s += 'if(%s) goto ' % (repr(self.condition))
         if self.gotoif != -1:
             s += "<bb %d>" % self.gotoif
@@ -63,15 +65,16 @@ class IfBlock(object):
             self.gotoelse = goto
 
 class WhileBlock(object):
-    def __init__(self, whilestmt, blocknum=-1, gotoif=-1, gotoelse=-1):
+    def __init__(self, whilestmt, blocknum=-1, gotoif=-1, gotoelse=-1, func=''):
         self.whilestmt = whilestmt
         self.blocknum = blocknum
         self.gotoif = gotoif
         self.gotoelse = gotoelse
         self.expandedAst = StmtList()
+        self.func = func
 
     def __str__(self):
-        s = '<bb %d>\n%s\n' % (self.blocknum, self.expandedAst.src())
+        s = self.func + '<bb %d>\n%s\n' % (self.blocknum, self.expandedAst.src())
         s += 'if(%s) goto ' % (repr(self.condition))
         if self.gotoif != -1:
             s += "<bb %d>" % self.gotoif
@@ -105,7 +108,10 @@ class CFG(object):
         global_list = self.ast.global_list
         for func in global_list:
             if isinstance(func, Func) and func.fname != 'main':
+                old_numblocks = self.numblocks
                 unassigned = self.dfs_traverse_ast(func.stlist)
+                if old_numblocks != self.numblocks:
+                    self.blocks[old_numblocks].func += 'function %s()\n' % (func.fname)
                 for blk in unassigned:
                     blk.assign_goto(self.numblocks)
 
