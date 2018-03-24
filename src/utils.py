@@ -9,7 +9,7 @@ def inc_tabsize(string):
 	return '\t' + string.replace('\n', '\n\t')
 
 def symbol_list_as_dict(params):
-	return '{%s}' % (', '.join([ '\'%s\': \'%s\'' % (param.label, param.datatype) for param in params]))
+	return '{%s}' % (', '.join(['\'%s\': \'%s\'' % (param.label, param.datatype) if hasattr(param, 'label') else '\'%s\'' % str(param) for param in params]))
 
 class DataType(object):
 	def __init__(self):

@@ -76,6 +76,7 @@ if __name__ == '__main__':
         ast = parser.parse(data)
         if ast:
             print (repr(ast))
+            print('\n'.join([ repr(symtab) for symtab in parser.all_symtab]))
             print('Procedure table :-')
             print('-----------------------------------------------------------------')
             print('Name\t\t|\tReturn Type  |  Parameter List')

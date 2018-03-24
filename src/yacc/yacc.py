@@ -143,13 +143,12 @@ class APLYacc(object):
 
     def p_pdf_symtab(self, p):
         '''
-            pdf_symtab : type STR var
+            pdf_symtab : type var
         '''
         if self.output == YaccOutput.AST:
-            p[3] += 1
-            func = Func(p[1](p[3].datatype), p[3].label,
-                        [], [], lineno=p.lineno(3))
-            self.curr_symtab = SymTab(name=p[3].label, parent=self.curr_symtab)
+            func = Func(p[1](p[2].datatype), p[2].label,
+                        [], [], lineno=p.lineno(2))
+            self.curr_symtab = SymTab(name=p[2].label, parent=self.curr_symtab)
             err = self.function_insert(func)
             self.curr_scope = Scope.LOCAL
             p[0] = (func, err)
@@ -233,12 +232,11 @@ class APLYacc(object):
 
     def p_proto_arglist_var(self, p):
         '''
-            proto_arglist : type STR var proto_arglist_helper
+            proto_arglist : type var proto_arglist_helper
         '''
         if self.output == YaccOutput.AST:
-            p[3] += 1
-            p[3].datatype = p[1](p[3].datatype)
-            p[0] = [p[3]] + p[4]
+            p[2].datatype = p[1](p[2].datatype)
+            p[0] = [p[2]] + p[3]
 
     def p_proto_arglist_helper(self, p):
         '''
@@ -250,35 +248,32 @@ class APLYacc(object):
 
     def p_proto_arglist_helper_transition(self, p):
         '''
-            proto_arglist_helper : COMMA type STR var proto_arglist_helper
+            proto_arglist_helper : COMMA type var proto_arglist_helper
         '''
         if self.output == YaccOutput.AST:
-            p[4] += 1
-            p[4].datatype = p[2](p[4].datatype)
-            p[0] = [p[4]] + p[5]
+            p[3].datatype = p[2](p[3].datatype)
+            p[0] = [p[3]] + p[4]
 
     def p_arglist(self, p):
         '''
-            arglist : type STR var arglist_helper
+            arglist : type var arglist_helper
         '''
         if self.output == YaccOutput.AST:
-            p[3] += 1
-            p[3].datatype = p[1](p[3].datatype)
-            entries = [ p[3].tableEntry(scope=Scope.ARGUMENT) ]
-            for var in p[4]:
+            p[2].datatype = p[1](p[2].datatype)
+            entries = [ p[2].tableEntry(scope=Scope.ARGUMENT) ]
+            for var in p[3]:
                 entries.append(var.tableEntry(scope=Scope.ARGUMENT))
             self.symbol_insert(entries)
-            p[0] = [p[3]] + p[4]
+            p[0] = [p[2]] + p[3]
     
     def p_arglist_helper(self, p):
         '''
-            arglist_helper : COMMA type STR var arglist_helper
+            arglist_helper : COMMA type var arglist_helper
         '''
         if self.output == YaccOutput.AST:
-            p[4] += 1
-            p[4].datatype = p[2](p[4].datatype)
-            # self.symbol_insert(p[4].tableEntry(scope=Scope.ARGUMENT))
-            p[0] = [p[4]] + p[5] 
+            p[3].datatype = p[2](p[3].datatype)
+            # self.symbol_insert(p[3].tableEntry(scope=Scope.ARGUMENT))
+            p[0] = [p[3]] + p[4] 
                 
 
     def p_arglist_helper_empty(self, p):
@@ -290,10 +285,10 @@ class APLYacc(object):
 
     def p_derived_type(self, p):
         '''
-            d_type : type STR str
+            d_type : type str
         '''
         if self.output == YaccOutput.AST:
-            p[0] = p[1](p[3] + 1)
+            p[0] = p[1](p[2])
 
     def p_str(self, p):
         '''
@@ -487,6 +482,9 @@ class APLYacc(object):
                 eprint("Programmer's Error: Function %s is not in the symbol table" % self.curr_symtab.name)
             p[0] = Return(p[2], type=func.type[0], lineno=p.lineno(1))
 
+#######################################################################
+#######################################################################
+
     def p_proc_call(self, p):
         '''
             proc_call : ID LPAREN exprlist RPAREN
@@ -520,6 +518,7 @@ class APLYacc(object):
             except:
                 p[0] = []
 
+#######################################################################
 #######################################################################
 
     def p_declaration(self, p):
@@ -595,11 +594,8 @@ class APLYacc(object):
             if len(p) == 6:
                 temp = self.get_var(p[3], lineno=p.lineno(3))
                 if p[2] != '':
-                    for i in range(len(p[2]) - 1, -1, -1):
-                        if p[2][i] == '&':
-                            temp = UnaryOp(Operator.ref, temp, lineno=p.lineno(3))
-                        else:
-                            temp = UnaryOp(Operator.ptr, temp, lineno=p.lineno(3))
+                    for _ in range(len(p[2]) - 1, -1, -1):
+                        temp = UnaryOp(Operator.ptr, temp, lineno=p.lineno(3))
 
                 temp = UnaryOp(Operator.ptr, temp, lineno=p.lineno(3))
 
@@ -643,21 +639,27 @@ class APLYacc(object):
 
     def p_notNumExpr_leaf(self, p):
         '''
-            notNumExpr : ptr ID
+            notNumExpr : ptr REF ID
+                        | ptr ID
                         | ptr proc_call
         '''
         if self.output == YaccOutput.AST:
-            if isinstance(p[2], str):
-                temp = self.get_var(p[2], lineno=p.lineno(2))
-            elif isinstance(p[2], FuncCall):
-                temp = p[2]
-            if p[1] != '':
-                for i in range(len(p[1]) - 1, -1, -1):
-                    if p[1][i] == '&':
-                        temp = UnaryOp(Operator.ref, temp, lineno=p.lineno(2))
-                    else:
+            try:
+                temp = self.get_var(p[3], lineno=p.lineno(3))
+                temp = UnaryOp(Operator.ref, temp, lineno=p.lineno(2))
+                if p[1] != '':
+                    for _ in range(len(p[1]) - 1, -1, -1):
+                        temp = UnaryOp(Operator.ptr, temp, lineno=p.lineno(3))
+                p[0] = temp
+            except:
+                if isinstance(p[2], str):
+                    temp = self.get_var(p[2], lineno=p.lineno(2))
+                elif isinstance(p[2], FuncCall):
+                    temp = p[2]
+                if p[1] != '':
+                    for _ in range(len(p[1]) - 1, -1, -1):
                         temp = UnaryOp(Operator.ptr, temp, lineno=p.lineno(2))
-            p[0] = temp
+                p[0] = temp
             
 
     def p_onlyNumExpr(self, p):
@@ -696,7 +698,6 @@ class APLYacc(object):
     def p_ptr(self, p):
         '''
             ptr : STR ptr %prec DEREF
-                | REF ptr
                 | epsilon
         '''
         if self.output == YaccOutput.AST:
