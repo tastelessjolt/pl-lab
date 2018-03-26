@@ -5,7 +5,7 @@ int *q, *global;
 // int ***fun(int *);
 // int ***fun();
 int *fun1(int **b, int *a);
-float *fun2(int *);
+void fun2(int *);
 float *fun3(int***, int* a, int* b);
 
 void main () {
@@ -27,7 +27,7 @@ int ***fun(int *a)
     }
 }
 
-int *fun1(int **b, int *a)
+int* fun1(int **b, int *a)
 {
     return a;
 }

@@ -63,11 +63,11 @@ class APLYacc(object):
         entry = func.tableEntry(Scope.GLOBAL, self.curr_symtab)
         self.curr_symtab.name = func.fname
         if not self.curr_symtab.parent.insert_if_same_type(entry):
-            return '%s already defined in the same scope: \n\t %s' % (func.fname, repr(self.curr_symtab.parent.get(func.fname)))
+            return '\'%s\' already defined in the same scope: \n\t%s' % (func.fname, repr(self.curr_symtab.parent.get(func.fname)))
 
     def symbol_insert(self, entry):
         try:
-            self.curr_symtab.insert(entry)
+            return self.curr_symtab.insert(entry)
         except Exception as e:
             err_entries = e.args[0]
             for err_entry in err_entries:
@@ -136,7 +136,7 @@ class APLYacc(object):
         if self.output == YaccOutput.AST:
             func = Func(VoidType(), 'main', [], [], lineno=p.lineno(2))
             self.curr_symtab = SymTab(
-                name=p[2], parent=self.curr_symtab)
+                name=p[2], parent=self.curr_symtab, parent_func=func)
             err = self.function_insert(func)
             self.curr_scope = Scope.LOCAL
             p[0] = (func, err)
@@ -144,11 +144,16 @@ class APLYacc(object):
     def p_pdf_symtab(self, p):
         '''
             pdf_symtab : type var
+                        | VOID var
         '''
         if self.output == YaccOutput.AST:
-            func = Func(p[1](p[2].datatype), p[2].label,
+            if p[1] == 'void':
+                p[1] = VoidType() 
+            else:
+                p[1] = p[1](p[2].datatype)
+            func = Func(p[1], p[2].label,
                         [], [], lineno=p.lineno(2))
-            self.curr_symtab = SymTab(name=p[2].label, parent=self.curr_symtab)
+            self.curr_symtab = SymTab(name=p[2].label, parent=self.curr_symtab, parent_func=func)
             err = self.function_insert(func)
             self.curr_scope = Scope.LOCAL
             p[0] = (func, err)
@@ -161,13 +166,21 @@ class APLYacc(object):
             func, err = p[1]
             p[0] = func
             func.stlist = p[5].stlist
-            func.params = p[3]
             func.declaration = False
-            if err and self.curr_symtab.parent.search(func.fname).definition:
-                eprint('Line %d: ' % p.lineno(2) + err)
+            if err:
+                old_entry = self.curr_symtab.parent.search(func.fname)
+                if old_entry.definition:
+                    # function redefinition
+                    eprint('Line %d: %s' % (func.lineno, err))
+                elif old_entry.type != (func.rtype, func.params):
+                    # function type mismatch
+                    eprint('Line %d: \'%s\' function type mismatch with declaration defined in the same scope: \n\t%s' % (func.lineno, old_entry.name, repr(old_entry))  )
+                else:
+                    # old_entry is a declaration and is if the same type
+                    entry = self.function_insert(func)
             else:
+                # No errors while inserting => update whether it is declaration or definition
                 entry = self.curr_symtab.search(func.fname)
-                entry.type = (entry.type[0], p[3])
                 entry.definition = not func.declaration
 
             self.all_symtab.append(self.curr_symtab)
@@ -183,9 +196,19 @@ class APLYacc(object):
             p[0] = func
             func.stlist = p[4].stlist
             func.declaration = False
-            if err and self.curr_symtab.parent.search(func.fname).definition:
-                eprint('Line %d: ' % p.lineno(2) + err)
+            if err:
+                old_entry = self.curr_symtab.parent.search(func.fname)
+                if old_entry.definition:
+                    # function redefinition
+                    eprint('Line %d: %s' % (func.lineno, err))
+                elif old_entry.type != (func.rtype, func.params):
+                    # function type mismatch
+                    eprint('Line %d: \'%s\' function type mismatch with declaration defined in the same scope: \n\t%s' % (func.lineno, old_entry.name, repr(old_entry))  )
+                else:
+                    # old_entry is a declaration and is if the same type
+                    entry = self.function_insert(func)
             else:
+                # No errors while inserting => update whether it is declaration or definition
                 entry = self.curr_symtab.search(func.fname)
                 entry.definition = not func.declaration
 
@@ -201,9 +224,10 @@ class APLYacc(object):
         if self.output == YaccOutput.AST:
 
             func, err = p[1]
-            entry = self.curr_symtab.search(func.fname)
-            entry.type = (entry.type[0], p[3])
-            func.params = p[3]
+            # entry = self.curr_symtab.search(func.fname)
+            # entry.type = (entry.type[0], p[3])
+            func.params.clear()
+            func.params.extend(p[3])
             p[0] = func
             if err:
                 eprint( 'Line %d: ' % p.lineno(2) + err)
@@ -265,7 +289,8 @@ class APLYacc(object):
                 entries.append(var.tableEntry(scope=Scope.ARGUMENT))
             self.symbol_insert(entries)
             p[0] = [p[2]] + p[3]
-    
+            self.curr_symtab.parent_func.params.extend (p[0])
+
     def p_arglist_helper(self, p):
         '''
             arglist_helper : COMMA type var arglist_helper

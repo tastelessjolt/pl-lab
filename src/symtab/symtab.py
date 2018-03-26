@@ -30,10 +30,11 @@ class TableEntry(object):
             return 'Line %d: %s' % (self.lineno, repr((self.name, self.type, str(self.scope))))
 
 class SymTab(object):
-    def __init__(self, name='global', parent=None):
+    def __init__(self, name='global', parent=None, parent_func=None):
         self.name = name
         self.table = OrderedDict()
         self.parent = parent
+        self.parent_func = parent_func
 
     def search(self, key):
         if self.table.__contains__(key):
@@ -69,6 +70,8 @@ class SymTab(object):
             entry_type = old_entry.type
             ins_type = entry.type
             if entry_type == ins_type:
+                if not entry.definition:
+                    return
                 self.table[entry.name] = entry
                 return entry
         else:
