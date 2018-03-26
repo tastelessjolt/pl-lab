@@ -741,8 +741,8 @@ class APLYacc(object):
 ########################## Grammar Ends Here ##########################
 #######################################################################
 
-    def build(self, lexer, **kwargs):
-        self.yacc = yacc.yacc(module=self, write_tables=self.write_tables, debug=True, **kwargs)
+    def build(self, lexer, debug=False, **kwargs):
+        self.yacc = yacc.yacc(module=self, write_tables=self.write_tables, debug=debug, **kwargs)
         self.lexer = lexer.lexer
 
     def parse(self, data):

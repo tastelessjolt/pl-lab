@@ -72,7 +72,7 @@ if __name__ == '__main__':
 
     if args.ecfg or not (args.yacc or args.lex or args.ast or args.cfg):
         parser = APLYacc(output=YaccOutput.AST)
-        parser.build(lexer)
+        parser.build(lexer, debug=True)
         ast = parser.parse(data)
         if ast:
             print (repr(ast))
