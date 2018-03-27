@@ -1,4 +1,4 @@
-from utils import inc_tabsize, DataType, IntType, FloatType, AnyType, Operator, eprint, BooleanType, symbol_list_as_dict
+from utils import inc_tabsize, DataType, IntType, FloatType, AnyType, VoidType, Operator, eprint, BooleanType, symbol_list_as_dict
 import symtab
 class AST(object):
     def tableEntry(self, scope=symtab.Scope.NA, parent=None):
@@ -10,7 +10,7 @@ class AST(object):
 
 class Nothing(AST):
     def __init__(self):
-        self.type = AnyType()
+        self.type = VoidType()
     
     def __src__(self):
         return ''
