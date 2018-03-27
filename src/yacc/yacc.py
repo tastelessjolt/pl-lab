@@ -178,12 +178,13 @@ class APLYacc(object):
                 else:
                     # old_entry is a declaration and is if the same type
                     entry = self.function_insert(func)
+                    self.all_symtab.append(self.curr_symtab)
             else:
                 # No errors while inserting => update whether it is declaration or definition
                 entry = self.curr_symtab.search(func.fname)
                 entry.definition = not func.declaration
+                self.all_symtab.append(self.curr_symtab)
 
-            self.all_symtab.append(self.curr_symtab)
             self.curr_symtab = self.curr_symtab.parent
             self.curr_scope = Scope.GLOBAL
 
@@ -207,12 +208,13 @@ class APLYacc(object):
                 else:
                     # old_entry is a declaration and is if the same type
                     entry = self.function_insert(func)
+                    self.all_symtab.append(self.curr_symtab)
             else:
                 # No errors while inserting => update whether it is declaration or definition
                 entry = self.curr_symtab.search(func.fname)
                 entry.definition = not func.declaration
+                self.all_symtab.append(self.curr_symtab)
 
-            self.all_symtab.append(self.curr_symtab)
             self.curr_symtab = self.curr_symtab.parent
             self.curr_scope = Scope.GLOBAL
 
