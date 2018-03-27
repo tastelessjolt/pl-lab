@@ -502,10 +502,20 @@ class APLYacc(object):
             return : RETURN expr
         '''
         if self.output == YaccOutput.AST:
-            func = self.curr_symtab.parent.search(self.curr_symtab.name)
+            func = self.curr_symtab.parent_func
             if func is None:
                 eprint("Programmer's Error: Function %s is not in the symbol table" % self.curr_symtab.name)
-            p[0] = Return(p[2], type=func.type[0], lineno=p.lineno(1))
+            p[0] = Return(p[2], type=func.rtype, lineno=p.lineno(1))
+
+    def p_return_nothing(self, p):
+        '''
+            return : RETURN
+        '''
+        if self.output == YaccOutput.AST:
+            func = self.curr_symtab.parent_func
+            if func is None:
+                eprint("Programmer's Error: Function %s is not in the symbol table" % self.curr_symtab.name)
+            p[0] = Return(Nothing(), type=func.rtype, lineno=p.lineno(1))
 
 #######################################################################
 #######################################################################

@@ -1,4 +1,4 @@
-from utils import inc_tabsize, DataType, IntType, FloatType, Operator, eprint, BooleanType, symbol_list_as_dict
+from utils import inc_tabsize, DataType, IntType, FloatType, AnyType, Operator, eprint, BooleanType, symbol_list_as_dict
 import symtab
 class AST(object):
     def tableEntry(self, scope=symtab.Scope.NA, parent=None):
@@ -7,6 +7,19 @@ class AST(object):
             Output: Tuple ( table_entry_or_entries, symtables_created_in_the_process ) 
         '''
         pass
+
+class Nothing(AST):
+    def __init__(self):
+        self.type = AnyType()
+    
+    def __src__(self):
+        return ''
+
+    def __repr__(self):
+        return ''
+
+    def src(self):
+        return ''
 
 class DefList(AST, list):
     '''
@@ -222,7 +235,7 @@ class Return(AST):
         self.type = type
 
         if ast.type != type:
-            print("The return type of the function doesn't match that of the return expression at line %d" % lineno)
+            eprint("The return type of the function doesn't match that of the return expression at line %d" % lineno)
 
     def __str__(self):
         # return repr(self)

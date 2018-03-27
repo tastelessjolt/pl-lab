@@ -89,6 +89,13 @@ class BooleanType(DataType):
 	def __repr__(self):
 		return self.__str__()
 
+class AnyType(DataType):
+	def __init__(self):
+		self.basetype = 'nothing'
+
+	def __eq__(self, other):
+		return issubclass(type(other), DataType)
+
 class Operator(Enum):
 	plus = 0
 	minus = 1
