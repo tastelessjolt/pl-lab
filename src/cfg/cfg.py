@@ -119,12 +119,15 @@ class CFG(object):
                     self.blocks.append(BasicBlock(goto=-1, blocknum=self.numblocks))
                     self.numblocks += 1
 
-        main_func = [func for func in global_list if isinstance(func, Func) and func.fname == 'main'][0]
+        try:
+            main_func = [func for func in global_list if isinstance(func, Func) and func.fname == 'main'][0]
 
-        unassigned = self.dfs_traverse_ast(main_func.stlist)
-        for blk in unassigned:
-            blk.assign_goto(self.numblocks)
-
+            unassigned = self.dfs_traverse_ast(main_func.stlist)
+            for blk in unassigned:
+                blk.assign_goto(self.numblocks)
+        except:
+            pass
+            
         self.blocks.append(BasicBlock(end=True, blocknum=self.numblocks))
         self.numblocks += 1
 
