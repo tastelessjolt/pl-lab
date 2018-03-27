@@ -114,9 +114,10 @@ class CFG(object):
                     self.blocks[old_numblocks].func += 'function %s()\n' % (func.fname)
                 for blk in unassigned:
                     blk.assign_goto(self.numblocks)
-
-                # self.blocks.append(BasicBlock(end=False, blocknum=self.numblocks))
-                # self.numblocks += 1
+                
+                if len(unassigned) > 0:
+                    self.blocks.append(BasicBlock(goto=-1, blocknum=self.numblocks))
+                    self.numblocks += 1
 
         main_func = [func for func in global_list if isinstance(func, Func) and func.fname == 'main'][0]
 
