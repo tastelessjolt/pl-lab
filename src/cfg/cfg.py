@@ -116,7 +116,7 @@ class CFG(object):
                     blk.assign_goto(self.numblocks)
                 
                 if len(unassigned) > 0:
-                    self.blocks.append(BasicBlock(goto=-1, blocknum=self.numblocks))
+                    self.blocks.append(BasicBlock(astlist=StmtList([ Return(Nothing(), type=VoidType()) ]), goto=-1, blocknum=self.numblocks))
                     self.numblocks += 1
 
         try:
