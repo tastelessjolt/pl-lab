@@ -282,11 +282,19 @@ class Symbol(AST):
         return symtab.TableEntry(self.label, self.datatype, scope, lineno=self.lineno)
 
 class BinOp(AST):
-    def __init__(self, operator, operand1, operand2, lineno=-1):
+    def __init__(self, operator, operand1, operand2, lineno=-1, cfg=0):
         self.operator = operator
         self.operand1 = operand1
         self.operand2 = operand2
         self.lineno = lineno
+
+        if not cfg and isinstance(operand1, Var) and operand1.type.ptr_depth == 0:
+            eprint("Direct use of %s type variable not allowed. Line: %d" % (operand1.type.basetype, lineno))
+        
+        if not cfg and isinstance(operand2, Var) and operand2.type.ptr_depth == 0:
+            eprint("Direct use of %s type variable not allowed. Line: %d" %
+                   (operand2.type.basetype, lineno))
+
         match = BinOp._match_types(operand1, operand2)
         if match:
             if operator._is_logical_op():
@@ -315,7 +323,7 @@ class BinOp(AST):
             op2 = self.operand2.expand(cfg, block)
             if not isinstance(op2.type, VoidType):
                 block.expandedAst += [BinOp(Operator.equal,
-                                            self.operand1, op2)]
+                                            self.operand1, op2, cfg=1)]
         else:
             place1 = self.operand1.expand(cfg, block)
             place2 = self.operand2.expand(cfg, block)
@@ -328,7 +336,7 @@ class BinOp(AST):
             cfg.numtemps += 1
 
             block.expandedAst += [BinOp(Operator.equal,
-                                        newTmp, BinOp(self.operator, place1, place2))]
+                                        newTmp, BinOp(self.operator, place1, place2, cfg=1), cfg=1)]
             return newTmp
 
 class UnaryOp(AST):
@@ -378,7 +386,7 @@ class UnaryOp(AST):
         cfg.numtemps += 1
 
         block.expandedAst += [BinOp(Operator.equal,
-                                    newTmp, UnaryOp(self.operator, place))]
+                                    newTmp, UnaryOp(self.operator, place), cfg=1)]
         return newTmp
         
 

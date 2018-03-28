@@ -495,7 +495,7 @@ class APLYacc(object):
                 p[0] = p[1]
         else:
             if self.output == YaccOutput.AST:
-                p[0] = StmtList()
+                p[0] = ScopeBlock([])
 
 #######################################################################
 
