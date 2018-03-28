@@ -120,6 +120,8 @@ class FuncCall(AST):
         return '%s (%s)' % ( self.fname, ", ".join([repr(param) for param in self.params]) )
 
     def expand(self, cfg, block):
+        if isinstance(self.type, VoidType):
+            block.expandedAst.append(self)
         return self
 
 class IfStatement(AST):
@@ -310,8 +312,10 @@ class BinOp(AST):
 
     def expand(self, cfg, block):
         if self.operator == Operator.equal:
-            block.expandedAst += [BinOp(Operator.equal,
-                                        self.operand1, self.operand2.expand(cfg, block))]
+            op2 = self.operand2.expand(cfg, block)
+            if not isinstance(op2.type, VoidType):
+                block.expandedAst += [BinOp(Operator.equal,
+                                            self.operand1, op2)]
         else:
             place1 = self.operand1.expand(cfg, block)
             place2 = self.operand2.expand(cfg, block)

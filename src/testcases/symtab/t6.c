@@ -1,8 +1,16 @@
-void fun (int *a) {
+int* fun (int *a) {
     int *p;
 
     *p = 425;
 
-    fun (p);
+    p = fun (p);
     *p = *p + 454; 
-}   
+}
+
+void main () {
+    int a;
+    int *p;
+    p = &a;
+
+    p = fun(p);
+}
