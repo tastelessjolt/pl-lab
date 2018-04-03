@@ -35,7 +35,7 @@ void main()
 int *func2(int a, int b)
 {
     int *h;
-    if( *g3 == 52)
+    if( *g3 == 52 || *g3 == 52 || *g3 == 52)
     {
         while(  *h != 0)
         {

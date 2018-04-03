@@ -624,11 +624,23 @@ class APLYacc(object):
             assignment :  ID EQUALS notNumExpr
                         | STR ptr ID EQUALS notNumExpr %prec DEREF
                         | STR ptr ID EQUALS onlyNumExpr %prec DEREF
+                        | STR ptr REF ID EQUALS notNumExpr %prec DEREF
+                        | STR ptr REF ID EQUALS onlyNumExpr %prec DEREF
         '''
         if self.output == YaccOutput.STATS:
             p[0] = Stats((0, 0, 1))
         elif self.output == YaccOutput.AST:
-            if len(p) == 6:
+            if len(p) == 7:
+                temp = self.get_var(p[4], lineno=p.lineno(4))
+                temp = UnaryOp(Operator.ref, temp, lineno=p.lineno(3))
+                if p[2] != '':
+                    for _ in range(len(p[2]) - 1, -1, -1):
+                        temp = UnaryOp(Operator.ptr, temp, lineno=p.lineno(4))
+
+                temp = UnaryOp(Operator.ptr, temp, lineno=p.lineno(1))
+
+                p[0] = BinOp(Operator.equal, temp, p[6], lineno=p.lineno(5))
+            elif len(p) == 6:
                 temp = self.get_var(p[3], lineno=p.lineno(3))
                 if p[2] != '':
                     for _ in range(len(p[2]) - 1, -1, -1):

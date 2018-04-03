@@ -1,0 +1,29 @@
+
+FUNCTION func1
+PARAMS (int a, int aint b)
+RETURNS *int
+	ASGN
+	(
+		DEREF
+		(
+			ADDR
+			(
+				VAR(a)
+			)
+		)
+		,
+		DEREF
+		(
+			ADDR
+			(
+				VAR(b)
+			)
+		)
+	)
+RETURN 
+(
+	DEREF
+	(
+		VAR(h)
+	)
+)
