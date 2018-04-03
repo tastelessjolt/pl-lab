@@ -240,11 +240,12 @@ class Return(AST):
             eprint("The return type of the function doesn't match that of the return expression at line %d" % lineno)
 
     def __str__(self):
-        # return repr(self)
-        return ''
+        inner = str(self.ast)
+        return 'RETURN\n(\n%s\n)' % inc_tabsize(inner)
+        # return ''
 
     def __repr__(self):
-        return 'return(%s)' % repr(self.ast)
+        return 'return(%s)' % str(self.ast)
 
     def src(self):
         return 'return %s' % self.ast.src()
