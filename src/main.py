@@ -75,8 +75,8 @@ if __name__ == '__main__':
         parser.build(lexer, debug=True)
         ast = parser.parse(data)
         if ast:
-            repr(ast)
-            print(symtab_from_ast(parser, ast))
+            print(str(ast))
+            # print(symtab_from_ast(parser, ast))
             cfg = CFG(ast)
-            print( cfg )
+            # print( cfg )
 

@@ -9,7 +9,7 @@ def inc_tabsize(string):
     return '\t' + string.replace('\n', '\n\t')
 
 def symbol_list_as_dict(params):
-    return '{%s}' % (', '.join(['\'%s\': \'%s\'' % (param.label, param.datatype) if hasattr(param, 'label') else '\'%s\'' % str(param) for param in params]))
+    return '(%s)' % (', '.join(['%s %s' % (param.datatype, param.label) if hasattr(param, 'label') else '%s' % str(param) for param in params]))
 
 def symtab_from_ast(parser, ast):
     s = '\n'.join([repr(symtab) for symtab in parser.all_symtab]) + "\n"

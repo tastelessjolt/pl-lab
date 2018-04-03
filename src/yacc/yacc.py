@@ -434,7 +434,7 @@ class APLYacc(object):
                         | condition LOGICAL_AND condition 
         '''
         if self.output == YaccOutput.AST:
-            p[0] = BinOp(Operator.arith_sym_to_op(p[2]), p[1], p[3], lineno=p.lienop(2))
+            p[0] = BinOp(Operator.arith_sym_to_op(p[2]), p[1], p[3], lineno=p.lineno(2))
 
     def p_condition_not(self, p):
         '''
