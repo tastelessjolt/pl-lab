@@ -79,15 +79,10 @@ class Func(AST):
     def __str__(self):
         if not self.declaration:
             s = '%s\n%s' % (
-                ('Main' if self.fname == 'main' else ('FUNCTION %s\nPARAMS %s\nRETURNS %s' %
-                                                      (self.fname,
+                ( ('%s\nPARAMS %s\nRETURNS %s' %
+                   ('Function Main' if self.fname == 'main' else 'FUNCTION ' + self.fname,
                                                        symbol_list_as_dict(self.params), str(self.rtype)))),
-                inc_tabsize(str(StmtList(self.stlist[:-1]))))
-            
-            if isinstance(self.stlist[-1], Return):
-                s += "\n" + str(self.stlist[-1])
-            else:
-                s += "\n" + inc_tabsize(self.stlist[-1])
+                '\n'.join([str(stmt) if isinstance(stmt, Return) else inc_tabsize(str(stmt)) for stmt in self.stlist]))
             return s
         else:
             return ''
@@ -117,7 +112,7 @@ class FuncCall(AST):
                 eprint("Function call to %s expected %s as argument number %d but given %s" % (fname, repr(type[1][i]), i, repr((params[i], params[i].type)) if issubclass(params[i].__class__, AST) else repr(params[i]) ))
 
     def __str__(self):
-        return 'call %s( %s )' % ( (self.fname, ', '.join([ '%s' % repr(param) for param in self.params] )) )
+        return 'CALL %s\n(\n%s\n)\n' % (self.fname, inc_tabsize('\n,\n'.join([ '%s' % str(param) for param in self.params] )))
 
     def __repr__(self):
         return '%s (%s)' % ( self.fname, repr(self.params) )

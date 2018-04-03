@@ -134,7 +134,7 @@ class APLYacc(object):
             main_symtab : VOID MAIN
         '''
         if self.output == YaccOutput.AST:
-            func = Func(VoidType(), 'main', [], [], lineno=p.lineno(2))
+            func = Func(VoidType(), 'main', [], [], lineno=p.lineno(2), declaration=False)
             self.curr_symtab = SymTab(
                 name=p[2], parent=self.curr_symtab, parent_func=func)
             err = self.function_insert(func)
