@@ -8,8 +8,11 @@ def eprint(*args, **kwargs):
 def inc_tabsize(string):
     return '\t' + string.replace('\n', '\n\t')
 
-def symbol_list_as_dict(params):
-    return '(%s)' % (', '.join(['%s %s' % (param.datatype, param.label) if hasattr(param, 'label') else '%s' % str(param) for param in params]))
+def symbol_list_as_dict(params, bracket=True):
+    if bracket:
+        return '(%s)' % (', '.join(['%s %s' % (param.datatype, param.label) if hasattr(param, 'label') else '%s' % str(param) for param in params]))
+    else:
+        return '%s' % (', '.join(['%s %s' % (param.datatype, param.label) if hasattr(param, 'label') else '%s' % str(param) for param in params]))
 
 def symtab_from_ast(parser, ast):
     # s = '\n'.join([repr(symtab) for symtab in parser.all_symtab]) + "\n"
@@ -34,7 +37,7 @@ def symtab_from_ast(parser, ast):
                 s += value.__str__('procedure ' + str(symtab.name)
                                     if symtab.name != 'global' else 'global') + "\n"
     s += '-----------------------------------------------------------------\n'
-    s += '----------------------------------------------------------------\n'
+    s += '-----------------------------------------------------------------\n'
     return s
 
 class DataType(object):
