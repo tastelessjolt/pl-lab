@@ -12,12 +12,12 @@ def symbol_list_as_dict(params):
     return '(%s)' % (', '.join(['%s %s' % (param.datatype, param.label) if hasattr(param, 'label') else '%s' % str(param) for param in params]))
 
 def symtab_from_ast(parser, ast):
-    s = '\n'.join([repr(symtab) for symtab in parser.all_symtab]) + "\n"
+    # s = '\n'.join([repr(symtab) for symtab in parser.all_symtab]) + "\n"
+    s = ''
     s += 'Procedure table :-\n'
     s += '-----------------------------------------------------------------\n'
     s += 'Name\t\t|\tReturn Type  |  Parameter List\n'
-    s += '-----------------------------------------------------------------\n'
-    for key, value in parser.all_symtab[0].table.items():
+    for key, value in sorted(parser.all_symtab[0].table.items(), key=lambda x: x[1].name):
         if value.table_ptr and value.name != 'main':
                 s += str(value) + "\n"
     s += '-----------------------------------------------------------------\n'
@@ -28,8 +28,8 @@ def symtab_from_ast(parser, ast):
     all_symtab_copy = parser.all_symtab[1:]
     all_symtab_copy.reverse()
     all_symtab_copy.insert(0, parser.all_symtab[0])
-    for symtab in all_symtab_copy:
-        for key, value in symtab.table.items():
+    for symtab in sorted(all_symtab_copy, key=lambda  x: x.name):
+        for key, value in sorted(symtab.table.items(), key=lambda x: x[1].name):
             if not value.table_ptr:
                 s += value.__str__('procedure ' + str(symtab.name)
                                     if symtab.name != 'global' else 'global') + "\n"

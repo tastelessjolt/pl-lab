@@ -78,5 +78,5 @@ if __name__ == '__main__':
             print(str(ast))
             print(symtab_from_ast(parser, ast))
             cfg = CFG(ast)
-            print( cfg )
+            print(cfg)
 
