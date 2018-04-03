@@ -107,29 +107,17 @@ class CFG(object):
 
         global_list = self.ast.global_list
         for func in global_list:
-            if isinstance(func, Func) and func.fname != 'main':
+            if isinstance(func, Func): # and func.fname != 'main':
                 old_numblocks = self.numblocks
                 unassigned = self.dfs_traverse_ast(func.stlist)
                 if old_numblocks != self.numblocks:
-                    self.blocks[old_numblocks].func += 'function %s()\n' % (func.fname)
+                    self.blocks[old_numblocks].func += 'function %s%s\n' % (func.fname, symbol_list_as_dict(func.params))
                 for blk in unassigned:
                     blk.assign_goto(self.numblocks)
                 
                 if len(unassigned) > 0:
                     self.blocks.append(BasicBlock(astlist=StmtList([ Return(Nothing(), type=VoidType()) ]), goto=-1, blocknum=self.numblocks))
                     self.numblocks += 1
-
-        try:
-            main_func = [func for func in global_list if isinstance(func, Func) and func.fname == 'main'][0]
-
-            unassigned = self.dfs_traverse_ast(main_func.stlist)
-            for blk in unassigned:
-                blk.assign_goto(self.numblocks)
-        except:
-            pass
-            
-        self.blocks.append(BasicBlock(end=True, blocknum=self.numblocks))
-        self.numblocks += 1
 
         self.generate_expr_evals()
     

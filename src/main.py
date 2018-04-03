@@ -76,7 +76,7 @@ if __name__ == '__main__':
         ast = parser.parse(data)
         if ast:
             print(str(ast))
-            # print(symtab_from_ast(parser, ast))
+            print(symtab_from_ast(parser, ast))
             cfg = CFG(ast)
-            # print( cfg )
+            print( cfg )
 
