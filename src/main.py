@@ -75,8 +75,14 @@ if __name__ == '__main__':
         parser.build(lexer, debug=True)
         ast = parser.parse(data)
         if ast:
-            print(str(ast))
-            print(symtab_from_ast(parser, ast))
-            cfg = CFG(ast)
-            print(cfg)
+            with open(filename + '.ast', 'w') as f:
+                f.write(str(ast))
+            
+            sym_str = symtab_from_ast(parser, ast)
+            with open(filename + ".sym", 'w') as f:
+                f.write(sym_str)
 
+            cfg = CFG(ast) 
+            with open(filename + ".cfg", 'w') as f:
+                f.write(str(cfg))
+            
