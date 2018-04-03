@@ -78,11 +78,17 @@ class Func(AST):
     
     def __str__(self):
         if not self.declaration:
-            return '%s\n%s' % ( 
-                        ('Main' if self.fname == 'main' else ('FUNCTION %s\nPARAMS %s\nRETURNS %s' % 
-                                                    ( self.fname, 
-                                                    symbol_list_as_dict(self.params), str(self.rtype) ))) ,
-                         inc_tabsize(str(self.stlist)))
+            s = '%s\n%s' % (
+                ('Main' if self.fname == 'main' else ('FUNCTION %s\nPARAMS %s\nRETURNS %s' %
+                                                      (self.fname,
+                                                       symbol_list_as_dict(self.params), str(self.rtype)))),
+                inc_tabsize(str(StmtList(self.stlist[:-1]))))
+            
+            if isinstance(self.stlist[-1], Return):
+                s += "\n" + str(self.stlist[-1])
+            else:
+                s += "\n" + inc_tabsize(self.stlist[-1])
+            return s
         else:
             return ''
 
@@ -151,31 +157,6 @@ class IfStatement(AST):
         if len(self.stlist2) != 0:
             s += '\nelse {\n' + inc_tabsize('\n'.join([repr(st) for st in self.stlist2])) + '\n}'
         return s
-
-    # def __tableEntry(self, scope=symtab.Scope.NA, parent=None):
-    #     new_table = None
-    #     scopes = []
-    #     scopes2 = []
-    #     errors = []
-    #     errors2 = []
-    #     entries = []
-    #     if len(self.stlist1) != 0:
-    #         scopes = symtab.SymTab.from_stlist(self.stlist1, scope=symtab.Scope.LOCAL, name='if_cond', parent=parent)
-    #         if scopes:
-    #             scopes, errors = scopes
-    #             new_table = scopes[0]
-    #             entries.append(new_table)
-    #         else:
-    #             scopes = []
-    #     if len(self.stlist2) != 0:
-    #         scopes2 = symtab.SymTab.from_stlist(self.stlist1, scope=symtab.Scope.LOCAL, name='else', parent=parent)
-    #         if scopes2:
-    #             scopes2, errors2 = scopes2
-    #             new_table = scopes2[0]
-    #             entries.append(new_table)
-    #         else:
-    #             scopes2 = []
-    #     return (symtab.TableEntry('if_cond', None, scope, new_table), scopes + scopes2, errors + errors2)
 
 
 class WhileStatement(AST):
