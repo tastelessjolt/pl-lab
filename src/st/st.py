@@ -361,7 +361,7 @@ class UnaryOp(AST):
         return "%s%s" % (repr(self.operator), self.operand.src())
 
     def __str__(self):
-        s = "%s\n(\n\t%s\n)" % (self.operator, str(self.operand))
+        s = "%s\n(\n%s\n)" % (self.operator, inc_tabsize(str(self.operand)))
         return s
 
     def __repr__(self):
