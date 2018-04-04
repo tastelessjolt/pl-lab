@@ -340,7 +340,8 @@ class APLYacc(object):
                 p[0] = Stats((0, 0, 0))
         elif self.output == YaccOutput.AST:
             try:
-                p[0] = StmtList([p[1]]) + p[2]
+                p[2].insert(0, p[1])
+                p[0] = p[2]
             except:
                 p[0] = StmtList()
 
