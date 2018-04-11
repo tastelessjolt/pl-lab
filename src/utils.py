@@ -216,6 +216,81 @@ class Operator(Enum):
             self.__class__.logical_not.value: '!',
         }[self.value]
 
+<<<<<<< HEAD
 class FreeList:
     def __init__ (self, list):
         self.curr = 0
+=======
+
+class Register(Enum):
+# General Purpose registers
+    zero = 0
+    at = 1
+    v0 = 2
+    v1 = 3
+    a0 = 4
+    a1 = 5
+    a2 = 6
+    a3 = 7
+    t0 = 8
+    t1 = 9
+    t2 = 10
+    t3 = 11
+    t4 = 12
+    t5 = 13
+    t6 = 14
+    t7 = 15
+    s0 = 16
+    s1 = 17
+    s2 = 18
+    s3 = 19
+    s4 = 20
+    s5 = 21
+    s6 = 22
+    s7 = 23
+    t8 = 24
+    t9 = 25
+    k0 = 26
+    k1 = 27
+    gp = 28
+    sp = 29
+    fp = 30
+    ra = 31
+# Floating Point registers
+    f0 = 32
+    f1 = 33
+    f2 = 34
+    f3 = 35
+    f4 = 36
+    f5 = 37
+    f6 = 38
+    f7 = 39
+    f8 = 40
+    f9 = 41
+    f10 = 42
+    f11 = 43
+    f12 = 44
+    f13 = 45
+    f14 = 46
+    f15 = 47
+    f16 = 48
+    f17 = 49
+    f18 = 50
+    f19 = 51
+    f20 = 52
+    f21 = 53
+    f22 = 54
+    f23 = 55
+    f24 = 56
+    f25 = 57
+    f26 = 58
+    f27 = 59
+    f28 = 60
+    f29 = 61
+    f30 = 62
+    f31 = 63
+
+    def __str__(self):
+        return '$' + self.name
+ 
+>>>>>>> ccdcf18660ca1d39ae2636700e2acfb97957c7d6
