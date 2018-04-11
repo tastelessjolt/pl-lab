@@ -14,6 +14,9 @@ def symbol_list_as_dict(params, bracket=True):
     else:
         return '%s' % (', '.join(['%s %s' % (param.datatype, param.label) if hasattr(param, 'label') else '%s' % str(param) for param in params]))
 
+def _super(obj):
+    return super(type(obj), obj)
+
 def symtab_from_ast(parser, ast):
     # s = '\n'.join([repr(symtab) for symtab in parser.all_symtab]) + "\n"
     s = ''
@@ -287,4 +290,4 @@ class Register(Enum):
 
     def __str__(self):
         return '$' + self.name
- 
+
