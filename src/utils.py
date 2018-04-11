@@ -216,11 +216,6 @@ class Operator(Enum):
             self.__class__.logical_not.value: '!',
         }[self.value]
 
-<<<<<<< HEAD
-class FreeList:
-    def __init__ (self, list):
-        self.curr = 0
-=======
 
 class Register(Enum):
 # General Purpose registers
@@ -293,4 +288,3 @@ class Register(Enum):
     def __str__(self):
         return '$' + self.name
  
->>>>>>> ccdcf18660ca1d39ae2636700e2acfb97957c7d6
