@@ -215,3 +215,7 @@ class Operator(Enum):
             self.__class__.logical_and.value: '&&',
             self.__class__.logical_not.value: '!',
         }[self.value]
+
+class FreeList:
+    def __init__ (self, list):
+        self.curr = 0
