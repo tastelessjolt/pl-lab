@@ -34,7 +34,8 @@ class TableEntry(object):
         else:
             return 'Line %d: %s' % (self.lineno, repr((self.name, self.type, str(self.scope), self.offset, self.width)))
     
-    def get_size(self):
+    @property
+    def size(self):
         if self.table_ptr:
             return self.table_ptr.width
 
