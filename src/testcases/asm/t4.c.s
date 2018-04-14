@@ -47,14 +47,12 @@ label2:
 	li $s0, 3
 	lw $s1, 8($sp)
 	sw $s0, 0($s1)
+	# setting up activation record for called function
 	lw $s0, 4($sp)
 	lw $s1, 0($s0)
-	move $s0, $s1
-	lw $s1, 8($sp)
-	lw $s2, 0($s1)
-	move $s1, $s2
-	# setting up activation record for called function
-	sw $s0, -4($sp)
+	sw $s1, -4($sp)
+	lw $s0, 8($sp)
+	lw $s1, 0($s0)
 	sw $s1, 0($sp)
 	sub $sp, $sp, 8
 	jal f # function call

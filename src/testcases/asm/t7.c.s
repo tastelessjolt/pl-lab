@@ -11,15 +11,13 @@ main:
 	sub $sp, $sp, 20	# Make space for the locals
 # Prologue ends
 label0:
+	# setting up activation record for called function
 	lw $s0, 8($sp)
 	l.s $f10, 0($s0)
-	mov.s $f12, $f10
+	s.s $f10, -4($sp)
 	lw $s0, 12($sp)
 	lw $s1, 0($s0)
-	move $s0, $s1
-	# setting up activation record for called function
-	s.s $f12, -4($sp)
-	sw $s0, 0($sp)
+	sw $s1, 0($sp)
 	sub $sp, $sp, 12
 	jal f # function call
 	add $sp, $sp, 12 # destroying activation record of called function

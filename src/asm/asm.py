@@ -44,20 +44,25 @@ class SPIM(ASM):
         s += 'sw $ra, 0($sp)  # Save the return address\n'
         s += 'sw $fp, -4($sp) # Save the frame pointer\n'
         s += 'sub $fp, $sp, 8 # Update the frame pointer\n'
-        s += 'sub $sp, $sp, %d    # Make space for the locals\n' % (func_entry.get_size() + 8)
+        s += 'sub $sp, $sp, %d    # Make space for the locals\n' % (func_entry.size + 8)
         return s
     
     def get_epilogue(self, func_entry):
         s = ''
-        s += '# Epilogue begins'
+        s += 'add $sp, $sp, %d' % (func_entry.size + 8)
+        s += 'lw $fp, -4($sp)'
+        s += 'lw $ra, 0($sp)'
+        s += 'jr $ra  # Jump back to the called procedure'
+        return s
     
     def get_text_section(self):
         s = ''
         global_symtab = self.parser.all_symtab[0]
         for key, value in sorted(global_symtab.table.items(), key=lambda x: x[1].name):
             if value.table_ptr:
-                s += "\t.text\n"
-                s += "\t.globl %s\n%s:\n" % (value.name, value.name)
+                s += "\t.text\t# The .text assembler directive indicates\n"
+                s += "\t.globl %s\t# The following is the code\n" % value.name
+                s += "%s:\n" % value.name
                 s += "# Prologue begins\n"
                 s += inc_tabsize(self.get_prologue(value))
                 s += "# Prologue ends\n"
