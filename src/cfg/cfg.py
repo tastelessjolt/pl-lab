@@ -23,7 +23,9 @@ class BasicBlock(object):
         self.expandedAst = StmtList()
         for stmt in self.astlist:
             stmt.expand(cfg, self)
-
+    
+    def get_asm(self, parser, asm):
+        return "\n".join([ast.get_asm(parser, asm) for ast in self.expandedAst])
 
     def assign_goto(self, goto):
         self.goto = goto
@@ -104,13 +106,16 @@ class CFG(object):
         self.blocks = []
         self.numblocks = 0
         self.numtemps = 0
+        self.func_to_blocknum = {}
 
         global_list = self.ast.global_list
         for func in global_list:
             if isinstance(func, Func): # and func.fname != 'main':
                 old_numblocks = self.numblocks
                 unassigned = self.dfs_traverse_ast(func.stlist)
+                ## TODO: WHY??
                 if old_numblocks != self.numblocks:
+                    self.func_to_blocknum[func.fname] = old_numblocks
                     self.blocks[old_numblocks].func += 'function %s%s\n' % (func.fname, symbol_list_as_dict(func.params))
                 for blk in unassigned:
                     blk.assign_goto(self.numblocks)
@@ -228,76 +233,6 @@ class CFG(object):
                     self.blocks[-1].goto = self.numblocks
 
         return unassigned
-
-    @DeprecationWarning
-    def traverse_if(self, ifblock, nextblock):
-        ifblock.gotoif = self.traverse_ast(ifblock.ifstmt.stlist1, nextblock)
-        if ifblock.ifstmt.stlist2:
-            ifblock.gotoelse = self.traverse_ast(ifblock.ifstmt.stlist2, nextblock)
-        else:
-            ifblock.gotoelse = nextblock
-
-    @DeprecationWarning
-    def traverse_while(self, whileblock, nextblock):
-        whileblock.gotoif = self.traverse_ast(whileblock.whilestmt.stlist, whileblock)
-        whileblock.gotoelse = nextblock
-
-    @DeprecationWarning
-    def traverse_block(self, blockblock, nextblock):
-        self.traverse_ast(blockblock.stlist, nextblock)
-        blockblock.goto = nextblock
-
-    @DeprecationWarning
-    def traverse_ast(self, stlist, nextblock):
-        localblocks = []
-        block_list = StmtList()
-
-        j = 0
-        while(j < len(stlist)):
-            # IfBlock
-            if isinstance(stlist[j], IfStatement):
-                self.blocks.append(IfBlock(stlist[j]))
-                localblocks.append(self.blocks[-1])
-                j += 1
-            # While Block
-            elif isinstance(stlist[j], WhileStatement):
-                self.blocks.append(WhileBlock(stlist[j]))
-                localblocks.append(self.blocks[-1])
-                j += 1
-            # Basic Block
-            elif isinstance(stlist[j], ScopeBlock):
-                self.blocks.append(BasicBlock(stlist[j].stlist))
-                localblocks.append(self.blocks[-1])
-                j += 1
-            elif isinstance(stlist[j], Declaration):
-                j += 1
-            else:
-                block_list = StmtList()
-                while(not (j >= len(stlist) or isinstance(stlist[j], IfStatement) or
-                        isinstance(stlist[j], WhileStatement) or \
-                           isinstance(stlist[j], ScopeBlock) or \
-                           isinstance(stlist[j], Declaration))):
-                    block_list.append(stlist[j])
-                    j += 1
-                self.blocks.append(BasicBlock(block_list))
-                localblocks.append(self.blocks[-1])
-
-        localblocks.append(nextblock)
-
-        for i in range(len(localblocks) - 1):
-            thisblock = localblocks[i]
-            _nextblock = localblocks[i+1]
-            if isinstance(thisblock, BasicBlock):
-                thisblock.goto = _nextblock
-            elif isinstance(thisblock, IfBlock):
-                self.traverse_if(thisblock, _nextblock)
-            else:
-                self.traverse_while(thisblock, _nextblock)
-
-        ret = localblocks[0]
-        localblocks.pop()
-
-        return ret
 
     def __str__(self):
         return '\n'.join ([str(block) for block in self.blocks])

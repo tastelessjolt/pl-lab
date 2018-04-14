@@ -7,6 +7,9 @@ class AST(object):
             Output: Tuple ( table_entry_or_entries, symtables_created_in_the_process ) 
         '''
         pass
+    
+    def get_asm(self, parser, asm):
+        raise NotImplementedError
 
 class Nothing(AST):
     def __init__(self):
@@ -124,6 +127,9 @@ class FuncCall(AST):
         if isinstance(self.type, VoidType):
             block.expandedAst.append(self)
         return self
+    
+    def get_asm(self, parser, asm):
+        raise NotImplementedError
 
 class IfStatement(AST):
     def __init__(self, operator, condition, stlist1, stlist2=StmtList()):
@@ -152,6 +158,9 @@ class IfStatement(AST):
         if len(self.stlist2) != 0:
             s += '\nelse {\n' + inc_tabsize('\n'.join([repr(st) for st in self.stlist2])) + '\n}'
         return s
+    
+    def get_asm(self, parser, asm):
+        raise NotImplementedError
 
 
 class WhileStatement(AST):
@@ -174,6 +183,9 @@ class WhileStatement(AST):
         if len(self.stlist) != 0:
             s += '{\n' + inc_tabsize('\n'.join([repr(st) for st in self.stlist])) + '\n}'
         return s
+    
+    def get_asm(self, parser, asm):
+        raise NotImplementedError
 
 class ScopeBlock(AST):
     '''
@@ -229,6 +241,9 @@ class Return(AST):
     def expand(self, cfg, block):
         block.expandedAst.append(self)
         return self
+    
+    def get_asm(self, parser, asm):
+        raise NotImplementedError
 
 class Symbol(AST):
     # this is only used for Declarations
@@ -257,6 +272,9 @@ class Symbol(AST):
     
     def tableEntry(self, scope=symtab.Scope.NA, parent=None):
         return symtab.TableEntry(self.label, self.datatype, scope, lineno=self.lineno)
+    
+    def get_asm(self, parser, asm):
+        raise NotImplementedError
 
 class BinOp(AST):
     def __init__(self, operator, operand1, operand2, lineno=-1, cfg=0):
@@ -315,6 +333,9 @@ class BinOp(AST):
             block.expandedAst += [BinOp(Operator.equal,
                                         newTmp, BinOp(self.operator, place1, place2, cfg=1), cfg=1)]
             return newTmp
+    
+    def get_asm(self, parser, asm):
+        raise NotImplementedError
 
 class UnaryOp(AST):
     def __init__(self, operator, operand, lineno=-1):
@@ -365,7 +386,9 @@ class UnaryOp(AST):
         block.expandedAst += [BinOp(Operator.equal,
                                     newTmp, UnaryOp(self.operator, place), cfg=1)]
         return newTmp
-        
+    
+    def get_asm(self, parser, asm):
+        raise NotImplementedError
 
 class Var(AST):    
     def __init__(self, label, type=DataType(), lineno=-1):
@@ -384,6 +407,9 @@ class Var(AST):
 
     def expand(self, cfg, block):
         return self
+    
+    def get_asm(self, parser, asm):
+        raise NotImplementedError
 
 class Num(AST):
     def __init__(self, val, lineno=-1):

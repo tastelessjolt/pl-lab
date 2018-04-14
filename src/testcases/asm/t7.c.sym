@@ -7,12 +7,12 @@ Variable table :-
 -----------------------------------------------------------------
 Name	|	Scope		|	Base Type  |  Derived Type
 -----------------------------------------------------------------
-y		|	procedure f	|	int	   |	
-z		|	procedure f	|	int	   |	
-t		|	procedure f	|	int	   |	*
-x		|	procedure f	|	float	   |	
 y		|	procedure main	|	int	   |	*
-ans		|	procedure main	|	int	   |	*
 x		|	procedure main	|	float	   |	*
+ans		|	procedure main	|	int	   |	*
+z		|	procedure f	|	int	   |	
+y		|	procedure f	|	int	   |	
+x		|	procedure f	|	float	   |	
+t		|	procedure f	|	int	   |	*
 -----------------------------------------------------------------
 -----------------------------------------------------------------
