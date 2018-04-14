@@ -143,7 +143,7 @@ from .asm import *
     nop # No operation
 '''
 
-r_instructions = 
-i_instructions = 
-j_instructions = 
-misc_instructions = 
+r_instructions = []
+i_instructions = []
+j_instructions = []
+misc_instructions = []
