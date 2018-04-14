@@ -67,7 +67,7 @@ class SPIM(ASM):
                 s += inc_tabsize(self.get_prologue(value))
                 s += "# Prologue ends\n"
                 func_block = self.cfg.blocks[self.cfg.func_to_blocknum[value.name]]
-                s += func_block.get_asm(self.parser, self)
+                s += func_block.get_asm(self.parser, value.table_ptr, self)
                 s += "# Epilogue begins\n"
                 s += "epilogue_%s:\n" % value.name
                 s += inc_tabsize(self.get_epilogue(value))
@@ -82,23 +82,40 @@ class SPIM(ASM):
 
         return s
 
+class InstrOp(Enum):
+    add = 0
+    sub = 1
+    mul = 2
+    j = 3
+    be = 4
+    bne = 5
+    li = 6
+    lw = 7
+    sw = 8
+
+    def __str__(self):
+        return self.name
+
 class Instruction:
-    def __init__(self, opcode, operands):
-        self.opcode = opcode
+    def __init__(self, operator, *operands):
+        self.operator = operator
         self.operands = operands
 
+    def __str__(self):
+        print(self.operator, " ".join([str(reg) for reg in self.operands]))
+
     def __repr__(self):
-        print(self.opcode, self.operands)
+        print(self.operator, self.operands)
 
 class RInstruction(Instruction):
-    def __init__(self, opcode, operands):
-        mysuper(self).__init__(opcode, operands)
+    def __init__(self, operator, operands):
+        mysuper(self).__init__(operator, operands)
 
 class IInstruction(Instruction):
-    def __init__(self, opcode, operands):
-        mysuper(self).__init__(opcode, operands)
+    def __init__(self, operator, operands):
+        mysuper(self).__init__(operator, operands)
 
 class JInstruction(Instruction):
-    def __init__(self, opcode, operands):
-        mysuper(self).__init__(opcode, operands)
+    def __init__(self, operator, operands):
+        mysuper(self).__init__(operator, operands)
 
