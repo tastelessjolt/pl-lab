@@ -33,6 +33,10 @@ class TableEntry(object):
             return 'Line %d: %s' % (self.lineno, repr ((self.name, self.type, str(self.scope), self.table_ptr.name)))
         else:
             return 'Line %d: %s' % (self.lineno, repr((self.name, self.type, str(self.scope), self.offset, self.width)))
+    
+    def get_size(self):
+        if self.table_ptr:
+            return self.table_ptr.width
 
 class SymTab(object):
     def __init__(self, name='global', parent=None, parent_func=None):

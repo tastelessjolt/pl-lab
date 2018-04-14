@@ -36,16 +36,34 @@ class SPIM(ASM):
         
         return s
 
+    def get_prologue(self, func_entry):
+        s = ''
+        s += 'sw $ra, 0($sp)  # Save the return address\n'
+        s += 'sw $fp, -4($sp) # Save the frame pointer\n'
+        s += 'sub $fp, $sp, 8 # Update the frame pointer\n'
+        s += 'sub $sp, $sp, %d    # Make space for the locals\n' % (func_entry.get_size() + 8)
+        return s
+    
+    def get_epilogue(self, func_entry):
+        s = ''
+        s += '# Epilogue begins'
     
     def get_text_section(self):
         s = ''
-        s += "\t.text\n"
         global_symtab = self.parser.all_symtab[0]
         for key, value in sorted(global_symtab.table.items(), key=lambda x: x[1].name):
             if value.table_ptr:
-                s += "\t.globl %s\n" % value.name
+                s += "\t.text\n"
+                s += "\t.globl %s\n%s:\n" % (value.name, value.name)
+                s += "# Prologue begins\n"
+                s += inc_tabsize(self.get_prologue(value))
+                s += "# Prologue ends\n"
                 func_block = self.cfg.blocks[self.cfg.func_to_blocknum[value.name]]
                 s += func_block.get_asm(self.parser, self)
+                s += "# Epilogue begins\n"
+                s += "epilogue_%s:\n" % value.name
+                s += inc_tabsize(self.get_epilogue(value))
+                s += "# Epilogue ends\n"
 
         return s
 
