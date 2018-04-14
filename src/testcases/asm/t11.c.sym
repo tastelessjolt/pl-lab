@@ -1,0 +1,21 @@
+Procedure table :-
+-----------------------------------------------------------------
+Name		|	Return Type  |  Parameter List
+f		|	float		|	int *a, int *afloat b, float bint *c, int *cint *d, int *dint *e
+-----------------------------------------------------------------
+Variable table :- 
+-----------------------------------------------------------------
+Name	|	Scope		|	Base Type  |  Derived Type
+-----------------------------------------------------------------
+ptr		|	procedure main	|	int	   |	*
+gl		|	global		|	float	   |	
+pt		|	global		|	float	   |	*
+a		|	procedure f	|	int	   |	*
+p		|	procedure f	|	float	   |	*
+c		|	procedure f	|	int	   |	*
+b		|	procedure f	|	float	   |	
+e		|	procedure f	|	int	   |	*
+d		|	procedure f	|	int	   |	*
+q		|	procedure f	|	float	   |	*
+-----------------------------------------------------------------
+-----------------------------------------------------------------

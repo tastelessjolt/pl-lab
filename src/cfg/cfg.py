@@ -24,8 +24,9 @@ class BasicBlock(object):
         for stmt in self.astlist:
             stmt.expand(cfg, self)
     
-    def get_asm(self, parser, asm):
-        return "\n".join([ast.get_asm(parser, asm) for ast in self.expandedAst])
+    def get_asm(self, parser, symtab, asm):
+        for ast in self.expandedAst:
+            ast.get_asm(parser, symtab, asm)
 
     def assign_goto(self, goto):
         self.goto = goto
@@ -66,6 +67,11 @@ class IfBlock(object):
         if self.gotoelse == -1:
             self.gotoelse = goto
 
+    def get_asm(self, parser, symtab, asm):
+        # TODO: add branch instructions
+        for ast in self.expandedAst:
+            ast.get_asm(parser, symtab, asm)
+
 class WhileBlock(object):
     def __init__(self, whilestmt, blocknum=-1, gotoif=-1, gotoelse=-1, func=''):
         self.whilestmt = whilestmt
@@ -99,6 +105,11 @@ class WhileBlock(object):
         if self.gotoif == -1:
             self.gotoif = goto
         self.gotoelse = goto
+
+    def get_asm(self, parser, symtab, asm):
+        # TODO: add branch instructions
+        for ast in self.expandedAst:
+            ast.get_asm(parser, symtab, asm)
 
 class CFG(object):
     def __init__(self, programAST):

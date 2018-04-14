@@ -12,15 +12,19 @@ class SPIM(ASM):
         self.instructions = all_instructions
         self.free_registers = RegStack()
         self.var_to_reg_map = {}
+        self.code = []
 
-    def get_register(self, var):
-        if self.var_to_reg_map.__contains__(var.label):
+    def get_register(self, var, symtab):
+        if var.label in self.var_to_reg_map:
             return self.var_to_reg_map[var.label]
         else:
             raise NotImplementedError
 
-    def set_register(self, var, reg):
-        self.var_to_reg_map[var.label] = reg
+    def free_variable(self, var):
+        self.free_register(self.var_to_reg_map.pop(var.label, None))
+
+    def set_register(self, var):
+        self.var_to_reg_map[var.label] = self.new_register()
 
     def new_register(self):
         if self.free_registers.isEmpty(type):
@@ -32,7 +36,8 @@ class SPIM(ASM):
 
     def free_register(self, *regs):
         for reg in regs:
-            self.free_registers.push(reg)
+            if reg is not None:
+                self.free_registers.push(reg)
 
     def get_data_section(self):
         s = ''

@@ -254,8 +254,6 @@ class Return(AST):
             s = self.ast.get_asm()
             s += '' % (asm.get_register(self.ast))
             raise NotImplementedError
-        else:
-            return ''
             
 
 
@@ -471,4 +469,4 @@ class Num(AST):
     
     def get_asm(self, parser, symtab, asm):
         new_reg = asm.get_register(self.type)
-        return Instruction(InstrOp.li, new_reg, self.val)
+        asm.code.append(Instruction(InstrOp.li, new_reg, self.val))

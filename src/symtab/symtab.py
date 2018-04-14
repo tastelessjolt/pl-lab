@@ -63,9 +63,10 @@ class SymTab(object):
 
         for entry in entrys:
             if not self.table.__contains__(entry.name):
-                entry.offset = self.width
                 self.table[entry.name] = entry
-                self.width += entry.width
+                if entry.scope == Scope.LOCAL:
+                    entry.offset = self.width
+                    self.width += entry.width
             else:
                 errors.append(entry)
         if len(errors) > 0:

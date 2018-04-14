@@ -161,9 +161,9 @@ class RegStack():
         self.float_regs = []
         for reg in Register:
             if reg.is_gp and reg.is_temp:
-                self.gp_regs.append(0, reg)
+                self.gp_regs.insert(0, reg)
             elif reg.is_float and reg.is_temp:
-                self.float_regs.append(0, reg)
+                self.float_regs.insert(0, reg)
 
     def isEmpty(self, type):
         if type.isInt() or type.isDerived():
