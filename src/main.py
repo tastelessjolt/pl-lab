@@ -4,11 +4,12 @@ from utils import eprint, symtab_from_ast
 from lex import *
 from yacc import *
 from cfg import *
+from asm import *
 import sys
 import os
 import argparse
 
-VERSION = '0.4.0'
+VERSION = '0.5.0'
 
 def buildArgParser():
     parser = argparse.ArgumentParser(description='APL Compiler ver ' + VERSION)
@@ -19,6 +20,7 @@ def buildArgParser():
     parser.add_argument('-a', '--ast', help='generate AST output', action='store_true')
     parser.add_argument('-c', '--cfg', help='generate CFG output', action='store_true')    
     parser.add_argument('-e', '--ecfg', help='generate Extended CFG output', action='store_true')    
+    parser.add_argument('-s', '--asm', help='generate mips assembly', action='store_true')    
     return parser
 
 if __name__ == '__main__':
@@ -70,7 +72,7 @@ if __name__ == '__main__':
             with open(filename + '.cfg', 'w') as f:
                 f.write(str(cfg))
 
-    if args.ecfg or not (args.yacc or args.lex or args.ast or args.cfg):
+    if args.ecfg:
         parser = APLYacc(output=YaccOutput.AST)
         parser.build(lexer, debug=True)
         ast = parser.parse(data)
@@ -85,4 +87,14 @@ if __name__ == '__main__':
             cfg = CFG(ast) 
             with open(filename + ".cfg", 'w') as f:
                 f.write(str(cfg))
-            
+    
+    if args.asm or not (args.yacc or args.lex or args.ast or args.cfg or args.ecfg):
+        parser = APLYacc(output=YaccOutput.AST)
+        parser.build(lexer, debug=True)
+        ast = parser.parse(data)
+        if ast:
+            cfg = CFG(ast)
+            asm = SPIM(parser, cfg)
+
+            print(asm.get_data_section())
+            # print(asm.get_text_section())
