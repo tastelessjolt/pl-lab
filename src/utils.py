@@ -14,7 +14,7 @@ def symbol_list_as_dict(params, bracket=True):
     else:
         return '%s' % (', '.join(['%s %s' % (param.datatype, param.label) if hasattr(param, 'label') else '%s' % str(param) for param in params]))
 
-def _super(obj):
+def mysuper(obj):
     return super(type(obj), obj)
 
 def symtab_from_ast(parser, ast):
@@ -130,6 +130,13 @@ class AnyType(DataType):
 
     def __eq__(self, other):
         return issubclass(type(other), DataType)
+
+
+class Stack(list):
+    def isEmpty(self):
+        return not self
+    def push(self, item):
+        self.append(item)
 
 class Operator(Enum):
     plus = 0

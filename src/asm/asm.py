@@ -1,4 +1,4 @@
-import utils
+from utils import *
 
 all_instructions = []
 
@@ -10,6 +10,20 @@ class SPIM(ASM):
         self.cfg = cfg
         self.parser = parser
         self.instructions = all_instructions
+        self.free_registers = Stack()
+        self.var_to_reg_map = {}
+
+    def get_register(self):
+        if self.free_registers.isEmpty():
+            eprint("Out of registers!")
+            eprint("Exiting...")
+            sys.exit()
+        else:
+            return self.free_registers.pop()
+
+    def free_register(self, *regs):
+        for reg in regs:
+            self.free_registers.push(reg)
 
     def get_data_section(self):
         s = ''
@@ -52,13 +66,13 @@ class Instruction:
 
 class RInstruction(Instruction):
     def __init__(self, opcode, operands):
-        utils._super(self).__init__(opcode, operands)
+        mysuper(self).__init__(opcode, operands)
 
 class IInstruction(Instruction):
     def __init__(self, opcode, operands):
-        utils._super(self).__init__(opcode, operands)
+        mysuper(self).__init__(opcode, operands)
 
 class JInstruction(Instruction):
     def __init__(self, opcode, operands):
-        utils._super(self).__init__(opcode, operands)
+        mysuper(self).__init__(opcode, operands)
 

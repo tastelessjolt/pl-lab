@@ -335,7 +335,25 @@ class BinOp(AST):
             return newTmp
     
     def get_asm(self, parser, asm):
-        raise NotImplementedError
+        s = ''
+        if self.operator._is_arithmetic_op():
+            load_str1, reg1 = self.operand1.load(asm)
+            load_str2, reg2 = self.operand2.load(asm)
+            s += load_str1 + load_str2
+            new_reg = asm.get_register()
+            if self.operator == Operator.plus:
+                s += "add %s %s %s" % (new_reg, reg1, reg2)
+            elif self.operator == Operator.minus:
+                s += "sub %s %s %s" % (new_reg, reg1, reg2)
+            elif self.operator == Operator.mul:
+                raise NotImplementedError
+            elif self.operator == Operator.divide:
+                raise NotImplementedError
+            elif self.operator == Operator.equal:
+                raise NotImplementedError
+
+            asm.free_register(reg1, reg2)
+
 
 class UnaryOp(AST):
     def __init__(self, operator, operand, lineno=-1):
