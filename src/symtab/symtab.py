@@ -28,6 +28,9 @@ class TableEntry(object):
             return 'Line %d: %s' % (self.lineno, repr ((self.name, self.type, str(self.scope), self.table_ptr.name)))
         else:
             return 'Line %d: %s' % (self.lineno, repr((self.name, self.type, str(self.scope))))
+    
+    def get_size(self):
+        return self.table_ptr.get_local_size()
 
 class SymTab(object):
     def __init__(self, name='global', parent=None, parent_func=None):
@@ -81,6 +84,13 @@ class SymTab(object):
     def get(self, key):
         if self.table.__contains__(key):
             return self.table[key]
+    
+    def get_local_size(self):
+        items = 0
+        for key, value in self.table.items():
+            if value.scope == Scope.LOCAL:
+                items += 1
+        return 4*items
 
     def __repr__(self):
         return '%s (%s) {\n%s\n}' % (self.name, self.parent.name if self.parent else '' , inc_tabsize('\n'.join([repr(self.table[key]) for key in self.table])))
