@@ -32,7 +32,10 @@ class SPIM(ASM):
         for key, value in sorted(global_symtab.table.items(), key=lambda x: x[1].name):
             if not value.table_ptr:
                 # Update this incase float is to be taken as 8 bytes
-                s += "global_%s\t.word\t0\n" % value.name
+                if value.type.isFloat():
+                    s += "global_%s\t.space\t%d\n" % (value.name, value.width)
+                else:
+                    s += "global_%s\t.word\t0\n" % value.name
         
         return s
 

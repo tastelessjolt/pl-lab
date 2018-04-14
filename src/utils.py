@@ -61,6 +61,15 @@ class DataType(object):
         return ((other.__class__ == self.__class__) and (other.ptr_depth == self.ptr_depth)) or \
                     ( (not issubclass(type(other), DataType)) and other == self)
 
+    def isFloat(self):
+        return isinstance(self, FloatType) and self.ptr_depth == 0 
+
+    def isInt(self):
+        return isinstance(self, IntType) and self.ptr_depth == 0
+
+    def isDerived(self):
+        return issubclass(type(self), DataType) and self.ptr_depth > 0
+
     @property
     def width(self):
         return 0
