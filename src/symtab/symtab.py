@@ -16,6 +16,11 @@ class TableEntry(object):
         self.table_ptr = table_ptr
         self.lineno = lineno
         self.definition = definition
+        self.offset = 0
+        if self.table_ptr:
+            self.width = 0
+        else:
+            self.width = self.type.width
     
     def __str__(self, fname='global'):
         if self.table_ptr:
@@ -27,7 +32,7 @@ class TableEntry(object):
         if self.table_ptr:
             return 'Line %d: %s' % (self.lineno, repr ((self.name, self.type, str(self.scope), self.table_ptr.name)))
         else:
-            return 'Line %d: %s' % (self.lineno, repr((self.name, self.type, str(self.scope))))
+            return 'Line %d: %s' % (self.lineno, repr((self.name, self.type, str(self.scope), self.offset, self.width)))
 
 class SymTab(object):
     def __init__(self, name='global', parent=None, parent_func=None):
@@ -35,6 +40,7 @@ class SymTab(object):
         self.table = OrderedDict()
         self.parent = parent
         self.parent_func = parent_func
+        self.width = 0
 
     def search(self, key):
         if self.table.__contains__(key):
@@ -52,7 +58,9 @@ class SymTab(object):
 
         for entry in entrys:
             if not self.table.__contains__(entry.name):
+                entry.offset = self.width
                 self.table[entry.name] = entry
+                self.width += entry.width
             else:
                 errors.append(entry)
         if len(errors) > 0:
@@ -83,4 +91,4 @@ class SymTab(object):
             return self.table[key]
 
     def __repr__(self):
-        return '%s (%s) {\n%s\n}' % (self.name, self.parent.name if self.parent else '' , inc_tabsize('\n'.join([repr(self.table[key]) for key in self.table])))
+        return '%s (%s) [%d] {\n%s\n}' % (self.name, self.parent.name if self.parent else '' , self.width, inc_tabsize('\n'.join([repr(self.table[key]) for key in self.table])))
