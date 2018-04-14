@@ -13,7 +13,16 @@ class SPIM(ASM):
         self.free_registers = Stack()
         self.var_to_reg_map = {}
 
-    def get_register(self):
+    def get_register(self, var):
+        if self.var_to_reg_map.__contains__(var.label):
+            return self.var_to_reg_map[var.label]
+        else:
+            raise NotImplementedError
+
+    def set_register(self, var, reg):
+        self.var_to_reg_map[var.label] = reg
+
+    def new_register(self):
         if self.free_registers.isEmpty():
             eprint("Out of registers!")
             eprint("Exiting...")
@@ -44,7 +53,7 @@ class SPIM(ASM):
         s += 'sw $ra, 0($sp)  # Save the return address\n'
         s += 'sw $fp, -4($sp) # Save the frame pointer\n'
         s += 'sub $fp, $sp, 8 # Update the frame pointer\n'
-        s += 'sub $sp, $sp, %d    # Make space for the locals\n' % (func_entry.get_size() + 8)
+        s += 'sub $sp, $sp, %d    # Make space for the locals\n' % (func_entry.size + 8)
         return s
     
     def get_epilogue(self, func_entry):

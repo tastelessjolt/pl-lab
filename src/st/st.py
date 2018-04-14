@@ -11,6 +11,9 @@ class AST(object):
     def get_asm(self, parser, asm):
         raise NotImplementedError
 
+    def isNothing(self):
+        return isinstance(self, Nothing)
+
 class Nothing(AST):
     def __init__(self):
         self.type = VoidType()
@@ -243,7 +246,14 @@ class Return(AST):
         return self
     
     def get_asm(self, parser, asm):
-        raise NotImplementedError
+        if not self.ast.isNothing():
+            s = self.ast.get_asm()
+            s += '' % (asm.get_register(self.ast))
+            raise NotImplementedError
+        else:
+            return ''
+            
+
 
 class Symbol(AST):
     # this is only used for Declarations
@@ -427,7 +437,7 @@ class Var(AST):
         return self
     
     def get_asm(self, parser, asm):
-        raise NotImplementedError
+        return ''
 
 class Num(AST):
     def __init__(self, val, lineno=-1):
