@@ -87,12 +87,17 @@ class InstrOp(Enum):
     sub = 1
     mul = 2
     j = 3
-    be = 4
+    beq = 4
     bne = 5
     li = 6
     lw = 7
     sw = 8
-
+    sne = 9
+    seq = 10
+    move = 11
+    jal = 12
+    jr = 13
+    
     def __str__(self):
         return self.name
 
