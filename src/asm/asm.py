@@ -13,7 +13,16 @@ class SPIM(ASM):
         self.free_registers = RegStack()
         self.var_to_reg_map = {}
 
-    def get_register(self, type):
+    def get_register(self, var):
+        if self.var_to_reg_map.__contains__(var.label):
+            return self.var_to_reg_map[var.label]
+        else:
+            raise NotImplementedError
+
+    def set_register(self, var, reg):
+        self.var_to_reg_map[var.label] = reg
+
+    def new_register(self):
         if self.free_registers.isEmpty(type):
             eprint("Out of registers!")
             eprint("Exiting...")
