@@ -10,16 +10,16 @@ class SPIM(ASM):
         self.cfg = cfg
         self.parser = parser
         self.instructions = all_instructions
-        self.free_registers = Stack()
+        self.free_registers = RegStack()
         self.var_to_reg_map = {}
 
-    def get_register(self):
-        if self.free_registers.isEmpty():
+    def get_register(self, type):
+        if self.free_registers.isEmpty(type):
             eprint("Out of registers!")
             eprint("Exiting...")
             sys.exit()
         else:
-            return self.free_registers.pop()
+            return self.free_registers.pop(type)
 
     def free_register(self, *regs):
         for reg in regs:

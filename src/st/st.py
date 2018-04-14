@@ -449,3 +449,11 @@ class Num(AST):
 
     def expand(self, cfg, block):
         return self
+    
+    def get_asm(self, parser, asm):
+        if self.type.isInt():
+            new_reg = asm.get_int_register()
+        elif self.type.isFloat():
+            new_reg = asm.get_float_register()
+
+        return "li %s %d" % (new_reg, self.val)

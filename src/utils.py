@@ -155,11 +155,33 @@ class AnyType(DataType):
         return issubclass(type(other), DataType)
 
 
-class Stack(list):
-    def isEmpty(self):
-        return not self
+class RegStack():
+    def __init__(self):
+        self.gp_regs = []
+        self.float_regs = []
+        for reg in Register:
+            if reg.is_gp and reg.is_temp:
+                self.gp_regs.append(0, reg)
+            elif reg.is_float and reg.is_temp:
+                self.float_regs.append(0, reg)
+
+    def isEmpty(self, type):
+        if type.isInt() or type.isDerived():
+            return not self.gp_regs
+        else:
+            return not self.float_regs
+
     def push(self, item):
-        self.append(item)
+        if item.is_gp:
+            self.gp_regs.append(item)
+        else:
+            self.float_regs.append(item)
+
+    def pop(self, type):
+        if type.isInt() or type.isDerived():
+            return self.gp_regs.pop()
+        else:
+            return self.float_regs.pop()
 
 class Operator(Enum):
     plus = 0
@@ -320,4 +342,17 @@ class Register(Enum):
 
     def __str__(self):
         return '$' + self.name
+    
+    @property
+    def is_gp(self):
+        return self.value < 32
+    
+    @property
+    def is_float(self):
+        return self.value >= 32
+
+    @property
+    ## TODO: Check for floating point
+    def is_temp(self):
+        return (self.value >= 8 and self.value <= 25) or (self.value >= 8 + 32 and self.value <= 25 + 32)
 
