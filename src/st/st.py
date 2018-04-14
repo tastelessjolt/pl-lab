@@ -1,5 +1,9 @@
-from utils import inc_tabsize, DataType, IntType, FloatType, AnyType, VoidType, Operator, eprint, BooleanType, symbol_list_as_dict
+from utils import inc_tabsize, DataType, IntType, FloatType, AnyType, VoidType
+from utils import Operator, eprint, BooleanType, symbol_list_as_dict
+from asm import *
 import symtab
+
+
 class AST(object):
     def tableEntry(self, scope=symtab.Scope.NA, parent=None):
         '''
@@ -8,7 +12,7 @@ class AST(object):
         '''
         pass
     
-    def get_asm(self, parser, asm):
+    def get_asm(self, parser, symtab, asm):
         raise NotImplementedError
 
     def isNothing(self):
@@ -131,7 +135,7 @@ class FuncCall(AST):
             block.expandedAst.append(self)
         return self
     
-    def get_asm(self, parser, asm):
+    def get_asm(self, parser, symtab, asm):
         raise NotImplementedError
 
 class IfStatement(AST):
@@ -162,7 +166,7 @@ class IfStatement(AST):
             s += '\nelse {\n' + inc_tabsize('\n'.join([repr(st) for st in self.stlist2])) + '\n}'
         return s
     
-    def get_asm(self, parser, asm):
+    def get_asm(self, parser, symtab, asm):
         raise NotImplementedError
 
 
@@ -187,7 +191,7 @@ class WhileStatement(AST):
             s += '{\n' + inc_tabsize('\n'.join([repr(st) for st in self.stlist])) + '\n}'
         return s
     
-    def get_asm(self, parser, asm):
+    def get_asm(self, parser, symtab, asm):
         raise NotImplementedError
 
 class ScopeBlock(AST):
@@ -245,7 +249,7 @@ class Return(AST):
         block.expandedAst.append(self)
         return self
     
-    def get_asm(self, parser, asm):
+    def get_asm(self, parser, symtab, asm):
         if not self.ast.isNothing():
             s = self.ast.get_asm()
             s += '' % (asm.get_register(self.ast))
@@ -283,7 +287,7 @@ class Symbol(AST):
     def tableEntry(self, scope=symtab.Scope.NA, parent=None):
         return symtab.TableEntry(self.label, self.datatype, scope, lineno=self.lineno)
     
-    def get_asm(self, parser, asm):
+    def get_asm(self, parser, symtab, asm):
         raise NotImplementedError
 
 class BinOp(AST):
@@ -344,22 +348,27 @@ class BinOp(AST):
                                         newTmp, BinOp(self.operator, place1, place2, cfg=1), cfg=1)]
             return newTmp
     
-    def get_asm(self, parser, asm):
-        s = ''
+    def get_asm(self, parser, symtab, asm):
+        s = []
         if self.operator._is_arithmetic_op():
-            load_str1, reg1 = self.operand1.load(asm)
-            load_str2, reg2 = self.operand2.load(asm)
-            s += load_str1 + load_str2
-            new_reg = asm.get_register()
-            if self.operator == Operator.plus:
-                s += "add %s %s %s" % (new_reg, reg1, reg2)
-            elif self.operator == Operator.minus:
-                s += "sub %s %s %s" % (new_reg, reg1, reg2)
-            elif self.operator == Operator.mul:
-                raise NotImplementedError
-            elif self.operator == Operator.divide:
-                raise NotImplementedError
-            elif self.operator == Operator.equal:
+            if self.operator != Operator.equal:
+                load1 = self.operand1.load(asm)
+                load2 = self.operand2.load(asm)
+                s.extend([load1, load2])
+                new_reg = asm.get_register()
+                ## TODO: register extraction
+                reg1 = Register()
+                reg2 = Register()
+                if self.operator == Operator.plus:
+                    s += Instruction(InstrOp.add, new_reg, reg1, reg2)
+                elif self.operator == Operator.minus:
+                    s += Instruction(InstrOp.sub, new_reg, reg1, reg2)
+                elif self.operator == Operator.mul:
+                    s += Instruction(InstrOp.mul, new_reg, reg1, reg2)
+                elif self.operator == Operator.divide:
+                    s += Instruction(InstrOp.div, new_reg, reg1, reg2)
+            else:
+
                 raise NotImplementedError
 
             asm.free_register(reg1, reg2)
@@ -415,7 +424,7 @@ class UnaryOp(AST):
                                     newTmp, UnaryOp(self.operator, place), cfg=1)]
         return newTmp
     
-    def get_asm(self, parser, asm):
+    def get_asm(self, parser, symtab, asm):
         raise NotImplementedError
 
 class Var(AST):    
@@ -436,8 +445,8 @@ class Var(AST):
     def expand(self, cfg, block):
         return self
     
-    def get_asm(self, parser, asm):
-        return ''
+    def get_asm(self, parser, symtab, asm):
+        raise NotImplementedError
 
 class Num(AST):
     def __init__(self, val, lineno=-1):
@@ -459,3 +468,7 @@ class Num(AST):
 
     def expand(self, cfg, block):
         return self
+    
+    def get_asm(self, parser, symtab, asm):
+        new_reg = asm.get_register(self.type)
+        return Instruction(InstrOp.li, new_reg, self.val)

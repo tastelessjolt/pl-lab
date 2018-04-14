@@ -10,7 +10,7 @@ class SPIM(ASM):
         self.cfg = cfg
         self.parser = parser
         self.instructions = all_instructions
-        self.free_registers = Stack()
+        self.free_registers = RegStack()
         self.var_to_reg_map = {}
 
     def get_register(self, var):
@@ -23,12 +23,12 @@ class SPIM(ASM):
         self.var_to_reg_map[var.label] = reg
 
     def new_register(self):
-        if self.free_registers.isEmpty():
+        if self.free_registers.isEmpty(type):
             eprint("Out of registers!")
             eprint("Exiting...")
             sys.exit()
         else:
-            return self.free_registers.pop()
+            return self.free_registers.pop(type)
 
     def free_register(self, *regs):
         for reg in regs:
@@ -58,20 +58,25 @@ class SPIM(ASM):
     
     def get_epilogue(self, func_entry):
         s = ''
-        s += '# Epilogue begins'
+        s += 'add $sp, $sp, %d' % (func_entry.size + 8)
+        s += 'lw $fp, -4($sp)'
+        s += 'lw $ra, 0($sp)'
+        s += 'jr $ra  # Jump back to the called procedure'
+        return s
     
     def get_text_section(self):
         s = ''
         global_symtab = self.parser.all_symtab[0]
         for key, value in sorted(global_symtab.table.items(), key=lambda x: x[1].name):
             if value.table_ptr:
-                s += "\t.text\n"
-                s += "\t.globl %s\n%s:\n" % (value.name, value.name)
+                s += "\t.text\t# The .text assembler directive indicates\n"
+                s += "\t.globl %s\t# The following is the code\n" % value.name
+                s += "%s:\n" % value.name
                 s += "# Prologue begins\n"
                 s += inc_tabsize(self.get_prologue(value))
                 s += "# Prologue ends\n"
                 func_block = self.cfg.blocks[self.cfg.func_to_blocknum[value.name]]
-                s += func_block.get_asm(self.parser, self)
+                s += func_block.get_asm(self.parser, value.table_ptr, self)
                 s += "# Epilogue begins\n"
                 s += "epilogue_%s:\n" % value.name
                 s += inc_tabsize(self.get_epilogue(value))
@@ -86,23 +91,40 @@ class SPIM(ASM):
 
         return s
 
+class InstrOp(Enum):
+    add = 0
+    sub = 1
+    mul = 2
+    j = 3
+    be = 4
+    bne = 5
+    li = 6
+    lw = 7
+    sw = 8
+
+    def __str__(self):
+        return self.name
+
 class Instruction:
-    def __init__(self, opcode, operands):
-        self.opcode = opcode
+    def __init__(self, operator, *operands):
+        self.operator = operator
         self.operands = operands
 
+    def __str__(self):
+        print(self.operator, " ".join([str(reg) for reg in self.operands]))
+
     def __repr__(self):
-        print(self.opcode, self.operands)
+        print(self.operator, self.operands)
 
 class RInstruction(Instruction):
-    def __init__(self, opcode, operands):
-        mysuper(self).__init__(opcode, operands)
+    def __init__(self, operator, operands):
+        mysuper(self).__init__(operator, operands)
 
 class IInstruction(Instruction):
-    def __init__(self, opcode, operands):
-        mysuper(self).__init__(opcode, operands)
+    def __init__(self, operator, operands):
+        mysuper(self).__init__(operator, operands)
 
 class JInstruction(Instruction):
-    def __init__(self, opcode, operands):
-        mysuper(self).__init__(opcode, operands)
+    def __init__(self, operator, operands):
+        mysuper(self).__init__(operator, operands)
 

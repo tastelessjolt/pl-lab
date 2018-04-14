@@ -52,13 +52,12 @@ label3:
 	bne $s0, $0, label4
 	j label5
 label4:
+	# setting up activation record for called function
+	li $s0, 3
+	sw $s0, -4($sp)
 	lw $s0, 4($sp)
 	lw $s1, 0($s0)
-	move $s0, $s1
-	# setting up activation record for called function
-	li $s1, 3
-	sw $s1, -4($sp)
-	sw $s0, 0($sp)
+	sw $s1, 0($sp)
 	sub $sp, $sp, 8
 	jal f # function call
 	add $sp, $sp, 8 # destroying activation record of called function

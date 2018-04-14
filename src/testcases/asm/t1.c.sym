@@ -9,8 +9,8 @@ Name	|	Scope		|	Base Type  |  Derived Type
 -----------------------------------------------------------------
 d		|	global		|	int	   |	
 a		|	procedure f	|	int	   |	
-m		|	procedure f	|	int	   |	
-b		|	procedure f	|	int	   |	*
 c		|	procedure f	|	int	   |	**
+b		|	procedure f	|	int	   |	*
+m		|	procedure f	|	int	   |	
 -----------------------------------------------------------------
 -----------------------------------------------------------------
