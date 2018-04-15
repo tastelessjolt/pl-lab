@@ -16,11 +16,12 @@ class TableEntry(object):
         self.table_ptr = table_ptr
         self.lineno = lineno
         self.definition = definition
-        self.offset = 0
+        self._offset = 0
         if self.table_ptr:
             self.width = 0
         else:
             self.width = self.type.width
+        self.enclosing_symtab = None
     
     def __str__(self, fname='global'):
         if self.table_ptr:
@@ -33,11 +34,26 @@ class TableEntry(object):
             return 'Line %d: %s' % (self.lineno, repr ((self.name, self.type, str(self.scope), self.table_ptr.name)))
         else:
             return 'Line %d: %s' % (self.lineno, repr((self.name, self.type, str(self.scope), self.offset, self.width)))
-    
+
+    def isFuncEntry(self):
+        return self.table_ptr is not None
+
     @property
     def size(self):
         if self.table_ptr:
             return self.table_ptr.width
+    
+    @property
+    def offset(self):
+        if self.enclosing_symtab and self.scope == Scope.ARGUMENT:
+            return self.enclosing_symtab.argument_width + self.enclosing_symtab.width + 8 - self._offset
+        else:
+            return self._offset + 4
+
+    @offset.setter
+    def offset(self, value):
+        self._offset = value
+
 
 class SymTab(object):
     def __init__(self, name='global', parent=None, parent_func=None):
@@ -46,6 +62,7 @@ class SymTab(object):
         self.parent = parent
         self.parent_func = parent_func
         self.width = 0
+        self.argument_width = 0
 
     def search(self, key):
         if self.table.__contains__(key):
@@ -64,9 +81,13 @@ class SymTab(object):
         for entry in entrys:
             if not self.table.__contains__(entry.name):
                 self.table[entry.name] = entry
+                entry.enclosing_symtab = self
                 if entry.scope == Scope.LOCAL:
                     entry.offset = self.width
                     self.width += entry.width
+                elif entry.scope == Scope.ARGUMENT:
+                    entry.offset = self.argument_width
+                    self.argument_width += entry.width
             else:
                 errors.append(entry)
         if len(errors) > 0:

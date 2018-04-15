@@ -15,18 +15,30 @@ class SPIM(ASM):
         self.code = []
 
     def get_register(self, var, symtab):
-        if var.label in self.var_to_reg_map:
-            return self.var_to_reg_map[var.label]
+        if var in self.var_to_reg_map:
+            return self.var_to_reg_map[var]
         else:
-            raise NotImplementedError
+            symtabEntry = symtab.search(var.label)
+            if symtabEntry and not symtabEntry.isFuncEntry():
+                reg = self.new_register(symtabEntry.type)
+                self.code.append(Instruction(InstrOp.lw, [ reg, symtabEntry.offset, Register.sp]))
+                return reg
+            else:
+                return self.set_register(var)
+                # raise Exception ('Variable %s not found in the symtab or in the temporaries' % var.label )
 
     def free_variable(self, var):
-        self.free_register(self.var_to_reg_map.pop(var.label, None))
+        self.free_register(self.var_to_reg_map.pop(var, None))
 
-    def set_register(self, var):
-        self.var_to_reg_map[var.label] = self.new_register()
+    def set_register(self, ast):
+        reg = self.new_register(ast.type)
+        self.var_to_reg_map[ast] = reg
+        return reg
 
-    def new_register(self):
+    def _set_reg(self, ast, reg):
+        self.var_to_reg_map[ast] = reg
+
+    def new_register(self, type):
         if self.free_registers.isEmpty(type):
             eprint("Out of registers!")
             eprint("Exiting...")
@@ -58,14 +70,14 @@ class SPIM(ASM):
         s += 'sw $ra, 0($sp)  # Save the return address\n'
         s += 'sw $fp, -4($sp) # Save the frame pointer\n'
         s += 'sub $fp, $sp, 8 # Update the frame pointer\n'
-        s += 'sub $sp, $sp, %d    # Make space for the locals\n' % (func_entry.size + 8)
+        s += 'sub $sp, $sp, %d    # Make space for the locals' % (func_entry.size + 8)
         return s
     
     def get_epilogue(self, func_entry):
         s = ''
-        s += 'add $sp, $sp, %d' % (func_entry.size + 8)
-        s += 'lw $fp, -4($sp)'
-        s += 'lw $ra, 0($sp)'
+        s += 'add $sp, $sp, %d\n' % (func_entry.size + 8)
+        s += 'lw $fp, -4($sp)\n'
+        s += 'lw $ra, 0($sp)\n'
         s += 'jr $ra  # Jump back to the called procedure'
         return s
     
@@ -79,12 +91,18 @@ class SPIM(ASM):
                 s += "%s:\n" % value.name
                 s += "# Prologue begins\n"
                 s += inc_tabsize(self.get_prologue(value))
+                s += '\n'
                 s += "# Prologue ends\n"
                 func_block = self.cfg.blocks[self.cfg.func_to_blocknum[value.name]]
-                s += func_block.get_asm(self.parser, value.table_ptr, self)
+                func_block.get_asm(self.parser, value.table_ptr, self)
+
+                s +=  inc_tabsize('\n'.join([repr(inst) for inst in self.code]))
+                self.code.clear()
+                s += '\n'
                 s += "# Epilogue begins\n"
                 s += "epilogue_%s:\n" % value.name
                 s += inc_tabsize(self.get_epilogue(value))
+                s += '\n'
                 s += "# Epilogue ends\n"
 
         return s
@@ -111,6 +129,7 @@ class InstrOp(Enum):
     move = 11
     jal = 12
     jr = 13
+    xor = 14
     
     def __str__(self):
         return self.name
@@ -121,10 +140,10 @@ class Instruction:
         self.operands = operands
 
     def __str__(self):
-        print(self.operator, " ".join([str(reg) for reg in self.operands]))
+        return str(self.operator) + " ".join([str(reg) for reg in self.operands])
 
     def __repr__(self):
-        print(self.operator, self.operands)
+        return str(self.operator) + ' ' + str(self.operands)
 
 class RInstruction(Instruction):
     def __init__(self, operator, operands):

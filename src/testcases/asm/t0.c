@@ -1,5 +1,6 @@
-int *func1(int a, int b)
+int *func1(int x, int y)
 {
-    int *c;
-    return c;   
+    int ****a, *c;
+    c = &a;
+    return c;
 }

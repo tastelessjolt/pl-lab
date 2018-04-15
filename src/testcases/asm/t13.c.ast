@@ -1,0 +1,10 @@
+FUNCTION f
+PARAMS ()
+RETURNS int
+RETURN 
+(
+	DEREF
+	(
+		VAR(a)
+	)
+)

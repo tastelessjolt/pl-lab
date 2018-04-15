@@ -342,6 +342,13 @@ class Register(Enum):
 
     def __str__(self):
         return '$' + self.name
+
+    @property
+    def type(self):
+        if self.is_float:
+            return FloatType(0)
+        else:
+            return IntType(0)
     
     @property
     def is_gp(self):

@@ -18,6 +18,9 @@ class AST(object):
     def isNothing(self):
         return isinstance(self, Nothing)
 
+    def free(self, asm):
+        raise NotImplementedError
+
 class Nothing(AST):
     def __init__(self):
         self.type = VoidType()
@@ -63,6 +66,10 @@ class StmtList(AST, list):
 
     def src(self):
         return '\n'.join([st.src() for st in self])
+
+    def get_asm(self, parser, symtab, asm):
+        for st in self:
+            st.get_asm(parser, symtab, asm)
 
 class Program(AST):
     def __init__(self, global_list, all_symtabs=None):
@@ -231,6 +238,10 @@ class Return(AST):
         self.ast = ast
         self.type = type
 
+        if isinstance(ast, Var) and ast.type.ptr_depth == 0:
+            eprint("Direct use of %s type variable not allowed. Line: %d" %
+                   (ast.type.basetype, lineno))
+
         if ast.type != type:
             eprint("The return type of the function doesn't match that of the return expression at line %d" % lineno)
 
@@ -251,10 +262,9 @@ class Return(AST):
     
     def get_asm(self, parser, symtab, asm):
         if not self.ast.isNothing():
-            s = self.ast.get_asm()
-            s += '' % (asm.get_register(self.ast))
-            raise NotImplementedError
-            
+            reg = self.ast.get_asm(parser, symtab, asm)
+            asm.code.append(Instruction(InstrOp.move, Register.v0, reg))
+            asm.free_variable(self.ast)
 
 
 class Symbol(AST):
@@ -284,9 +294,6 @@ class Symbol(AST):
     
     def tableEntry(self, scope=symtab.Scope.NA, parent=None):
         return symtab.TableEntry(self.label, self.datatype, scope, lineno=self.lineno)
-    
-    def get_asm(self, parser, symtab, asm):
-        raise NotImplementedError
 
 class BinOp(AST):
     def __init__(self, operator, operand1, operand2, lineno=-1, cfg=0):
@@ -347,29 +354,44 @@ class BinOp(AST):
             return newTmp
     
     def get_asm(self, parser, symtab, asm):
-        s = []
         if self.operator._is_arithmetic_op():
             if self.operator != Operator.equal:
-                load1 = self.operand1.load(asm)
-                load2 = self.operand2.load(asm)
-                s.extend([load1, load2])
-                new_reg = asm.get_register()
-                ## TODO: register extraction
-                reg1 = Register()
-                reg2 = Register()
+                reg1 = self.operand1.get_asm(asm)
+                reg2 = self.operand2.get_asm(asm)
+                new_reg = asm.set_register(self)
                 if self.operator == Operator.plus:
-                    s += Instruction(InstrOp.add, new_reg, reg1, reg2)
+                    asm.code.append(Instruction(InstrOp.add, new_reg, reg1, reg2))
                 elif self.operator == Operator.minus:
-                    s += Instruction(InstrOp.sub, new_reg, reg1, reg2)
+                    asm.code.append(Instruction(InstrOp.sub, new_reg, reg1, reg2))
                 elif self.operator == Operator.mul:
-                    s += Instruction(InstrOp.mul, new_reg, reg1, reg2)
+                    asm.code.append(Instruction(InstrOp.mul, new_reg, reg1, reg2))
                 elif self.operator == Operator.divide:
-                    s += Instruction(InstrOp.div, new_reg, reg1, reg2)
+                    asm.code.append(Instruction(InstrOp.div, new_reg, reg1, reg2))
+                asm.free_variable(self.operand1)
+                asm.free_variable(self.operand2)
+                return new_reg
             else:
+                reg2 = self.operand2.get_asm(parser, symtab, asm)
 
-                raise NotImplementedError
+                if isinstance(self.operand1, Var):
+                    entry = symtab.search(self.operand1.label)
+                    if entry and not entry.isFuncEntry():
+                        new_reg = asm.set_register(self.operand1)
+                        asm.code.append(Instruction(InstrOp.move, new_reg, reg2))
+                        asm.free_variable(self.operand2)
+                        asm.code.append(Instruction(InstrOp.sw, new_reg, entry.offset, Register.sp))
+                        asm.free_variable(self.operand1)
+                        return
+                    else:
+                        new_reg = asm.get_register(self.operand1, symtab)
+                        asm.code.append(Instruction(InstrOp.move, new_reg, reg2))
+                        asm.free_variable(self.operand2)
+                        return
+                elif isinstance(self.operand1, UnaryOp):
+                    pass
+                    
 
-            asm.free_register(reg1, reg2)
+        raise Exception('Problem in BinOP Assignment')
 
 
 class UnaryOp(AST):
@@ -401,7 +423,7 @@ class UnaryOp(AST):
         return "%s%s" % (repr(self.operator), repr(self.operand))
 
     def expand(self, cfg, block):
-        if self.operator == Operator.ptr and self.operand.type.ptr_depth < 2:
+        if self.operator == Operator.ptr or self.operator == Operator.ref:
             return self
 
         place = self.operand.expand(cfg, block)
@@ -423,6 +445,30 @@ class UnaryOp(AST):
         return newTmp
     
     def get_asm(self, parser, symtab, asm):
+        if self.operator == Operator.ref:
+            entry = symtab.search(self.operand.label)
+            if entry and not entry.isFuncEntry():
+                new_reg = asm.new_register(entry.type)
+                asm.code.append(Instruction(InstrOp.add, new_reg, entry.offset, Register.sp))
+                return new_reg
+            else:
+                raise Exception('Symtab search failed')
+        else:
+            reg = self.operand.get_asm(parser, symtab, asm)
+        if self.operator == Operator.ptr:
+            new_reg = asm.set_register(self)
+            asm.code.append( Instruction(InstrOp.lw, new_reg, 0, reg))
+            asm.free_variable(self.operand)
+            return new_reg
+        elif self.operator == Operator.uminus:
+            # new_reg = asm.set_register(self)
+            # asm.code.append(Instruction(InstrOp.lw, new_reg, 0, reg))
+            pass
+        elif self.operator == Operator.logical_not:
+            new_reg = asm.set_register(self)
+            asm.code.append(Instruction(InstrOp.xor, new_reg, reg, 1))
+            asm.free_variable(self.operand)
+            return new_reg
         raise NotImplementedError
 
 class Var(AST):    
@@ -444,7 +490,7 @@ class Var(AST):
         return self
     
     def get_asm(self, parser, symtab, asm):
-        raise NotImplementedError
+        return asm.get_register(self, symtab)
 
 class Num(AST):
     def __init__(self, val, lineno=-1):
@@ -468,5 +514,5 @@ class Num(AST):
         return self
     
     def get_asm(self, parser, symtab, asm):
-        new_reg = asm.get_register(self.type)
+        new_reg = asm.set_register(self)
         asm.code.append(Instruction(InstrOp.li, new_reg, self.val))

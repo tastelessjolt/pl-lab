@@ -1,7 +1,17 @@
 
+
 FUNCTION f
 PARAMS (int *a,float b,int *c,int *d,int *e)
 RETURNS float
+	ASGN
+	(
+		VAR(p)
+		,
+		ADDR
+		(
+			VAR(q)
+		)
+	)
 	ASGN
 	(
 		VAR(a)

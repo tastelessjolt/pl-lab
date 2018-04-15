@@ -10,11 +10,13 @@ f:
 	sw $ra, 0($sp)	# Save the return address
 	sw $fp, -4($sp)	# Save the frame pointer
 	sub $fp, $sp, 8	# Update the frame pointer
-	sub $sp, $sp, 16	# Make space for the locals
+	sub $sp, $sp, 20	# Make space for the locals
 # Prologue ends
 label0:
-	lw $s0, 32($sp)
-	sw $s0, 20($sp)
+	addi $s0, $sp, 12
+	sw $s0, 4($sp)
+	lw $s0, 36($sp)
+	sw $s0, 24($sp)
 	j label1
 label1:
 	lw $s0, global_pt
@@ -25,7 +27,7 @@ label1:
 
 # Epilogue begins
 epilogue_f:
-	add $sp, $sp, 16
+	add $sp, $sp, 20
 	lw $fp, -4($sp)
 	lw $ra, 0($sp)
 	jr $ra	# Jump back to the called procedure

@@ -3,7 +3,9 @@ float *pt;
 
 float f (int* a, float b, int* c, int* d, int* e) {
     float *p;
-    float *q;
+    float q;
+
+    p = &q;
     a = c;
 
     return *pt;
