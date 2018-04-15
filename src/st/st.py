@@ -376,11 +376,11 @@ class BinOp(AST):
                 if isinstance(self.operand1, Var):
                     entry = symtab.search(self.operand1.label)
                     if entry and not entry.isFuncEntry():
-                        new_reg = asm.set_register(self.operand1)
-                        asm.code.append(Instruction(InstrOp.move, new_reg, reg2))
+                        # new_reg = asm.set_register(self.operand1)
+                        # asm.code.append(Instruction(InstrOp.move, new_reg, reg2))
+                        asm.code.append(Instruction(InstrOp.sw, reg2, entry.offset, Register.sp))
                         asm.free_variable(self.operand2)
-                        asm.code.append(Instruction(InstrOp.sw, new_reg, entry.offset, Register.sp))
-                        asm.free_variable(self.operand1)
+                        # asm.free_variable(self.operand1)
                         return
                     else:
                         new_reg = asm.get_register(self.operand1, symtab)

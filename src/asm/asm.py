@@ -20,7 +20,7 @@ class SPIM(ASM):
         else:
             symtabEntry = symtab.search(var.label)
             if symtabEntry and not symtabEntry.isFuncEntry():
-                reg = self.new_register(symtabEntry.type)
+                reg = self.set_register(var)
                 self.code.append(Instruction(InstrOp.lw, [ reg, symtabEntry.offset, Register.sp]))
                 return reg
             else:
