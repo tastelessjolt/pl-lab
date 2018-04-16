@@ -55,7 +55,7 @@ class SPIM(ASM):
         s = ''
         s += "\t.data\n"
         global_symtab = self.parser.all_symtab[0]
-        for key, value in sorted(global_symtab.table.items(), key=lambda x: x[1].name):
+        for _, value in sorted(global_symtab.table.items(), key=lambda x: x[1].name):
             if not value.table_ptr:
                 # Update this incase float is to be taken as 8 bytes
                 if value.type.isFloat():
@@ -84,7 +84,7 @@ class SPIM(ASM):
     def get_text_section(self):
         s = ''
         global_symtab = self.parser.all_symtab[0]
-        for key, value in sorted(global_symtab.table.items(), key=lambda x: x[1].name):
+        for _, value in sorted(global_symtab.table.items(), key=lambda x: x[1].name):
             if value.table_ptr:
                 s += "\t.text\t# The .text assembler directive indicates\n"
                 s += "\t.globl %s\t# The following is the code\n" % value.name

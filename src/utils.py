@@ -23,7 +23,7 @@ def symtab_from_ast(parser, ast):
     s += 'Procedure table :-\n'
     s += '-----------------------------------------------------------------\n'
     s += 'Name\t\t|\tReturn Type  |  Parameter List\n'
-    for key, value in sorted(parser.all_symtab[0].table.items(), key=lambda x: x[1].name):
+    for _, value in sorted(parser.all_symtab[0].table.items(), key=lambda x: x[1].name):
         if value.table_ptr and value.name != 'main':
                 s += str(value) + "\n"
     s += '-----------------------------------------------------------------\n'
@@ -35,7 +35,7 @@ def symtab_from_ast(parser, ast):
     all_symtab_copy.reverse()
     all_symtab_copy.insert(0, parser.all_symtab[0])
     for symtab in sorted(all_symtab_copy, key=lambda  x: x.name):
-        for key, value in sorted(symtab.table.items(), key=lambda x: x[1].name):
+        for _, value in sorted(symtab.table.items(), key=lambda x: x[1].name):
             if not value.table_ptr:
                 s += value.__str__('procedure ' + str(symtab.name)
                                     if symtab.name != 'global' else 'global') + "\n"

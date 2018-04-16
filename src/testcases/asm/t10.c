@@ -7,8 +7,6 @@ float *var1, var2;
 void func1(int a, int b)
 {
     int **h;
-	g3 = &a;
-	g3 = &b;
     if( *g3 == 52)
     {
         while(  **h != 0)
@@ -28,7 +26,7 @@ void main()
     {
         while(  *h != 0)
         {
-            *g3 = *g3 + 1 + 2;
+            *g3 = *g3 + 1;
         }
     }
     

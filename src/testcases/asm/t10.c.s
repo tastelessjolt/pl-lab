@@ -1,9 +1,9 @@
 
 	.data
-global_var1:	.word	0
+global_g:	.word	0
 global_g3:	.word	0
 global_l3:	.word	0
-global_g:	.word	0
+global_var1:	.word	0
 global_var2:	.space	8
 
 	.text	# The .text assembler directive indicates
@@ -16,29 +16,23 @@ func1:
 	sub $sp, $sp, 12	# Make space for the locals
 # Prologue ends
 label0:
-	addi $s0, $sp, 16
-	sw $s0, global_g3
-	addi $s0, $sp, 20
-	sw $s0, global_g3
-	j label1
-label1:
 	lw $s0, global_g3
 	lw $s1, 0($s0)
 	li $s0, 52
 	seq $s2, $s1, $s0
 	move $s0, $s2
-	bne $s0, $0, label2
-	j label4
-label2:
+	bne $s0, $0, label1
+	j label3
+label1:
 	lw $s0, 4($sp)
 	lw $s1, 0($s0)
 	lw $s0, 0($s1)
 	li $s1, 0
 	sne $s2, $s0, $s1
 	move $s0, $s2
-	bne $s0, $0, label3
-	j label4
-label3:
+	bne $s0, $0, label2
+	j label3
+label2:
 	lw $s0, global_g3
 	lw $s1, 0($s0)
 	li $s0, 1
@@ -47,8 +41,8 @@ label3:
 	lw $s1, 4($sp)
 	lw $s2, 0($s1)
 	sw $s0, 0($s2)
-	j label2
-label4:
+	j label1
+label3:
 	j epilogue_func1
 
 # Epilogue begins
@@ -67,7 +61,7 @@ main:
 	sub $fp, $sp, 8	# Update the frame pointer
 	sub $sp, $sp, 20	# Make space for the locals
 # Prologue ends
-label5:
+label4:
 	# setting up activation record for called function
 	li $s0, 3
 	sw $s0, -4($sp)
@@ -79,24 +73,24 @@ label5:
 	add $sp, $sp, 8 # destroying activation record of called function
 	move $s0, $v1 # using the return value of called function
 	sw $s0, global_g3
-	j label6
-label6:
+	j label5
+label5:
 	lw $s0, global_g3
 	lw $s1, 0($s0)
 	li $s0, 52
 	seq $s2, $s1, $s0
 	move $s0, $s2
-	bne $s0, $0, label7
-	j label9
-label7:
+	bne $s0, $0, label6
+	j label8
+label6:
 	lw $s0, 12($sp)
 	lw $s1, 0($s0)
 	li $s0, 0
 	sne $s2, $s1, $s0
 	move $s0, $s2
-	bne $s0, $0, label8
-	j label9
-label8:
+	bne $s0, $0, label7
+	j label8
+label7:
 	lw $s0, global_g3
 	lw $s1, 0($s0)
 	li $s0, 1
@@ -104,8 +98,8 @@ label8:
 	move $s0, $s2
 	lw $s1, global_g3
 	sw $s0, 0($s1)
-	j label7
-label9:
+	j label6
+label8:
 	j epilogue_main
 
 # Epilogue begins
@@ -124,23 +118,23 @@ func2:
 	sub $fp, $sp, 8	# Update the frame pointer
 	sub $sp, $sp, 12	# Make space for the locals
 # Prologue ends
-label10:
+label9:
 	lw $s0, global_g3
 	lw $s1, 0($s0)
 	li $s0, 52
 	seq $s2, $s1, $s0
 	move $s0, $s2
-	bne $s0, $0, label11
-	j label13
-label11:
+	bne $s0, $0, label10
+	j label12
+label10:
 	lw $s0, 4($sp)
 	lw $s1, 0($s0)
 	li $s0, 0
 	sne $s2, $s1, $s0
 	move $s0, $s2
-	bne $s0, $0, label12
-	j label13
-label12:
+	bne $s0, $0, label11
+	j label12
+label11:
 	lw $s0, global_g3
 	lw $s1, 0($s0)
 	li $s0, 1
@@ -148,8 +142,8 @@ label12:
 	move $s0, $s2
 	lw $s1, global_g3
 	sw $s0, 0($s1)
-	j label11
-label13:
+	j label10
+label12:
 	lw $s0, 4($sp)
 	move $v1, $s0 # move return value to $v1
 	j epilogue_func2

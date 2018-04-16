@@ -1,27 +1,7 @@
 
-
-
 FUNCTION func1
 PARAMS (int a,int b)
 RETURNS void
-	ASGN
-	(
-		VAR(g3)
-		,
-		ADDR
-		(
-			VAR(a)
-		)
-	)
-	ASGN
-	(
-		VAR(g3)
-		,
-		ADDR
-		(
-			VAR(b)
-		)
-	)
 	IF
 	(
 		EQ

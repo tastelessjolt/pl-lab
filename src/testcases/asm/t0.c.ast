@@ -1,22 +1,6 @@
-
 FUNCTION func1
-PARAMS (int x,int y)
+PARAMS (int a,int b)
 RETURNS *int
-	ASGN
-	(
-		VAR(c)
-		,
-		DEREF
-		(
-			DEREF
-			(
-				DEREF
-				(
-					VAR(a)
-				)
-			)
-		)
-	)
 RETURN 
 (
 	VAR(c)
