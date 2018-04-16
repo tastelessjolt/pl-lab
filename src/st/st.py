@@ -388,7 +388,11 @@ class BinOp(AST):
                         asm.free_variable(self.operand2)
                         return
                 elif isinstance(self.operand1, UnaryOp):
-                    pass
+                    reg1 = self.operand1.operand.get_asm(parser, symtab, asm)
+                    asm.code.append(Instruction(InstrOp.sw, reg2, 0, reg1))
+                    asm.free_variable(self.operand2)
+                    asm.free_variable(self.operand1.operand)
+                    return
                     
 
         raise Exception('Problem in BinOP Assignment')
@@ -448,8 +452,8 @@ class UnaryOp(AST):
         if self.operator == Operator.ref:
             entry = symtab.search(self.operand.label)
             if entry and not entry.isFuncEntry():
-                new_reg = asm.new_register(entry.type)
-                asm.code.append(Instruction(InstrOp.add, new_reg, entry.offset, Register.sp))
+                new_reg = asm.set_register(self)
+                asm.code.append(Instruction(InstrOp.add, new_reg, Register.sp, entry.offset))
                 return new_reg
             else:
                 raise Exception('Symtab search failed')

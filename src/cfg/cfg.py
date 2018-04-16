@@ -25,6 +25,7 @@ class BasicBlock(object):
             stmt.expand(cfg, self)
     
     def get_asm(self, parser, symtab, asm):
+        asm.code.append(Label('label' + str(self.blocknum)))
         self.expandedAst.get_asm(parser, symtab, asm)
 
     def assign_goto(self, goto):
@@ -123,7 +124,7 @@ class CFG(object):
                 unassigned = self.dfs_traverse_ast(func.stlist)
                 ## TODO: WHY??
                 if old_numblocks != self.numblocks:
-                    self.func_to_blocknum[func.fname] = old_numblocks
+                    self.func_to_blocknum[func.fname] = (old_numblocks, self.numblocks)
                     self.blocks[old_numblocks].func += 'function %s%s\n' % (func.fname, symbol_list_as_dict(func.params))
                 for blk in unassigned:
                     blk.assign_goto(self.numblocks)

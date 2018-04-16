@@ -93,10 +93,12 @@ class SPIM(ASM):
                 s += inc_tabsize(self.get_prologue(value))
                 s += '\n'
                 s += "# Prologue ends\n"
-                func_block = self.cfg.blocks[self.cfg.func_to_blocknum[value.name]]
-                func_block.get_asm(self.parser, value.table_ptr, self)
+                start_block, end_block = self.cfg.func_to_blocknum[value.name]
+                for blocknum in range(start_block, end_block):
+                    curr_block = self.cfg.blocks[blocknum]
+                    curr_block.get_asm(self.parser, value.table_ptr, self)
 
-                s +=  inc_tabsize('\n'.join([repr(inst) for inst in self.code]))
+                s +=  ''.join([ (inc_tabsize(repr(inst)) + '\n') if isinstance(inst, Instruction) else repr(inst) for inst in self.code])
                 self.code.clear()
                 s += '\n'
                 s += "# Epilogue begins\n"
@@ -157,3 +159,22 @@ class JInstruction(Instruction):
     def __init__(self, operator, operands):
         mysuper(self).__init__(operator, operands)
 
+class Directives(Enum):
+    data = 0
+    text = 1
+    globl = 2
+
+class AsmDirectives:
+    def __init__(self, directive, *operands):
+        self.directive = directive
+        self.operands = operands
+
+class Label:
+    def __init__(self, name, value = None):
+        self.name = name
+        self.value = value
+
+    def __repr__(self):
+        return self.name + ':' + (self.value if self.value is not None else '') + '\n'
+
+    
