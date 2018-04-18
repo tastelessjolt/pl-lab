@@ -1,0 +1,87 @@
+
+
+
+FUNCTION fn
+PARAMS (int *p,int *q,int *r,int *a,int *b,int *c)
+RETURNS void
+	ASGN
+	(
+		DEREF
+		(
+			VAR(p)
+		)
+		,
+		DEREF
+		(
+			VAR(q)
+		)
+	)
+	ASGN
+	(
+		DEREF
+		(
+			VAR(r)
+		)
+		,
+		DEREF
+		(
+			VAR(a)
+		)
+	)
+	ASGN
+	(
+		DEREF
+		(
+			VAR(b)
+		)
+		,
+		DEREF
+		(
+			VAR(c)
+		)
+	)
+RETURN 
+(
+)
+
+
+
+Function Main
+PARAMS() 
+RETURNS void
+	ASGN
+	(
+		DEREF
+		(
+			VAR(p)
+		)
+		,
+		DEREF
+		(
+			VAR(q)
+		)
+	)
+	ASGN
+	(
+		DEREF
+		(
+			VAR(r)
+		)
+		,
+		DEREF
+		(
+			VAR(a)
+		)
+	)
+	ASGN
+	(
+		DEREF
+		(
+			VAR(b)
+		)
+		,
+		DEREF
+		(
+			VAR(c)
+		)
+	)

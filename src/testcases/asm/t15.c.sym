@@ -1,0 +1,25 @@
+Procedure table :-
+-----------------------------------------------------------------
+Name		|	Return Type  |  Parameter List
+fn		|	void		|	int *p, int *pint *q, int *qint *r, int *rint *a, int *aint *b, int *bint *c
+-----------------------------------------------------------------
+Variable table :- 
+-----------------------------------------------------------------
+Name	|	Scope		|	Base Type  |  Derived Type
+-----------------------------------------------------------------
+a		|	procedure main	|	int	   |	*
+q		|	procedure main	|	int	   |	*
+c		|	procedure main	|	int	   |	*
+b		|	procedure main	|	int	   |	*
+p		|	procedure main	|	int	   |	*
+r		|	procedure main	|	int	   |	*
+a		|	procedure fn	|	int	   |	*
+c		|	procedure fn	|	int	   |	*
+b		|	procedure fn	|	int	   |	*
+q		|	procedure fn	|	int	   |	*
+p		|	procedure fn	|	int	   |	*
+r		|	procedure fn	|	int	   |	*
+gsd		|	procedure fn	|	int	   |	*
+gksd		|	procedure fn	|	int	   |	
+-----------------------------------------------------------------
+-----------------------------------------------------------------
