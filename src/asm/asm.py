@@ -59,9 +59,9 @@ class SPIM(ASM):
             if not value.table_ptr:
                 # Update this incase float is to be taken as 8 bytes
                 if value.type.isFloat():
-                    s += "global_%s\t.space\t%d\n" % (value.name, value.width)
+                    s += "global_%s:\t.space\t%d\n" % (value.name, value.width)
                 else:
-                    s += "global_%s\t.word\t0\n" % value.name
+                    s += "global_%s:\t.word\t0\n" % value.name
         
         return s
 
@@ -132,6 +132,7 @@ class InstrOp(Enum):
     jal = 12
     jr = 13
     xor = 14
+    addi = 15 
     
     def __str__(self):
         return self.name

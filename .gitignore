@@ -110,3 +110,6 @@ Parser_ast_*
 
 # Temp
 temp/
+
+temp.out
+err

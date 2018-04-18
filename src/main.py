@@ -96,7 +96,7 @@ if __name__ == '__main__':
             cfg = CFG(ast)
             asm = SPIM(parser, cfg)
 
-            print (cfg)
+            eprint (cfg)
 
             print(asm.get_data_section())
             print(asm.get_text_section())

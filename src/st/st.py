@@ -453,7 +453,7 @@ class UnaryOp(AST):
             entry = symtab.search(self.operand.label)
             if entry and not entry.isFuncEntry():
                 new_reg = asm.set_register(self)
-                asm.code.append(Instruction(InstrOp.add, new_reg, Register.sp, entry.offset))
+                asm.code.append(Instruction(InstrOp.addi, new_reg, Register.sp, entry.offset))
                 return new_reg
             else:
                 raise Exception('Symtab search failed')
