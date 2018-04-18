@@ -393,7 +393,34 @@ class BinOp(AST):
                     asm.free_variable(self.operand2)
                     asm.free_variable(self.operand1.operand)
                     return
-                    
+        else: # logical operator
+            reg1 = self.operand1.get_asm(parser, symtab, asm)
+            reg2 = self.operand2.get_asm(parser, symtab, asm)
+            new_reg = asm.set_register(self)
+            mapping = { 
+                Operator.cmp_eq : InstrOp.seq,
+                Operator.cmp_not_eq: InstrOp.sne,
+                Operator.less : InstrOp.slt,
+                Operator.less_or_eq : InstrOp.sle,
+                Operator.logical_and: InstrOp._and,
+                Operator.logical_or: InstrOp._or,
+            }
+
+            op = mapping.get(self.operator, None)
+            if not op:
+                op = {
+                    Operator.greater: InstrOp.slt,
+                    Operator.greater_or_eq : InstrOp.sle,
+                }[self.operator]
+                tmp = reg1 
+                reg1 = reg2
+                reg2 = tmp
+            
+            asm.code.append(Instruction(op, new_reg, reg1, reg2))
+            asm.free_variable(self.operand1)
+            asm.free_variable(self.operand2)
+            return new_reg
+
 
         raise Exception('Problem in BinOP Assignment')
 
@@ -520,3 +547,4 @@ class Num(AST):
     def get_asm(self, parser, symtab, asm):
         new_reg = asm.set_register(self)
         asm.code.append(Instruction(InstrOp.li, new_reg, self.val))
+        return new_reg

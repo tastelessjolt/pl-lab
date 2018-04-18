@@ -21,7 +21,7 @@ class SPIM(ASM):
             symtabEntry = symtab.search(var.label)
             if symtabEntry and not symtabEntry.isFuncEntry():
                 reg = self.set_register(var)
-                self.code.append(Instruction(InstrOp.lw, [ reg, symtabEntry.offset, Register.sp]))
+                self.code.append(Instruction(InstrOp.lw, reg, symtabEntry.offset, Register.sp))
                 return reg
             else:
                 return self.set_register(var)
@@ -98,7 +98,7 @@ class SPIM(ASM):
                     curr_block = self.cfg.blocks[blocknum]
                     curr_block.get_asm(self.parser, value.table_ptr, self)
 
-                s +=  ''.join([ (inc_tabsize(repr(inst)) + '\n') if isinstance(inst, Instruction) else repr(inst) for inst in self.code])
+                s +=  ''.join([ (inc_tabsize(str(inst)) + '\n') if isinstance(inst, Instruction) else str(inst) for inst in self.code])
                 self.code.clear()
                 s += '\n'
                 s += "# Epilogue begins\n"
@@ -133,6 +133,11 @@ class InstrOp(Enum):
     jr = 13
     xor = 14
     addi = 15 
+    _and = 16
+    _or = 17
+    _not = 18
+    slt = 19
+    sle = 20
     
     def __str__(self):
         return self.name
@@ -142,8 +147,20 @@ class Instruction:
         self.operator = operator
         self.operands = operands
 
+    def _format_sl(self):
+        return '%s %s, %d(%s)' % (self.operator, self.operands[0], self.operands[1], self.operands[2])
+
     def __str__(self):
-        return str(self.operator) + " ".join([str(reg) for reg in self.operands])
+        sl = {
+            InstrOp.sw: self._format_sl,
+            InstrOp.lw: self._format_sl,
+        }
+        func = sl.get (self.operator, None)
+        if func:
+            return func()
+
+        return repr (self)
+        # return str(self.operator) + " ".join([str(reg) for reg in self.operands])
 
     def __repr__(self):
         return str(self.operator) + ' ' + str(self.operands)

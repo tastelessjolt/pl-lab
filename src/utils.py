@@ -70,6 +70,9 @@ class DataType(object):
     def isDerived(self):
         return issubclass(type(self), DataType) and self.ptr_depth > 0
 
+    def isBoolean(self):
+        return isinstance(self, BooleanType)
+
     @property
     def width(self):
         return 0
@@ -166,7 +169,7 @@ class RegStack():
                 self.float_regs.insert(0, reg)
 
     def isEmpty(self, type):
-        if type.isInt() or type.isDerived():
+        if type.isInt() or type.isDerived() or type.isBoolean():
             return not self.gp_regs
         else:
             return not self.float_regs
@@ -178,7 +181,7 @@ class RegStack():
             self.float_regs.append(item)
 
     def pop(self, type):
-        if type.isInt() or type.isDerived():
+        if type.isInt() or type.isDerived() or type.isBoolean():
             return self.gp_regs.pop()
         else:
             return self.float_regs.pop()

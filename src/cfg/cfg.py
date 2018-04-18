@@ -71,7 +71,13 @@ class IfBlock(object):
 
     def get_asm(self, parser, symtab, asm):
         # TODO: add branch instructions
+        asm.code.append(Label('label%d' % (self.blocknum)))
         self.expandedAst.get_asm(parser, symtab, asm)
+        reg = asm.get_register(self.expandedAst[-1].operand1, symtab)
+        asm.code.append(Instruction(InstrOp.bne, reg, Register.zero, 'label%d' % self.gotoif))
+        asm.free_variable(self.expandedAst[-1].operand1)
+        asm.code.append(Instruction(InstrOp.j, 'label%d' % self.gotoelse))
+
 
 class WhileBlock(object):
     def __init__(self, whilestmt, blocknum=-1, gotoif=-1, gotoelse=-1, func=''):
@@ -109,7 +115,12 @@ class WhileBlock(object):
 
     def get_asm(self, parser, symtab, asm):
         # TODO: add branch instructions
+        asm.code.append(Label('label%d' % (self.blocknum)))
         self.expandedAst.get_asm(parser, symtab, asm)
+        reg = asm.get_register(self.expandedAst[-1].operand1, symtab)
+        asm.code.append(Instruction(InstrOp.bne, reg, Register.zero, 'label%d' % self.gotoif))
+        asm.free_variable(self.expandedAst[-1].operand1)
+        asm.code.append(Instruction(InstrOp.j, 'label%d' % self.gotoelse))
 
 class CFG(object):
     def __init__(self, programAST):
