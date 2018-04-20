@@ -155,7 +155,8 @@ class FuncCall(AST):
         return newfuncCall
     
     def get_asm(self, parser, symtab, asm):
-        called_symtab = symtab.search(self.fname).table_ptr
+        entry = symtab.search(self.fname)
+        called_symtab = entry.table_ptr
         asm.code.append(Instruction(
             comment='setting up activation record for called function'))
         for param, fparam in zip(self.params, called_symtab.parent_func.params):
@@ -170,9 +171,14 @@ class FuncCall(AST):
             InstrOp.jal, self.fname, comment='function call'))
         asm.code.append(Instruction(InstrOp.add, Register.sp, Register.sp,
                                     called_symtab.argument_width, comment='destroying activation record of called function'))
-        asm.code.append(Instruction(InstrOp.move, Register.s0, Register.v1,
+        new_reg = asm.set_register(self)
+        if new_reg.is_float:
+            asm.code.append(Instruction(InstrOp.move, new_reg, Register.f0,
                                     comment='using the return value of called function'))
-        return Register.s0
+        else:
+            asm.code.append(Instruction(InstrOp.move, new_reg, Register.v1,
+                                    comment='using the return value of called function'))
+        return new_reg
 
 
 class IfStatement(AST):
@@ -296,7 +302,11 @@ class Return(AST):
     def get_asm(self, parser, symtab, asm):
         if not self.ast.isNothing():
             reg = self.ast.get_asm(parser, symtab, asm)
-            asm.code.append(Instruction(InstrOp.move, Register.v1, reg, comment='move return value to $v1'))
+            if reg.is_float:
+                asm.code.append(Instruction(
+                    InstrOp.move, Register.f0, reg, comment='move return value to $f0'))
+            else:
+                asm.code.append(Instruction(InstrOp.move, Register.v1, reg, comment='move return value to $v1'))
             asm.free_variable(self.ast)
 
 
@@ -560,7 +570,7 @@ class UnaryOp(AST):
             entry = symtab.search(self.operand.label)
             if entry and not entry.isFuncEntry():
                 new_reg = asm.set_register(self)
-                if self.operand.type.isFloat():
+                if entry.scope == symtabby.Scope.GLOBAL:
                     asm.code.append(Instruction(InstrOp.la, new_reg, 'global_%s' % entry.name))                   
                 else:
                     asm.code.append(Instruction(InstrOp.addi, new_reg, Register.sp, entry.offset))
