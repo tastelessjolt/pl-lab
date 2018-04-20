@@ -2,6 +2,7 @@ Procedure table :-
 -----------------------------------------------------------------
 Name		|	Return Type  |  Parameter List
 multiple_logical_ops		|	int		|	
+multiple_arithmetic_ops		|	int		|	
 -----------------------------------------------------------------
 Variable table :- 
 -----------------------------------------------------------------
@@ -9,5 +10,8 @@ Name	|	Scope		|	Base Type  |  Derived Type
 -----------------------------------------------------------------
 a		|	procedure multiple_logical_ops	|	int	   |	*
 b		|	procedure multiple_logical_ops	|	int	   |	*
+a		|	procedure multiple_arithmetic_ops	|	int	   |	*
+c		|	procedure multiple_arithmetic_ops	|	int	   |	*
+b		|	procedure multiple_arithmetic_ops	|	int	   |	*
 -----------------------------------------------------------------
 -----------------------------------------------------------------

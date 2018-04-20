@@ -290,3 +290,109 @@ RETURNS int
 RETURN 
 (
 )
+
+
+
+
+
+FUNCTION multiple_arithmetic_ops
+PARAMS ()
+RETURNS int
+	ASGN
+	(
+		DEREF
+		(
+			VAR(a)
+		)
+		,
+		PLUS
+		(
+			DEREF
+			(
+				VAR(b)
+			)
+			,
+			DEREF
+			(
+				VAR(c)
+			)
+		)
+	)
+	ASGN
+	(
+		DEREF
+		(
+			VAR(a)
+		)
+		,
+		MINUS
+		(
+			DEREF
+			(
+				VAR(b)
+			)
+			,
+			DEREF
+			(
+				VAR(c)
+			)
+		)
+	)
+	ASGN
+	(
+		DEREF
+		(
+			VAR(a)
+		)
+		,
+		MUL
+		(
+			DEREF
+			(
+				VAR(b)
+			)
+			,
+			DEREF
+			(
+				VAR(c)
+			)
+		)
+	)
+	ASGN
+	(
+		DEREF
+		(
+			VAR(a)
+		)
+		,
+		DIV
+		(
+			DEREF
+			(
+				VAR(b)
+			)
+			,
+			DEREF
+			(
+				VAR(c)
+			)
+		)
+	)
+	ASGN
+	(
+		DEREF
+		(
+			VAR(a)
+		)
+		,
+		UMINUS
+		(
+			DEREF
+			(
+				VAR(b)
+			)
+		)
+	)
+RETURN 
+(
+)

@@ -34,9 +34,9 @@ int multiple_logical_ops() {
 
 int multiple_arithmetic_ops() {
     int *a, *b, *c;
-    a = *b + *c;
-    a = *b - *c;
-    a = *b * *c;
-    a = *b / *c;
-    a = - *b;
+    *a = *b + *c;
+    *a = *b - *c;
+    *a = *b * *c;
+    *a = *b / *c;
+    *a = - *b;
 }

@@ -84,7 +84,7 @@ class SPIM(ASM):
     def get_text_section(self):
         s = ''
         global_symtab = self.parser.all_symtab[0]
-        for _, value in sorted(global_symtab.table.items(), key=lambda x: x[1].name):
+        for value in global_symtab.table.values():
             if value.table_ptr:
                 s += "\t.text\t# The .text assembler directive indicates\n"
                 s += "\t.globl %s\t# The following is the code\n" % value.name
@@ -131,7 +131,7 @@ class InstrOp(Enum):
     move = 11
     jal = 12
     jr = 13
-    xor = 14
+    xori = 14
     addi = 15
     _and = 16
     _or = 17
@@ -139,9 +139,11 @@ class InstrOp(Enum):
     slt = 19
     sle = 20
     div = 21
+    mflo = 22
+    negu = 23
     
     def __str__(self):
-        return self.name
+        return self.name if self.name[0] != '_' else self.name[1:]
 
 class Instruction:
     def __init__(self, operator, *operands):

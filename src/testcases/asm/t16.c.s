@@ -164,3 +164,63 @@ epilogue_multiple_logical_ops:
 	lw $ra, 0($sp)
 	jr $ra	# Jump back to the called procedure
 # Epilogue ends
+	.text	# The .text assembler directive indicates
+	.globl multiple_arithmetic_ops	# The following is the code
+multiple_arithmetic_ops:
+# Prologue begins
+	sw $ra, 0($sp)	# Save the return address
+	sw $fp, -4($sp)	# Save the frame pointer
+	sub $fp, $sp, 8	# Update the frame pointer
+	sub $sp, $sp, 20	# Make space for the locals
+# Prologue ends
+label19:
+	lw $s0, 8($sp)
+	lw $s1, 0($s0)
+	lw $s0, 12($sp)
+	lw $s2, 0($s0)
+	add $s0, $s1, $s2
+	move $s1, $s0
+	lw $s0, 4($sp)
+	sw $s1, 0($s0)
+	lw $s0, 8($sp)
+	lw $s1, 0($s0)
+	lw $s0, 12($sp)
+	lw $s2, 0($s0)
+	sub $s0, $s1, $s2
+	move $s1, $s0
+	lw $s0, 4($sp)
+	sw $s1, 0($s0)
+	lw $s0, 8($sp)
+	lw $s1, 0($s0)
+	lw $s0, 12($sp)
+	lw $s2, 0($s0)
+	mul $s0, $s1, $s2
+	move $s1, $s0
+	lw $s0, 4($sp)
+	sw $s1, 0($s0)
+	lw $s0, 8($sp)
+	lw $s1, 0($s0)
+	lw $s0, 12($sp)
+	lw $s2, 0($s0)
+	div $s1, $s2
+	mflo $s0
+	move $s1, $s0
+	lw $s0, 4($sp)
+	sw $s1, 0($s0)
+	lw $s0, 8($sp)
+	lw $s1, 0($s0)
+	negu $s0, $s1
+	move $s1, $s0
+	lw $s0, 4($sp)
+	sw $s1, 0($s0)
+	j label20
+label20:
+	j epilogue_multiple_arithmetic_ops
+
+# Epilogue begins
+epilogue_multiple_arithmetic_ops:
+	add $sp, $sp, 20
+	lw $fp, -4($sp)
+	lw $ra, 0($sp)
+	jr $ra	# Jump back to the called procedure
+# Epilogue ends

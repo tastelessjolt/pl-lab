@@ -347,7 +347,7 @@ class Register(Enum):
     f31 = 63
 
     def __str__(self):
-        return '$' + self.name
+        return '$' + (self.name if self.value != 0 else '0')
     
     def __lt__(self, other):
         return self.value < other.value

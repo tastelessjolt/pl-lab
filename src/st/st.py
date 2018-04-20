@@ -358,17 +358,22 @@ class BinOp(AST):
             if self.operator != Operator.equal:
                 reg1 = self.operand1.get_asm(parser, symtab, asm)
                 reg2 = self.operand2.get_asm(parser, symtab, asm)
-                new_reg = asm.set_register(self)
-                if self.operator == Operator.plus:
-                    asm.code.append(Instruction(InstrOp.add, new_reg, reg1, reg2))
-                elif self.operator == Operator.minus:
-                    asm.code.append(Instruction(InstrOp.sub, new_reg, reg1, reg2))
-                elif self.operator == Operator.mul:
-                    asm.code.append(Instruction(InstrOp.mul, new_reg, reg1, reg2))
-                elif self.operator == Operator.divide:
-                    asm.code.append(Instruction(InstrOp.div, new_reg, reg1, reg2))
-                asm.free_variable(self.operand1)
-                asm.free_variable(self.operand2)
+                if self.operator == Operator.divide:
+                    asm.code.append(Instruction(InstrOp.div, reg1, reg2))
+                    asm.free_variable(self.operand1)
+                    asm.free_variable(self.operand2)
+                    new_reg = asm.set_register(self)
+                    asm.code.append(Instruction(InstrOp.mflo, new_reg))
+                else:
+                    new_reg = asm.set_register(self)
+                    if self.operator == Operator.plus:
+                        asm.code.append(Instruction(InstrOp.add, new_reg, reg1, reg2))
+                    elif self.operator == Operator.minus:
+                        asm.code.append(Instruction(InstrOp.sub, new_reg, reg1, reg2))
+                    elif self.operator == Operator.mul:
+                        asm.code.append(Instruction(InstrOp.mul, new_reg, reg1, reg2))
+                    asm.free_variable(self.operand1)
+                    asm.free_variable(self.operand2)
                 return new_reg
             else:
                 reg2 = self.operand2.get_asm(parser, symtab, asm)
@@ -492,12 +497,13 @@ class UnaryOp(AST):
             asm.free_variable(self.operand)
             return new_reg
         elif self.operator == Operator.uminus:
-            # new_reg = asm.set_register(self)
-            # asm.code.append(Instruction(InstrOp.lw, new_reg, 0, reg))
-            pass
+            new_reg = asm.set_register(self)
+            asm.code.append(Instruction(InstrOp.negu, new_reg, reg))
+            asm.free_variable(self.operand)
+            return new_reg
         elif self.operator == Operator.logical_not:
             new_reg = asm.set_register(self)
-            asm.code.append(Instruction(InstrOp.xor, new_reg, reg, 1))
+            asm.code.append(Instruction(InstrOp.xori, new_reg, reg, 1))
             asm.free_variable(self.operand)
             return new_reg
         raise NotImplementedError
