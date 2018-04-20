@@ -31,3 +31,12 @@ int multiple_logical_ops() {
         *a = 2;
     }
 }
+
+int multiple_arithmetic_ops() {
+    int *a, *b, *c;
+    a = *b + *c;
+    a = *b - *c;
+    a = *b * *c;
+    a = *b / *c;
+    a = - *b;
+}

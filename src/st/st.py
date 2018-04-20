@@ -263,7 +263,7 @@ class Return(AST):
     def get_asm(self, parser, symtab, asm):
         if not self.ast.isNothing():
             reg = self.ast.get_asm(parser, symtab, asm)
-            asm.code.append(Instruction(InstrOp.move, Register.v0, reg))
+            asm.code.append(Instruction(InstrOp.move, Register.v1, reg))
             asm.free_variable(self.ast)
 
 
@@ -356,8 +356,8 @@ class BinOp(AST):
     def get_asm(self, parser, symtab, asm):
         if self.operator._is_arithmetic_op():
             if self.operator != Operator.equal:
-                reg1 = self.operand1.get_asm(asm)
-                reg2 = self.operand2.get_asm(asm)
+                reg1 = self.operand1.get_asm(parser, symtab, asm)
+                reg2 = self.operand2.get_asm(parser, symtab, asm)
                 new_reg = asm.set_register(self)
                 if self.operator == Operator.plus:
                     asm.code.append(Instruction(InstrOp.add, new_reg, reg1, reg2))

@@ -29,6 +29,8 @@ class BasicBlock(object):
         self.expandedAst.get_asm(parser, symtab, asm)
         if self.goto != -1: # if not a return block
             asm.code.append( Instruction(InstrOp.j, 'label%d' % self.goto) )
+        else:
+            asm.code.append(Instruction(InstrOp.j, 'epilogue_%s' % self.func))
 
     def assign_goto(self, goto):
         self.goto = goto

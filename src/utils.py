@@ -162,6 +162,7 @@ class RegStack():
     def __init__(self):
         self.gp_regs = []
         self.float_regs = []
+        
         for reg in Register:
             if reg.is_gp and reg.is_temp:
                 self.gp_regs.insert(0, reg)
@@ -182,6 +183,8 @@ class RegStack():
 
     def pop(self, type):
         if type.isInt() or type.isDerived() or type.isBoolean():
+            # import pdb; pdb.set_trace()
+            self.gp_regs.sort(reverse=True)
             return self.gp_regs.pop()
         else:
             return self.float_regs.pop()
@@ -285,22 +288,22 @@ class Register(Enum):
     a1 = 5
     a2 = 6
     a3 = 7
-    t0 = 8
-    t1 = 9
-    t2 = 10
-    t3 = 11
-    t4 = 12
-    t5 = 13
-    t6 = 14
-    t7 = 15
-    s0 = 16
-    s1 = 17
-    s2 = 18
-    s3 = 19
-    s4 = 20
-    s5 = 21
-    s6 = 22
-    s7 = 23
+    t0 = 16
+    t1 = 17
+    t2 = 18
+    t3 = 19
+    t4 = 20
+    t5 = 21
+    t6 = 22
+    t7 = 23
+    s0 = 8
+    s1 = 9
+    s2 = 10
+    s3 = 11
+    s4 = 12
+    s5 = 13
+    s6 = 14
+    s7 = 15
     t8 = 24
     t9 = 25
     k0 = 26
@@ -345,6 +348,9 @@ class Register(Enum):
 
     def __str__(self):
         return '$' + self.name
+    
+    def __lt__(self, other):
+        return self.value < other.value
 
     @property
     def type(self):
@@ -365,4 +371,3 @@ class Register(Enum):
     ## TODO: Check for floating point
     def is_temp(self):
         return (self.value >= 8 and self.value <= 25) or (self.value >= 8 + 32 and self.value <= 25 + 32)
-

@@ -28,17 +28,17 @@ class SPIM(ASM):
                 # raise Exception ('Variable %s not found in the symtab or in the temporaries' % var.label )
 
     def free_variable(self, var):
-        self.free_register(self.var_to_reg_map.pop(var, None))
+        self._free_register(self.var_to_reg_map.pop(var, None))
 
     def set_register(self, ast):
-        reg = self.new_register(ast.type)
+        reg = self._new_register(ast.type)
         self.var_to_reg_map[ast] = reg
         return reg
 
     def _set_reg(self, ast, reg):
         self.var_to_reg_map[ast] = reg
 
-    def new_register(self, type):
+    def _new_register(self, type):
         if self.free_registers.isEmpty(type):
             eprint("Out of registers!")
             eprint("Exiting...")
@@ -46,7 +46,7 @@ class SPIM(ASM):
         else:
             return self.free_registers.pop(type)
 
-    def free_register(self, *regs):
+    def _free_register(self, *regs):
         for reg in regs:
             if reg is not None:
                 self.free_registers.push(reg)
@@ -132,12 +132,13 @@ class InstrOp(Enum):
     jal = 12
     jr = 13
     xor = 14
-    addi = 15 
+    addi = 15
     _and = 16
     _or = 17
     _not = 18
     slt = 19
     sle = 20
+    div = 21
     
     def __str__(self):
         return self.name
@@ -163,7 +164,7 @@ class Instruction:
         # return str(self.operator) + " ".join([str(reg) for reg in self.operands])
 
     def __repr__(self):
-        return str(self.operator) + ' ' + str(self.operands)
+        return str(self.operator) + ' ' + ', '.join([str(i) for i in self.operands])
 
 class RInstruction(Instruction):
     def __init__(self, operator, operands):
