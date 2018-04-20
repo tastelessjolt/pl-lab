@@ -21,8 +21,7 @@ label0:
 label1:
 	lw $s0, global_pt
 	l.s $f10, 0($s0)
-	mov.s $f12, $f10
-	mov.s $f0, $f12 # move return value to $f0
+	mov.s $f0, $f10 # move return value to $f0
 	j epilogue_f
 
 # Epilogue begins

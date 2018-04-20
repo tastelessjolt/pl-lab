@@ -23,7 +23,7 @@ label1:
 	li $s0, 4
 	slt $s2, $s0, $s1
 	move $s0, $s2
-	not $s1, $s0
+	xori $s1, $s0, 1
 	move $s0, $s1
 	bne $s0, $0, label2
 	j label3

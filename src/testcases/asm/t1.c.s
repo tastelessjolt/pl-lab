@@ -19,8 +19,7 @@ label0:
 label1:
 	lw $s0, 4($sp)
 	lw $s1, 0($s0)
-	move $s0, $s1
-	move $v1, $s0 # move return value to $v1
+	move $v1, $s1 # move return value to $v1
 	j epilogue_f
 
 # Epilogue begins

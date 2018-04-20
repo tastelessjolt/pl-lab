@@ -145,7 +145,7 @@ label16:
 	lw $s2, 0($s0)
 	seq $s0, $s1, $s2
 	move $s1, $s0
-	not $s0, $s1
+	xori $s0, $s1, 1
 	move $s1, $s0
 	bne $s1, $0, label17
 	j label18

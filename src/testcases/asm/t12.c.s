@@ -1,9 +1,9 @@
 
 	.data
-global_var1:	.word	0
+global_g:	.word	0
 global_g3:	.word	0
 global_l3:	.word	0
-global_g:	.word	0
+global_var1:	.word	0
 global_var2:	.space	8
 
 	.text	# The .text assembler directive indicates
