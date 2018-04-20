@@ -70,6 +70,14 @@ class SymTab(object):
         elif self.parent is not None:
             return self.parent.search(key)
     
+    def commit(self):
+        local_vars = sorted( [ (key, entry) for key, entry in self.table.items() if entry.scope == Scope.LOCAL], key=lambda t: t[0]) 
+
+        width = 0
+        for name, entry in local_vars:
+            entry.offset = width
+            width += entry.width
+    
     def insert(self, entry_or_entrys):
         if isinstance(entry_or_entrys, list):
             entrys = entry_or_entrys

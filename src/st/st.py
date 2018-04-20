@@ -553,7 +553,7 @@ class Var(AST):
     
     def get_asm(self, parser, symtab, asm):
         entry = symtab.search(self.label)
-        if entry.scope == symtabby.Scope.GLOBAL:
+        if entry and entry.scope == symtabby.Scope.GLOBAL:
             new_reg = asm.set_register(self)
             asm.code.append(Instruction(
                 InstrOp.lw, new_reg, "global_%s" % entry.name))

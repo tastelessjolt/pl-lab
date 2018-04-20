@@ -87,6 +87,8 @@ class APLYacc(object):
             p[0] = p[1]
         elif self.output == YaccOutput.AST:
             p[0] = Program(p[1])
+            for symtab in self.all_symtab:
+                symtab.commit()
 
     def p_epsilon(self, p):
         '''
