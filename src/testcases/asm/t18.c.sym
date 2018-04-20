@@ -1,0 +1,20 @@
+Procedure table :-
+-----------------------------------------------------------------
+Name		|	Return Type  |  Parameter List
+floating_arith		|	int		|	
+floating_logic		|	int		|	
+-----------------------------------------------------------------
+Variable table :- 
+-----------------------------------------------------------------
+Name	|	Scope		|	Base Type  |  Derived Type
+-----------------------------------------------------------------
+a		|	procedure floating_logic	|	float	   |	*
+c		|	procedure floating_logic	|	float	   |	*
+b		|	procedure floating_logic	|	float	   |	*
+gf2		|	global		|	float	   |	*
+gf1		|	global		|	float	   |	
+a		|	procedure floating_arith	|	float	   |	*
+c		|	procedure floating_arith	|	float	   |	*
+b		|	procedure floating_arith	|	float	   |	*
+-----------------------------------------------------------------
+-----------------------------------------------------------------

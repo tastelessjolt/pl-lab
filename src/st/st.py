@@ -33,6 +33,7 @@ class Nothing(AST):
     def src(self):
         return ''
 
+
 class DefList(AST, list):
     '''
         Used to represent list of proc-declarations and global var-declarations
@@ -48,6 +49,7 @@ class DefList(AST, list):
 
     def src(self):
         return '\n'.join([st.src() for st in self])
+
 
 class StmtList(AST, list):
     '''
@@ -69,6 +71,7 @@ class StmtList(AST, list):
     def get_asm(self, parser, symtab, asm):
         for st in self:
             st.get_asm(parser, symtab, asm)
+
 
 class Program(AST):
     def __init__(self, global_list, all_symtabs=None):
@@ -112,6 +115,7 @@ class Func(AST):
 
     def tableEntry(self, scope=symtab.Scope.NA, table_ptr=None):
         return symtab.TableEntry(self.fname, (self.rtype, self.params), scope, table_ptr, lineno=self.lineno, definition=not self.declaration)
+
 
 class FuncCall(AST):
     def __init__(self, fname, params, type=DataType(), lineno=-1):
@@ -166,6 +170,7 @@ class FuncCall(AST):
         asm.code.append(Instruction(InstrOp.move, Register.s0, Register.v1,
                                     comment='using the return value of called function'))
         return Register.s0
+
 
 class IfStatement(AST):
     def __init__(self, operator, condition, stlist1, stlist2=StmtList()):
@@ -223,6 +228,7 @@ class WhileStatement(AST):
     def get_asm(self, parser, symtab, asm):
         raise NotImplementedError
 
+
 class ScopeBlock(AST):
     '''
         This describes anything of the form 'LCURLY stlist RCURLY'
@@ -239,6 +245,7 @@ class ScopeBlock(AST):
     def tableEntry(self, scope=symtab.Scope.NA):
         pass
 
+
 class Declaration(AST):
     # varlist is list of `Symbol` ASTs
     def __init__(self, symlist):
@@ -253,6 +260,7 @@ class Declaration(AST):
 
     def tableEntry(self, scope=symtab.Scope.NA, parent=None):
         return [sym.tableEntry(scope) for sym in self.symlist]
+
 
 class Return(AST):
     # represents a return statement
@@ -316,6 +324,7 @@ class Symbol(AST):
     
     def tableEntry(self, scope=symtab.Scope.NA, parent=None):
         return symtab.TableEntry(self.label, self.datatype, scope, lineno=self.lineno)
+
 
 class BinOp(AST):
     def __init__(self, operator, operand1, operand2, lineno=-1, cfg=0):
@@ -560,6 +569,7 @@ class Var(AST):
             return new_reg
         else:
             return asm.get_register(self, symtab)
+
 
 class Num(AST):
     def __init__(self, val, lineno=-1):

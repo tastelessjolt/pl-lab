@@ -370,4 +370,4 @@ class Register(Enum):
     @property
     ## TODO: Check for floating point
     def is_temp(self):
-        return (self.value >= 8 and self.value <= 25) or (self.value >= 8 + 32 and self.value <= 25 + 32)
+        return (self.value >= 8 and self.value <= 25) or (self.value in range(42, 64,2))

@@ -16,49 +16,7 @@ RETURNS void
 		(
 			ADDR
 			(
-				DEREF
-				(
-					ADDR
-					(
-						DEREF
-						(
-							ADDR
-							(
-								DEREF
-								(
-									ADDR
-									(
-										DEREF
-										(
-											ADDR
-											(
-												DEREF
-												(
-													ADDR
-													(
-														DEREF
-														(
-															ADDR
-															(
-																DEREF
-																(
-																	ADDR
-																	(
-																		VAR(m)
-																	)
-																)
-															)
-														)
-													)
-												)
-											)
-										)
-									)
-								)
-							)
-						)
-					)
-				)
+				VAR(m)
 			)
 		)
 	)

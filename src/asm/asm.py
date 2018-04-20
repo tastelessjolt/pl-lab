@@ -142,6 +142,10 @@ class InstrOp(Enum):
     mflo = 22
     negu = 23
     _ = 24
+    add_s = 25
+    sub_s = 26
+    mul_s = 27
+    
 
     def __str__(self):
         return self.name if self.name[0] != '_' else self.name[1:]
