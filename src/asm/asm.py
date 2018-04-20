@@ -13,6 +13,7 @@ class SPIM(ASM):
         self.free_registers = RegStack()
         self.var_to_reg_map = {}
         self.code = []
+        self.fp_j_label = 0
 
     def get_register(self, var, symtab):
         if var in self.var_to_reg_map:
@@ -156,9 +157,10 @@ class InstrOp(Enum):
     c_le_s = 36
     bc1t = 37
     bc1f = 38
+    la = 39
 
     def __str__(self):
-        return self.name if self.name[0] != '_' else self.name[1:]
+        return self.name.replace('_', '.') if self.name[0] != '_' else self.name[1:]
 
 class Instruction:
     def __init__(self, operator=InstrOp._, *operands, comment = ''):
@@ -166,11 +168,11 @@ class Instruction:
         self.operands = operands
         isFloat = False
         for operand in self.operands:
-            if isinstance(operand, Register) and operand.is_fp:
+            if isinstance(operand, Register) and operand.is_float:
                 isFloat = True
 
         if isFloat:
-            self.operator = self.get_float_form[self.operator]
+            self.operator = Instruction.get_float_form[self.operator]
 
         self.comment = comment
 
@@ -183,9 +185,10 @@ class Instruction:
         InstrOp.li: InstrOp.li_s,
         InstrOp.sw: InstrOp.s_s,
         InstrOp.move: InstrOp.mov_s,
-        InstrOp.neg: InstrOp.neg_s,
-        InstrOp.beq: InstrOp.c_eq_s,
+        InstrOp.negu: InstrOp.neg_s,
+        InstrOp.seq: InstrOp.c_eq_s,
         InstrOp.slt: InstrOp.c_lt_s,
+        InstrOp.sne: InstrOp.c_eq_s,
         InstrOp.sle: InstrOp.c_le_s,
     }
 
@@ -200,6 +203,8 @@ class Instruction:
         sl = {
             InstrOp.sw: self._format_sl,
             InstrOp.lw: self._format_sl,
+            InstrOp.s_s: self._format_sl,
+            InstrOp.l_s: self._format_sl,
         }
         func = sl.get (self.operator, None)
         if func:

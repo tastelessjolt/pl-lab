@@ -187,6 +187,7 @@ class RegStack():
             self.gp_regs.sort(reverse=True)
             return self.gp_regs.pop()
         else:
+            self.float_regs.sort(reverse=True)
             return self.float_regs.pop()
 
 class Operator(Enum):

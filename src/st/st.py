@@ -390,11 +390,17 @@ class BinOp(AST):
                 reg1 = self.operand1.get_asm(parser, symtab, asm)
                 reg2 = self.operand2.get_asm(parser, symtab, asm)
                 if self.operator == Operator.divide:
-                    asm.code.append(Instruction(InstrOp.div, reg1, reg2))
-                    asm.free_variable(self.operand1)
-                    asm.free_variable(self.operand2)
-                    new_reg = asm.set_register(self)
-                    asm.code.append(Instruction(InstrOp.mflo, new_reg))
+                    if reg1.is_float:
+                        new_reg = asm.set_register(self)
+                        asm.code.append(Instruction(InstrOp.div, new_reg, reg1, reg2))
+                        asm.free_variable(self.operand1)
+                        asm.free_variable(self.operand2)
+                    else:
+                        asm.code.append(Instruction(InstrOp.div, reg1, reg2))
+                        asm.free_variable(self.operand1)
+                        asm.free_variable(self.operand2)
+                        new_reg = asm.set_register(self)
+                        asm.code.append(Instruction(InstrOp.mflo, new_reg))
                 else:
                     new_reg = asm.set_register(self)
                     if self.operator == Operator.plus:
@@ -432,17 +438,30 @@ class BinOp(AST):
                     asm.free_variable(self.operand2)
                     asm.free_variable(self.operand1.operand)
                     return
-        else: # logical operator
+        elif self.operator in [Operator.logical_and, Operator.logical_or]:  # logical operator
             reg1 = self.operand1.get_asm(parser, symtab, asm)
             reg2 = self.operand2.get_asm(parser, symtab, asm)
             new_reg = asm.set_register(self)
-            mapping = { 
-                Operator.cmp_eq : InstrOp.seq,
-                Operator.cmp_not_eq: InstrOp.sne,
-                Operator.less : InstrOp.slt,
-                Operator.less_or_eq : InstrOp.sle,
+
+            op = {
                 Operator.logical_and: InstrOp._and,
                 Operator.logical_or: InstrOp._or,
+            }[self.operator]
+            asm.code.append(Instruction(op, new_reg, reg1, reg2))
+            asm.free_variable(self.operand1)
+            asm.free_variable(self.operand2)
+            return new_reg
+            
+        else: # cmp operator
+            reg1 = self.operand1.get_asm(parser, symtab, asm)
+            reg2 = self.operand2.get_asm(parser, symtab, asm)
+            new_reg = asm.set_register(self)
+            
+            mapping = { 
+                Operator.cmp_eq : InstrOp.seq,
+                Operator.less : InstrOp.slt,
+                Operator.less_or_eq : InstrOp.sle,
+                Operator.cmp_not_eq: InstrOp.sne,
             }
 
             op = mapping.get(self.operator, None)
@@ -454,10 +473,29 @@ class BinOp(AST):
                 tmp = reg1 
                 reg1 = reg2
                 reg2 = tmp
-            
-            asm.code.append(Instruction(op, new_reg, reg1, reg2))
-            asm.free_variable(self.operand1)
-            asm.free_variable(self.operand2)
+                
+            if self.operand1.type.isFloat():
+                if op == InstrOp.sne:
+                    jump_label = 'L_CondTrue_%d' % asm.fp_j_label
+                else:
+                    jump_label = 'L_CondFalse_%d' % asm.fp_j_label
+                end_label = 'L_CondEnd_%d' % asm.fp_j_label
+                asm.fp_j_label += 1
+
+                asm.code.append(Instruction(op, reg1, reg2))
+                asm.code.append(Instruction(InstrOp.bc1f, jump_label))
+                asm.code.append(Instruction(InstrOp.li, new_reg, int(op != InstrOp.sne)))
+                asm.code.append(Instruction(InstrOp.j, end_label))
+
+                asm.code.append(Label(jump_label))
+                asm.code.append(Instruction(InstrOp.li, new_reg, int(op == InstrOp.sne)))
+                asm.code.append(Label(end_label))
+                asm.free_variable(self.operand1)
+                asm.free_variable(self.operand2)
+            else:
+                asm.code.append(Instruction(op, new_reg, reg1, reg2))
+                asm.free_variable(self.operand1)
+                asm.free_variable(self.operand2)
             return new_reg
 
 
@@ -519,7 +557,10 @@ class UnaryOp(AST):
             entry = symtab.search(self.operand.label)
             if entry and not entry.isFuncEntry():
                 new_reg = asm.set_register(self)
-                asm.code.append(Instruction(InstrOp.addi, new_reg, Register.sp, entry.offset))
+                if self.operand.type.isFloat():
+                    asm.code.append(Instruction(InstrOp.la, new_reg, 'global_%s' % entry.name))                   
+                else:
+                    asm.code.append(Instruction(InstrOp.addi, new_reg, Register.sp, entry.offset))
                 return new_reg
             else:
                 raise Exception('Symtab search failed')
