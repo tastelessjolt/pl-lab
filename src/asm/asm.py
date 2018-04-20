@@ -84,9 +84,18 @@ class SPIM(ASM):
     
     def get_text_section(self):
         s = ''
+
+
         global_symtab = self.parser.all_symtab[0]
-        for value in global_symtab.table.values():
-            if value.table_ptr:
+        # for value in global_symtab.table.values():
+        #     if value.table_ptr:
+
+        global_list = self.cfg.ast.global_list
+        for func in global_list:
+            if func.isFunc() and not func.declaration:
+                value = global_symtab.search(func.fname)
+                if value is None:
+                    raise Exception('Not found %s function in symtab')
                 s += "\t.text\t# The .text assembler directive indicates\n"
                 s += "\t.globl %s\t# The following is the code\n" % value.name
                 s += "%s:\n" % value.name
