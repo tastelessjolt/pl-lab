@@ -162,7 +162,7 @@ class FuncCall(AST):
         for param, fparam in zip(self.params, called_symtab.parent_func.params):
             s0 = param.get_asm(parser, symtab, asm)
             entry = called_symtab.search(fparam.label)
-            offset = 12 + called_symtab.width - entry.offset
+            offset = - 8 - called_symtab.width - called_symtab.argument_width + entry.offset
             asm.code.append(Instruction(InstrOp.sw, s0, offset, Register.sp))
             asm.free_variable(param)
         asm.code.append(Instruction(InstrOp.sub, Register.sp, Register.sp,

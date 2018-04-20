@@ -46,9 +46,9 @@ class TableEntry(object):
     @property
     def offset(self):
         if self.enclosing_symtab and self.scope == Scope.ARGUMENT:
-            return self.enclosing_symtab.argument_width + self.enclosing_symtab.width + 8 - self._offset
+            return self.enclosing_symtab.width + 8 + self._offset
         else:
-            return self._offset + 4
+            return self._offset
 
     @offset.setter
     def offset(self, value):
@@ -72,11 +72,11 @@ class SymTab(object):
     
     def commit(self):
         local_vars = sorted( [ (key, entry) for key, entry in self.table.items() if entry.scope == Scope.LOCAL], key=lambda t: t[0]) 
-
+        # import pdb; pdb.set_trace()
         width = 0
         for name, entry in local_vars:
-            entry.offset = width
             width += entry.width
+            entry.offset = width
     
     def insert(self, entry_or_entrys):
         if isinstance(entry_or_entrys, list):
@@ -91,11 +91,11 @@ class SymTab(object):
                 self.table[entry.name] = entry
                 entry.enclosing_symtab = self
                 if entry.scope == Scope.LOCAL:
-                    entry.offset = self.width
                     self.width += entry.width
+                    entry.offset = self.width
                 elif entry.scope == Scope.ARGUMENT:
-                    entry.offset = self.argument_width
                     self.argument_width += entry.width
+                    entry.offset = self.argument_width
             else:
                 errors.append(entry)
         if len(errors) > 0:
