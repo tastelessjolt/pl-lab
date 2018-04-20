@@ -113,3 +113,6 @@ temp/
 
 temp.out
 err
+
+# A5 update latest
+update_latest.sh
