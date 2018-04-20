@@ -30,7 +30,7 @@ class BasicBlock(object):
         if self.goto != -1: # if not a return block
             asm.code.append( Instruction(InstrOp.j, 'label%d' % self.goto) )
         else:
-            asm.code.append(Instruction(InstrOp.j, 'epilogue_%s' % self.func))
+            asm.code.append(Instruction(InstrOp.j, 'epilogue_%s' % symtab.name))
 
     def assign_goto(self, goto):
         self.goto = goto
@@ -138,15 +138,17 @@ class CFG(object):
                 old_numblocks = self.numblocks
                 unassigned = self.dfs_traverse_ast(func.stlist)
                 ## TODO: WHY??
-                if old_numblocks != self.numblocks:
-                    self.func_to_blocknum[func.fname] = (old_numblocks, self.numblocks)
-                    self.blocks[old_numblocks].func += 'function %s%s\n' % (func.fname, symbol_list_as_dict(func.params))
+                
                 for blk in unassigned:
                     blk.assign_goto(self.numblocks)
                 
                 if len(unassigned) > 0:
                     self.blocks.append(BasicBlock(astlist=StmtList([ Return(Nothing(), type=VoidType()) ]), goto=-1, blocknum=self.numblocks))
                     self.numblocks += 1
+                
+                if old_numblocks != self.numblocks:
+                    self.func_to_blocknum[func.fname] = (old_numblocks, self.numblocks)
+                    self.blocks[old_numblocks].func += 'function %s%s\n' % (func.fname, symbol_list_as_dict(func.params))
 
         self.generate_expr_evals()
     

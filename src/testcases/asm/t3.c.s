@@ -37,8 +37,11 @@ main:
 	sub $sp, $sp, 16	# Make space for the locals
 # Prologue ends
 label2:
-	# setting up activation record for called function
 	li $s0, 3
+	li $s1, 5
+	add $s2, $s0, $s1
+	move $s0, $s2
+	# setting up activation record for called function
 	sw $s0, -4($sp)
 	li $s0, 4
 	sw $s0, 0($sp)

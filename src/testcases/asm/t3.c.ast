@@ -24,7 +24,12 @@ RETURNS void
 		VAR(d)
 		,
 		CALL f( 
-			CONST(3)
+			PLUS
+			(
+				CONST(3)
+				,
+				CONST(5)
+			)
 			,
 			CONST(4)
 		 )

@@ -11,6 +11,6 @@ int* f(int a, int b)
 void main(){
 	
 	int x ,y;
-	d = f(3,4);
+	d = f(3 + 5,4);
 
 }
