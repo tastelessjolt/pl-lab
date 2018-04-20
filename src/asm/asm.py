@@ -141,14 +141,16 @@ class InstrOp(Enum):
     div = 21
     mflo = 22
     negu = 23
-    
+    _ = 24
+
     def __str__(self):
         return self.name if self.name[0] != '_' else self.name[1:]
 
 class Instruction:
-    def __init__(self, operator, *operands):
+    def __init__(self, operator=InstrOp._, *operands, comment = ''):
         self.operator = operator
         self.operands = operands
+        self.comment = comment
 
     def _format_sl(self):
         return '%s %s, %d(%s)' % (self.operator, self.operands[0], self.operands[1], self.operands[2])
@@ -166,7 +168,13 @@ class Instruction:
         # return str(self.operator) + " ".join([str(reg) for reg in self.operands])
 
     def __repr__(self):
-        return str(self.operator) + ' ' + ', '.join([str(i) for i in self.operands])
+        s = ''
+        if self.operator != InstrOp._:
+            return str(self.operator) + ' ' + ', '.join([str(i) for i in self.operands]) + \
+            (" # %s" % self.comment if self.comment else "")
+        else:
+            return "# %s" % self.comment
+        
 
 class RInstruction(Instruction):
     def __init__(self, operator, operands):

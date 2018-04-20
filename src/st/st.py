@@ -18,8 +18,6 @@ class AST(object):
     def isNothing(self):
         return isinstance(self, Nothing)
 
-    def free(self, asm):
-        raise NotImplementedError
 
 class Nothing(AST):
     def __init__(self):
@@ -120,6 +118,7 @@ class FuncCall(AST):
         self.params = params
         self.type = type[0]
         self.lineno = lineno
+        self.param_types = type[1]
         
         if len(params) != len(type[1]):
             eprint("Function %s expected %d arguments but provided %d at line %d" % (fname, len(type[1]), len(params), lineno))
@@ -138,12 +137,34 @@ class FuncCall(AST):
         return '%s (%s)' % ( self.fname, ", ".join([repr(param) for param in self.params]) )
 
     def expand(self, cfg, block):
+        newParams = []
+        for param in self.params:
+            newParams.append(param.expand(cfg, block))
+        newfuncCall = FuncCall(self.fname, newParams, (self.type, self.param_types), self.lineno)
+
         if isinstance(self.type, VoidType):
-            block.expandedAst.append(self)
-        return self
+            block.expandedAst.append(newfuncCall)
+        return newfuncCall
     
     def get_asm(self, parser, symtab, asm):
-        raise NotImplementedError
+        called_symtab = symtab.search(self.fname).table_ptr
+        asm.code.append(Instruction(
+            comment='setting up activation record for called function'))
+        for param, fparam in zip(self.params, called_symtab.parent_func.params):
+            s0 = param.get_asm(parser, symtab, asm)
+            entry = called_symtab.search(fparam.label)
+            offset = 12 + called_symtab.width - entry.offset
+            asm.code.append(Instruction(InstrOp.sw, s0, offset, Register.sp))
+            asm.free_variable(param)
+        asm.code.append(Instruction(InstrOp.sub, Register.sp, Register.sp,
+                                    called_symtab.argument_width))
+        asm.code.append(Instruction(
+            InstrOp.jal, self.fname, comment='function call'))
+        asm.code.append(Instruction(InstrOp.add, Register.sp, Register.sp,
+                                    called_symtab.argument_width, comment='destroying activation record of called function'))
+        asm.code.append(Instruction(InstrOp.move, Register.s0, Register.v1,
+                                    comment='using the return value of called function'))
+        return Register.s0
 
 class IfStatement(AST):
     def __init__(self, operator, condition, stlist1, stlist2=StmtList()):
@@ -263,7 +284,7 @@ class Return(AST):
     def get_asm(self, parser, symtab, asm):
         if not self.ast.isNothing():
             reg = self.ast.get_asm(parser, symtab, asm)
-            asm.code.append(Instruction(InstrOp.move, Register.v1, reg))
+            asm.code.append(Instruction(InstrOp.move, Register.v1, reg, comment='move return value to $v1'))
             asm.free_variable(self.ast)
 
 
@@ -506,7 +527,7 @@ class UnaryOp(AST):
             asm.code.append(Instruction(InstrOp.xori, new_reg, reg, 1))
             asm.free_variable(self.operand)
             return new_reg
-        raise NotImplementedError
+
 
 class Var(AST):    
     def __init__(self, label, type=DataType(), lineno=-1):
