@@ -145,7 +145,17 @@ class InstrOp(Enum):
     add_s = 25
     sub_s = 26
     mul_s = 27
-    
+    div_s = 28
+    l_s = 29
+    li_s = 30
+    s_s = 31
+    mov_s = 32
+    neg_s = 33
+    c_eq_s = 34
+    c_lt_s = 35
+    c_le_s = 36
+    bc1t = 37
+    bc1f = 38
 
     def __str__(self):
         return self.name if self.name[0] != '_' else self.name[1:]
@@ -154,7 +164,31 @@ class Instruction:
     def __init__(self, operator=InstrOp._, *operands, comment = ''):
         self.operator = operator
         self.operands = operands
+        isFloat = False
+        for operand in self.operands:
+            if isinstance(operand, Register) and operand.is_fp:
+                isFloat = True
+
+        if isFloat:
+            self.operator = self.get_float_form[self.operator]
+
         self.comment = comment
+
+    get_float_form = {
+        InstrOp.add: InstrOp.add_s,
+        InstrOp.sub: InstrOp.sub_s,
+        InstrOp.mul: InstrOp.mul_s,
+        InstrOp.div: InstrOp.div_s,
+        InstrOp.lw: InstrOp.l_s,
+        InstrOp.li: InstrOp.li_s,
+        InstrOp.sw: InstrOp.s_s,
+        InstrOp.move: InstrOp.mov_s,
+        InstrOp.neg: InstrOp.neg_s,
+        InstrOp.beq: InstrOp.c_eq_s,
+        InstrOp.slt: InstrOp.c_lt_s,
+        InstrOp.sle: InstrOp.c_le_s,
+    }
+
 
     def _format_sl(self):
         try:
