@@ -153,7 +153,10 @@ class Instruction:
         self.comment = comment
 
     def _format_sl(self):
-        return '%s %s, %d(%s)' % (self.operator, self.operands[0], self.operands[1], self.operands[2])
+        try:
+            return '%s %s, %d(%s)' % (self.operator, self.operands[0], self.operands[1], self.operands[2])
+        except:
+            return repr(self)
 
     def __str__(self):
         sl = {

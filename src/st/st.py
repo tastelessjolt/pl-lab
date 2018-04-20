@@ -2,6 +2,7 @@ from utils import inc_tabsize, DataType, IntType, FloatType, AnyType, VoidType
 from utils import Operator, eprint, BooleanType, symbol_list_as_dict
 from asm import *
 import symtab
+import symtab as symtabby
 
 
 class AST(object):
@@ -404,7 +405,10 @@ class BinOp(AST):
                     if entry and not entry.isFuncEntry():
                         # new_reg = asm.set_register(self.operand1)
                         # asm.code.append(Instruction(InstrOp.move, new_reg, reg2))
-                        asm.code.append(Instruction(InstrOp.sw, reg2, entry.offset, Register.sp))
+                        if entry.scope == symtabby.Scope.GLOBAL:
+                            asm.code.append(Instruction(InstrOp.sw, reg2, "global_%s" % entry.name))
+                        else:
+                            asm.code.append(Instruction(InstrOp.sw, reg2, entry.offset, Register.sp))
                         asm.free_variable(self.operand2)
                         # asm.free_variable(self.operand1)
                         return
@@ -548,7 +552,14 @@ class Var(AST):
         return self
     
     def get_asm(self, parser, symtab, asm):
-        return asm.get_register(self, symtab)
+        entry = symtab.search(self.label)
+        if entry.scope == symtabby.Scope.GLOBAL:
+            new_reg = asm.set_register(self)
+            asm.code.append(Instruction(
+                InstrOp.lw, new_reg, "global_%s" % entry.name))
+            return new_reg
+        else:
+            return asm.get_register(self, symtab)
 
 class Num(AST):
     def __init__(self, val, lineno=-1):
