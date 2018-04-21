@@ -111,7 +111,7 @@ Parser_ast_*
 # Temp
 temp/
 
-temp.out
+temp.out*
 err
 
 # A5 update latest

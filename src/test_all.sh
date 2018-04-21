@@ -11,9 +11,11 @@ else
     if [ "$2" -eq "$one" ]; then
         diff -bB $file1 $file2
     else
-        sort $file1 > temp.out1
-        sort $file2 > temp.out2
-        diff -bBw <( tr -d ' \n\t' <temp.out1 ) <( tr -d ' \n\t' <temp.out2 )
+        tr -d ' \t' <$file1 > temp.out1
+        sort temp.out1 > temp.out2
+        tr -d ' \t' <$file2 > temp.out3
+        sort temp.out3 > temp.out4
+        diff -bB <( tr -d ' \n\t' <temp.out2 ) <( tr -d ' \n\t' <temp.out4 )
     fi
 fi    
 read;  
