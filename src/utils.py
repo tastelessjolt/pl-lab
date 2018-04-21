@@ -61,6 +61,9 @@ class DataType(object):
         return ((other.__class__ == self.__class__) and (other.ptr_depth == self.ptr_depth)) or \
                     ( (not issubclass(type(other), DataType)) and other == self)
 
+    def sym_print(self):
+        return str(self)
+
     def isFloat(self):
         return isinstance(self, FloatType) and self.ptr_depth == 0 
 
@@ -95,6 +98,9 @@ class IntType(DataType):
 
     def __str__(self):
         return '*'*self.ptr_depth + self.basetype
+    
+    def sym_print(self):
+        return self.basetype + '*'*self.ptr_depth
 
     def proper_str(self):
         if self.ptr_depth > 0:
@@ -123,6 +129,9 @@ class FloatType(DataType):
     def __str__(self):
         return '*'*self.ptr_depth + self.basetype
 
+    def sym_print(self):
+        return self.basetype + '*'*self.ptr_depth
+
     def proper_str(self):
         if self.ptr_depth > 0:
             return '%s %s' % (self.basetype, '*' * self.ptr_depth)
@@ -146,6 +155,9 @@ class VoidType(DataType):
     def __str__(self):
         return self.basetype
     
+    def sym_print(self):
+        return str(self)
+    
     def __repr__(self):
         return self.__str__()
 
@@ -160,6 +172,9 @@ class BooleanType(DataType):
 
     def __str__(self):
         return self.basetype
+    
+    def sym_print(self):
+        return str(self)
     
     def __repr__(self):
         return self.__str__()
