@@ -25,7 +25,7 @@ class TableEntry(object):
     
     def __str__(self, fname='global'):
         if self.table_ptr:
-            return '%s\t\t|\t%s\t\t|\t%s' % (self.name, str(self.type[0]), symbol_list_as_dict(self.type[1], False))
+            return '%s\t\t|\t%s\t\t|\t%s' % (self.name, self.type[0].sym_print(), symbol_list_as_dict(self.type[1], False))
         else:
             return '%s\t\t|\t%s\t|\t%s\t|\t%s' % (self.name, fname, self.type.basetype, '*'*self.type.ptr_depth)
     
