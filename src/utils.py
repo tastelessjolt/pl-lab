@@ -91,7 +91,7 @@ class IntType(DataType):
         return self
 
     def __str__(self):
-        return '*'*self.ptr_depth + self.basetype
+        return self.basetype + '*'*self.ptr_depth
 
     def __repr__(self):
         return self.__str__()
@@ -113,7 +113,7 @@ class FloatType(DataType):
         return self
 
     def __str__(self):
-        return '*'*self.ptr_depth + self.basetype
+        return self.basetype + '*'*self.ptr_depth
 
     def __repr__(self):
         return self.__str__()
