@@ -187,6 +187,10 @@ class APLYacc(object):
                 entry.definition = not func.declaration
                 self.all_symtab.append(self.curr_symtab)
 
+            if not func.stlist[-1].isReturn():
+                tmp = Nothing() 
+                func.stlist.append(Return(tmp, type=tmp.type))
+
             self.curr_symtab = self.curr_symtab.parent
             self.curr_scope = Scope.GLOBAL
 
@@ -216,6 +220,10 @@ class APLYacc(object):
                 entry = self.curr_symtab.search(func.fname)
                 entry.definition = not func.declaration
                 self.all_symtab.append(self.curr_symtab)
+
+            if not func.stlist[-1].isReturn():
+                tmp = Nothing() 
+                func.stlist.append(Return(tmp, type=tmp.type))
 
             self.curr_symtab = self.curr_symtab.parent
             self.curr_scope = Scope.GLOBAL

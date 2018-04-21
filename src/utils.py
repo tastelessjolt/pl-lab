@@ -73,6 +73,9 @@ class DataType(object):
     def isBoolean(self):
         return isinstance(self, BooleanType)
 
+    def isVoid(self):
+        return isinstance(self, VoidType)
+
     @property
     def width(self):
         return 0

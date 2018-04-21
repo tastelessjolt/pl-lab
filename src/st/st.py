@@ -22,6 +22,9 @@ class AST(object):
     def isFunc(self):
         return isinstance(self, Func)
 
+    def isReturn(self):
+        return isinstance(self, Return)
+
 
 class Nothing(AST):
     def __init__(self):

@@ -1,16 +1,7 @@
------------------------------------------------------------------
------------------------------------------------------------------
------------------------------------------------------------------
------------------------------------------------------------------
------------------------------------------------------------------
------------------------------------------------------------------
-Name		|	Return Type  |  Parameter List
-Name	|	Scope		|	Base Type  |  Derived Type
-Procedure table :-
-Variable table :- 
-a		|	procedure f	|	int	   |	
-b		|	procedure f	|	int	   |	*
-c		|	procedure f	|	int	   |	**
-d		|	global		|	int	   |	
-f		|	int*		|	int x, int *y
-m		|	procedure f	|	int	   |	
+	VAR(c)
+(
+)
+FUNCTION func1
+PARAMS (int a,int b)
+RETURN 
+RETURNS *int
