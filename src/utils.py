@@ -10,9 +10,9 @@ def inc_tabsize(string):
 
 def symbol_list_as_dict(params, bracket=True):
     if bracket:
-        return '(%s)' % (', '.join(['%s %s' % (param.datatype, param.label) if hasattr(param, 'label') else '%s' % str(param) for param in params]))
+        return '(%s)' % (', '.join(['%s %s' % (param.datatype.proper_str(), param.label) if hasattr(param, 'label') else '%s' % str(param) for param in params]))
     else:
-        return '%s' % (', '.join(['%s %s' % (param.datatype, param.label) if hasattr(param, 'label') else '%s' % str(param) for param in params]))
+        return '%s' % (', '.join(['%s %s' % (param.datatype.proper_str(), param.label) if hasattr(param, 'label') else '%s' % str(param) for param in params]))
 
 def mysuper(obj):
     return super(type(obj), obj)
@@ -93,6 +93,11 @@ class IntType(DataType):
     def __str__(self):
         return '*'*self.ptr_depth + self.basetype
 
+    def proper_str(self):
+        if self.ptr_depth > 0:
+            return '%s %s' % (self.basetype, '*' * self.ptr_depth)
+        else:
+            return str(self)
     def __repr__(self):
         return self.__str__()
 
@@ -114,6 +119,12 @@ class FloatType(DataType):
 
     def __str__(self):
         return '*'*self.ptr_depth + self.basetype
+
+    def proper_str(self):
+        if self.ptr_depth > 0:
+            return '%s %s' % (self.basetype, '*' * self.ptr_depth)
+        else:
+            return str(self)
 
     def __repr__(self):
         return self.__str__()

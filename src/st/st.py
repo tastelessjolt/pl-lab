@@ -139,10 +139,10 @@ class FuncCall(AST):
         return 'CALL %s\n(\n%s\n)\n' % (self.fname, inc_tabsize('\n,\n'.join([ '%s' % str(param) for param in self.params] )))
 
     def __repr__(self):
-        return '%s (%s)' % ( self.fname, repr(self.params) )
+        return '%s(%s)' % ( self.fname, repr(self.params) )
     
     def src(self):
-        return '%s (%s)' % ( self.fname, ", ".join([repr(param) for param in self.params]) )
+        return '%s(%s)' % ( self.fname, ", ".join([repr(param) for param in self.params]) )
 
     def expand(self, cfg, block):
         newParams = []
@@ -638,7 +638,7 @@ class Num(AST):
         return str(self.val)
 
     def __str__(self):
-        return "CONST(%d)" % self.val
+        return "CONST(%s)" % str(self.val)
 
     def __repr__(self):
         return str(self.val)

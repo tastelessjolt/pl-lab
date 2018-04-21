@@ -1,17 +1,18 @@
 FUNCTION f
 PARAMS (int a)
 RETURNS int
-RETURN 
+	
+RETURN
 (
 	DEREF
 	(
 		VAR(b)
 	)
 )
-
 Function Main
-PARAMS() 
+PARAMS ()
 RETURNS void
+	
 	ASGN
 	(
 		DEREF
@@ -21,9 +22,11 @@ RETURNS void
 		,
 		PLUS
 		(
-			CALL f( 
+			CALL f
+			(
 				CONST(3)
-			 )
+			)
+			
 			,
 			DEREF
 			(
