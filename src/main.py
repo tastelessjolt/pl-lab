@@ -93,10 +93,17 @@ if __name__ == '__main__':
         parser.build(lexer, debug=True)
         ast = parser.parse(data)
         if ast:
+            with open(filename + '.ast', 'w') as f:
+                f.write(str(ast))
+
+            sym_str = symtab_from_ast(parser, ast)
+            with open(filename + ".sym", 'w') as f:
+                f.write(sym_str)
+
             cfg = CFG(ast)
+            with open(filename + ".cfg", 'w') as f:
+                f.write(str(cfg))
+
             asm = SPIM(parser, cfg)
-
-            eprint (cfg)
-
-            print(asm.get_data_section())
-            print(asm.get_text_section())
+            with open(filename + ".s", 'w')  as f:
+                f.write(str(asm))
