@@ -17,26 +17,29 @@ def symbol_list_as_dict(params, bracket=True):
 def mysuper(obj):
     return super(type(obj), obj)
 
+def find_declaration(ast, name):
+    for st in ast.global_list:
+        if st.isFunc() and st.declaration:
+            return st
+
 def symtab_from_ast(parser, ast):
     # s = '\n'.join([repr(symtab) for symtab in parser.all_symtab]) + "\n"
     s = ''
     s += 'Procedure table :-\n'
     s += '-----------------------------------------------------------------\n'
     s += 'Name\t\t|\tReturn Type  |  Parameter List\n'
-    func_sts = {}
-    for an_st in ast.global_list:
-        try:
-            name = an_st.fname
-            func_sts[name] = an_st
-        except:
-            pass
 
     for _, value in sorted(parser.all_symtab[0].table.items(), key=lambda x: x[1].name):
         if value.table_ptr and value.name != 'main':
-            st_func = func_sts[value.name]
-            k = '%s\t\t|\t%s\t\t|\t%s' % (
-                st_func.fname, st_func.rtype.sym_print(), symbol_list_as_dict(st_func.params, False))
-            s += k + "\n"
+            st_func = find_declaration(ast, value.name)
+            if st_func:
+                k = '%s\t\t|\t%s\t\t|\t%s' % (
+                    st_func.fname, st_func.rtype.sym_print(), symbol_list_as_dict(st_func.params, False))
+
+                s += k + "\n"
+            else:
+                s += str(value) + "\n"
+            
     s += '-----------------------------------------------------------------\n'
     s += 'Variable table :-\n'
     s += '-----------------------------------------------------------------\n'
