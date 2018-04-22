@@ -23,9 +23,20 @@ def symtab_from_ast(parser, ast):
     s += 'Procedure table :-\n'
     s += '-----------------------------------------------------------------\n'
     s += 'Name\t\t|\tReturn Type  |  Parameter List\n'
+    func_sts = {}
+    for an_st in ast.global_list:
+        try:
+            name = an_st.fname
+            func_sts[name] = an_st
+        except:
+            pass
+
     for _, value in sorted(parser.all_symtab[0].table.items(), key=lambda x: x[1].name):
         if value.table_ptr and value.name != 'main':
-                s += str(value) + "\n"
+            st_func = func_sts[value.name]
+            k = '%s\t\t|\t%s\t\t|\t%s' % (
+                st_func.fname, st_func.rtype.sym_print(), symbol_list_as_dict(st_func.params, False))
+            s += k + "\n"
     s += '-----------------------------------------------------------------\n'
     s += 'Variable table :-\n'
     s += '-----------------------------------------------------------------\n'
@@ -34,6 +45,7 @@ def symtab_from_ast(parser, ast):
     all_symtab_copy = parser.all_symtab[1:]
     all_symtab_copy.reverse()
     all_symtab_copy.insert(0, parser.all_symtab[0])
+
     for symtab in sorted(all_symtab_copy, key=lambda  x: x.name):
         for _, value in sorted(symtab.table.items(), key=lambda x: x[1].name):
             if not value.table_ptr:
