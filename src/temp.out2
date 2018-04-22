@@ -11,4 +11,4 @@ Variabletable:-
 a|procedurefunc1|int|
 b|procedurefunc1|int|
 c|procedurefunc1|int|*
-func1|*int|inta,intb
+func1|int*|inta,intb
